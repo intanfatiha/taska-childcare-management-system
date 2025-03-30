@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Enrollment;
+use App\Models\Child;
+use App\Models\Father;
+use App\Models\Mother;
+use App\Models\Guardian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +24,7 @@ class StaffController extends Controller
         //
         //$staffList = Staff::all();
         $staffList = Staff::with('user')->latest()->get();
+       
         return view('staffs.index', compact('staffList'));
     }
 
@@ -73,9 +79,6 @@ class StaffController extends Controller
         }
     }
 
-        
-
-        
 
     /**
      * Display the specified resource.
@@ -162,5 +165,15 @@ class StaffController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error deleting staff: ' . $e->getMessage());
         }
+    }
+
+
+    public function staffAssignment()
+    {
+        // $childrens = Child::findOrFail($childrenId);
+        $childrens = Child::all();
+        $staffs = Staff::all();
+        return view('staffs.assign', compact('childrens','staffs'));
+      
     }
 }

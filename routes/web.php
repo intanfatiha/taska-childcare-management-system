@@ -10,12 +10,14 @@ use App\http\Controllers\AnnouncementsController;
 use App\http\Controllers\DailyActivitiesController;
 use App\http\Controllers\AdminController;
 use App\http\Controllers\CameraFootageController;
-use App\http\Controllers\ParentInfoController;
+use App\http\Controllers\EnrollmentController;
 use App\http\Controllers\AttendanceController;
 use App\http\Controllers\PaymentController;
 use App\http\Controllers\GenerateReportController;
 
-
+//GET	Fetch data (View)
+//POST	Create new data
+//PUT	Update existing data
 
 
 //use App\http\Controllers\ChildRegistrationController;
@@ -25,20 +27,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/try', function () {
-    return view('try'); // Make sure you have created this view file 'try.blade.php'
-});
+// //Show registration form
+// Route::get('/registration', function() {
+//     return view('registration');
+// });
 
-Route::get('/parentChildrenRegister', function () {
-    return view('parentChildrenRegister'); // Make sure you have created this view file 'try.blade.php'
-});
-
-Route::post('/register-children', [ParentInfoController::class, 'processRelationType'])->name('processRelationType');
-
-
-Route::get('/parent-children-register', function () {
-    return view('parentChildrenRegister');
-})->name('parentChildrenRegister');
+//Handle form submission
+Route::get('/registration', [EnrollmentController::class, 'create'])->name('enrollment.create');
+Route::post('/registration', [EnrollmentController::class, 'store'])->name('enrollment.store');
+Route::get('/registration/confirmation', function (){ return view('registrations.confirmation');})->name('enrollments.confirmation');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -55,45 +52,43 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/parentChildrenRegister', function () {
-    return view('parentChildrenRegister');
-})->middleware(['auth', 'verified'])->name('parentChildrenRegister');
+Route::resource('adminActivity', AdminController::class);
+
+Route::get('/children-Register-Request', [AdminController::class, 'childrenRegisterRequest'])->name('childrenRegisterRequest');
+Route::get('/children-Register-Request-reject', [AdminController::class, 'rejection'])->name('adminActivity.rejection');
+// Route::post('/register-parents-success', [AdminController::class, 'registerParents'])->name('adminActivity.success');
+// Route::post('/register-parents-success', [ParentRegistrationController::class, 'registerParents'])->name('adminActivity.success');
+Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
+    ->name('adminActivity.approveRegistration');
+Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])
+    ->name('adminActivity.approveForm');
+
 
 Route::resource('rooms',RoomController::class);
 Route::resource('roomreservations',RoomReservationController::class); //tgk nama model
 
-Route::resource('parentInfos', ParentInfoController::class);
-
-//Parent or Guardian selection page
-Route::get('/register-children', [ParentInfoController::class, 'showRegistrationForm'])->name('register.children');
-Route::post('/register-children', [ParentInfoController::class, 'processRelationType'])->name('processRelationType');
-
-// Parent routes
-Route::get('/father-form', [ParentInfoController::class, 'showFatherForm'])->name('father.form');
-Route::post('/father-form', [ParentInfoController::class, 'storeFather'])->name('father.store');
-
-Route::get('/mother-form', [ParentInfoController::class, 'showMotherForm'])->name('mother.form');
-Route::post('/mother-form', [ParentInfoController::class, 'storeMotherInfo'])->name('mother.store');
-
-// Guardian route
-Route::get('/guardian-form', [ParentInfoController::class, 'showGuardianForm'])->name('guardian.form');
-Route::post('/guardian-form', [ParentInfoController::class, 'storeGuardian'])->name('guardian.store');
-
-
 Route::resource('admin', DailyActivitiesController::class);
+
 Route::resource('staffs', StaffController::class);
+Route::get('/staff-assignment', [StaffController::class, 'staffAssignment'])->name('staffs.staffAssignment');
+
+
 Route::resource('childrens', ChildrenController::class);
 
 Route::resource('announcements',AnnouncementsController::class);
+
 Route::resource('daily_activities', DailyActivitiesController::class);
-Route::get('/children-Register-Request', [AdminController::class, 'childrenRegisterRequest'])->name('childrenRegisterRequest');
+
 Route::resource('camera_footages', CameraFootageController::class);
+
 Route::resource('attendances', AttendanceController::class);
+
 Route::resource('payments', PaymentController::class);
+
 Route::resource('generateReports', GenerateReportController::class);
 Route::get('/generate-reports/payment', [GenerateReportController::class, 'showPayment'])->name('generateReports.payment');
 
-
+Route::get('/camera', [CameraFootageController::class, 'index'])->name('camera.index');
 
 require __DIR__.'/auth.php';
 

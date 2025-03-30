@@ -11,7 +11,7 @@ class Father extends Model
     use HasFactory;
 
     protected $fillable = [
-        'parent_info_id',
+        'enrollment_id',
         'father_name',
         'father_email',
         'father_phoneNo',
@@ -27,9 +27,9 @@ class Father extends Model
         'father_office_number',
     ];
 
-    // Relationship with ParentInfo (assuming a one-to-one relationship)
-    public function parentInfo()
+    // Relationship with registration (assuming a one-to-one relationship)
+    public function enrollment()
     {
-        return $this->belongsTo(ParentInfo::class);
+        return $this->belongsTo(Enrollment::class);
     }
 }

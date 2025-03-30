@@ -58,10 +58,16 @@
                             required>
                     </div>
 
-                    <div class="flex justify-end">
-                        
-                       <button type="submit" class="btn btn-primary">Click </button>
-                </div>
+                
+
+                <div class="flex justify-between mt-4">
+                        <a href="{{ route('staffs.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 inline-block text-center">
+                            Go Back
+                        </a>
+                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700">
+                            Submit
+                        </button>
+                    </div>
                       
                     </div>
                 </form>

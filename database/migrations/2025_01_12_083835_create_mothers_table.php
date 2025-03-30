@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('mothers', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('parent_id');
-            $table->foreign('parent_id')->references('id')->on('parent_infos')->onDelete('cascade');
             $table->string('mother_name');
             $table->string('mother_email')->unique();
             $table->string('mother_phoneNo');

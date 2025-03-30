@@ -12,7 +12,7 @@ class Mother extends Model
 
       // Define the fillable attributes
       protected $fillable = [
-        'parent_info_id',
+        'enrollment_id',
         'mother_name',
         'mother_email',
         'mother_phoneNo',
@@ -28,9 +28,9 @@ class Mother extends Model
         'mother_office_number',
     ];
 
-     // Relationship with ParentInfo (assuming a one-to-one relationship)
-     public function parentInfo()
-     {
-         return $this->belongsTo(ParentInfo::class);
-     }
+     // Relationship with registration (assuming a one-to-one relationship)
+     public function enrollment()
+    {
+        return $this->belongsTo(Enrollment::class);
+    }
 }

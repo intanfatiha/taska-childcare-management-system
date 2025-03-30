@@ -12,8 +12,9 @@ class Guardian extends Model
 
     // Define the fillable attributes
     protected $fillable = [
-        'parent_info_id',
+        'enrollment_id',
         'guardian_name',
+        'guardian_relation',
         'guardian_email',
         'guardian_phoneNo',
         'guardian_ic',
@@ -26,12 +27,12 @@ class Guardian extends Model
         'guardian_staff_number',
         'guardian_ptj',
         'guardian_office_number',
-        'guardian_relation',
+        
     ];
 
     // Relationship with ParentInfo (assuming a one-to-one relationship)
-    public function parentInfo()
+    public function enrollment()
     {
-        return $this->belongsTo(ParentInfo::class);
+        return $this->belongsTo(Enrollment::class);
     }
 }

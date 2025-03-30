@@ -1,14 +1,24 @@
+<!-- index.blade -->
 <x-app-layout>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Staff List</h2>
-                    <!-- Register New Staff Button -->
+                <h2 class="text-2xl font-bold">Staff List</h2>
+                <!-- Register New Staff Button -->
                     
-                    <a href="{{ route('staffs.create') }}" class="btn btn-primary btn-sm">
-                Register New Staff
-            </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('staffs.create') }}" class="btn btn-sm" style="background-color:rgb(221, 130, 221); color: white;">
+                        Register New Staff
+                    </a>
+
+                    <a href="{{ route('staffs.staffAssignment') }}" class="btn btn-sm" style="background-color:rgb(221, 130, 221); color: white;">
+                        Staff Assignment
+                    </a>
+
+                </div>
+               
+
                 </div>
                 @if(session('error'))
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -25,7 +35,7 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto border-collapse border border-gray-300">
                         <thead>
-                            <tr class="bg-gray-100">
+                            <tr class="bg-[#8A4FFF] text-white">
                                 <th class="border px-4 py-2 text-left">Staff Name</th>
                                 <th class="border px-4 py-2 text-left">IC</th>
                                 <th class="border px-4 py-2 text-left">Email</th>

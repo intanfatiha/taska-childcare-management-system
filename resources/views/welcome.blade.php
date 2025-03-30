@@ -11,9 +11,6 @@
 <div class="min-h-screen bg-cover bg-center" style="background-image: url('{{ asset('assets/Taska-Hikmah-login.jpg') }}');">
 
 
-<!-- try for sementara -->
-<!-- <a href="/register" class="text-yellow-600" >New Parent</a> -->
-
   <div class="min-h-screen flex flex-col justify-start items-center pt-20">
     <!-- Welcome Section -->
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mt-10">
@@ -28,12 +25,14 @@
         <!-- Login and Register links will show if user is not logged in -->
         <div id="auth-buttons" class="space-x-4">
           <a href="/login" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all">Login</a>
-          <a href="/register" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all">Register Your Children</a>
+          <a href="{{ url('/registration') }}" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all">Register Your Children</a>
+          <a href="{{ url('register') }}" class="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition-all">Register </a>
+
         </div>
 
         <!-- Dashboard link will show if user is logged in -->
         <div id="dashboard-button" class="hidden space-x-4">
-          <a href="/dashboard" class="bg-indigo-500 text-white px-6 py-2 rounded-lg hover:bg-indigo-600 transition-all">Dashboard</a>
+          <a href="/admin-home" class="bg-indigo-500 text-white px-6 py-2 rounded-lg hover:bg-indigo-600 transition-all">Dashboard</a>
         </div>
       </div>
     </div>

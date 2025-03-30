@@ -10,11 +10,14 @@ class CameraFootageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $Camera_footages = Camera_footage::all();
-        return view('cameraFootages.index', compact('Camera_footages'));
+        // $Camera_footages = Camera_footage::all();
+        // return view('cameraFootages.index', compact('Camera_footages'));
+
+        return view('cameraFootages.index'); 
+      
     }
 
     /**

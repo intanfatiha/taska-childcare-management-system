@@ -18,13 +18,14 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                      <!-- <img src="{{ asset('assets/ppuk_logo.png') }}" alt="Taska Hikmah Logo" class="w-28 h-28"> -->
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <!-- <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg"> -->
                 {{ $slot }}
-            </div>
+            <!-- </div> -->
         </div>
     </body>
 </html>
+                    <!-- rel="icon" href="{{ asset('assets/Taska-Hikmah-login.jpg') }}" type="image/png" -->

@@ -1,10 +1,18 @@
 <x-guest-layout>
-        <div class="text-center mb-6">
-            <p class="mt-2 text-lg text-gray-600">TASKA HIKMAH CHILDCARE MANAGEMENT SYSTEM</p>
-        </div>
-
+<div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
+
+  
+    <div class="flex flex-col sm:justify-center items-center  ">
+            <div>
+                <a href="/">
+                      <img src="{{ asset('assets/ppuk_logo.png') }}" alt="Taska Hikmah Logo" class="w-28 h-28">
+                </a>
+            </div>
+    </div> 
+   
+    
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
@@ -28,27 +36,26 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me and Forgot Password -->
-        <div class="flex justify-between items-center mt-4">
+        <!-- Remember Me -->
+        <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
                 <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
                 <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
             </label>
+        </div>
 
+        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('password.request') }}">
+                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
-        </div>
 
-         <!-- Centered Buttons -->
-         <div class="button-container" style="display: flex; justify-content: center; gap: 16px; margin-top: 16px;">
-            <x-primary-button>
+            <x-primary-button class="ms-3">
                 {{ __('Log in') }}
             </x-primary-button>
-
-         
+            
         </div>
     </form>
+</div>
 </x-guest-layout>
