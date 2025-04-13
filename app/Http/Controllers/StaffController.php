@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Staff;
+use App\Models\staffAssignment;
 use App\Models\User;
 use App\Models\Enrollment;
 use App\Models\Child;
@@ -173,7 +174,61 @@ class StaffController extends Controller
         // $childrens = Child::findOrFail($childrenId);
         $childrens = Child::all();
         $staffs = Staff::all();
+
+        foreach ($childrens as $child) {
+            $assignment = StaffAssignment::where('child_id', $child->id)->first();
+            if ($assignment) {
+                $child->assigned_staff_id = $assignment->staff_id;
+                $child->status = $assignment->status;
+            } else {
+                $child->assigned_staff_id = null;
+                $child->status = 'no status';
+            }
+        }
         return view('staffs.assign', compact('childrens','staffs'));
       
     }
+
+    public function updateAssignments(Request $request)
+    {
+        $request->validate([
+            'primary_staff' => 'nullable|array',
+            'primary_staff.*' => 'nullable|exists:staff,id',
+            'status' => 'nullable|array',
+            'status.*' => 'nullable|in:active,offday,no status',
+        ]);
+    
+        try {
+            DB::beginTransaction();
+    
+            if ($request->has('primary_staff')) {
+                foreach ($request->primary_staff as $childId => $staffId) {
+                    $status = $request->status[$childId] ?? 'no status';
+    
+                    // If no staff selected, delete any assignment
+                    if (is_null($staffId) || $staffId === '') {
+                        // StaffAssignment::where('child_id', $childId)->delete();
+                        continue;
+                    }
+    
+                    // Update or create assignment
+                    StaffAssignment::updateOrCreate(
+                        ['child_id' => $childId],
+                        [
+                            'primary_staff_id' => $staffId, 
+                            'status' => $status
+                        ]
+                    );
+                }
+            }
+    
+            DB::commit();
+            return redirect()->route('staffs.staffAssignment')->with('success', 'Staff assignments updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage())->withInput();
+        }
+    }
+    
+
 }

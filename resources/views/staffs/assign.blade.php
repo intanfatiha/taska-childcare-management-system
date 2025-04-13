@@ -2,7 +2,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h2 class="text-2xl font-bold mb-4">Assign Staff to Childrens</h2>
+                <h2 class="text-2xl font-bold mb-4">Assign Staff to Children</h2>
 
                 @if($errors->any())
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -14,13 +14,25 @@
                     </div>
                 @endif
 
-                <form action="" method="POST" class="space-y-6">
+                @if(session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                <form action="{{ route('staff.updateAssignments') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <!-- Search Bar -->
                     <div class="mb-4">
                         <label for="search" class="block text-sm font-medium text-gray-700">Search Children</label>
-                        <input type="text" id="search" onkeyup="filterTable()" placeholder="Enter student name..." class="mt-1 p-2 w-1/3 border rounded-md shadow-sm focus:ring focus:ring-blue-300">
+                        <input type="text" id="search" onkeyup="filterTable()" placeholder="Enter children name..." class="mt-1 p-2 w-1/3 border rounded-md shadow-sm focus:ring focus:ring-blue-300">
                     </div>
 
                     <!-- Student List Table -->
@@ -30,7 +42,7 @@
                                 <tr>
                                     <th class="px-4 py-2 text-left">Children Name</th>
                                     <th class="px-4 py-2 text-left">Primary Staff</th>
-                                    <th class="px-4 py-2 text-left">Secondary Staff</th>
+                                    <th class="px-4 py-2 text-left">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,18 +51,26 @@
                                     <td class="px-4 py-2 child-name">{{ $child->child_name }}</td>
                                     <td class="px-4 py-2">
                                         <select name="primary_staff[{{ $child->id }}]" class="block w-full border-gray-300 rounded-md shadow-sm">
-                                            <option>Choose Staff</option>
+                                            <option value="">Choose Staff</option>
                                             @foreach($staffs as $staff)
-                                                <option value="{{ $staff->id }}">{{ $staff->staff_name }}</option>
+                                            <option value="{{ $staff->id }}" 
+                                                {{ optional($child->staffAssignment)->primary_staff_id == $staff->id ? 'selected' : '' }}>
+                                                {{ $staff->staff_name }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </td>
                                     <td class="px-4 py-2">
-                                        <select name="secondary_staff[{{ $child->id }}]" class="block w-full border-gray-300 rounded-md shadow-sm">
-                                            <option>Choose Staff</option>
-                                            @foreach($staffs as $staff)
-                                                <option value="{{ $staff->id }}">{{ $staff->staff_name }}</option>
-                                            @endforeach
+                                        <select name="status[{{ $child->id }}]" class="block w-full border-gray-300 rounded-md shadow-sm">
+                                            <option value="no status" {{ $child->status == 'no status' ? 'selected' : '' }}>
+                                                No Status
+                                            </option>
+                                            <option value="active" {{ $child->status == 'active' ? 'selected' : '' }}>
+                                                Active
+                                            </option>
+                                            <option value="offday" {{ $child->status == 'offday' ? 'selected' : '' }}>
+                                                Off Day
+                                            </option>
                                         </select>
                                     </td>
                                 </tr>

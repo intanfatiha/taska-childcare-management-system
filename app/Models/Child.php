@@ -38,4 +38,10 @@ class Child extends Model
     {
         return $this->belongsTo(Enrollment::class);
     }
+
+    public function staffAssignment()
+    {
+        return $this->hasOne(StaffAssignment::class, 'child_id');
+    }
+
 }

@@ -124,11 +124,11 @@
             </div>
    
             <!-- Action Buttons -->
-            <div class="mt-6 flex space-x-2">
-                <button class="bg-gray-300 px-4 py-2 rounded text-gray-700">Cancel</button>
-                <button class="bg-red-500 text-white px-4 py-2 rounded">Reject</button>
-                <button class="bg-green-500 text-white px-4 py-2 rounded">Approve</button>
-            </div>
+
+            <a href="{{ route('childrenRegisterRequest') }}" class="bg-gray-400 text-white px-4 py-2 gap-2 rounded-md hover:bg-gray-500 inline-block text-center">
+                Go Back
+            </a>
+            
         </div>
     </div>
 </x-app-layout>

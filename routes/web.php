@@ -71,6 +71,7 @@ Route::resource('admin', DailyActivitiesController::class);
 
 Route::resource('staffs', StaffController::class);
 Route::get('/staff-assignment', [StaffController::class, 'staffAssignment'])->name('staffs.staffAssignment');
+Route::post('/staff-assignments/update', [StaffController::class, 'updateAssignments'])->name('staff.updateAssignments');
 
 
 Route::resource('childrens', ChildrenController::class);

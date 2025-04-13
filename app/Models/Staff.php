@@ -10,6 +10,8 @@ class Staff extends Model
     /** @use HasFactory<\Database\Factories\StaffFactory> */
     use HasFactory;
 
+    protected $table = 'staff';
+    
     protected $fillable = [
         'user_id',
         'staff_name',
@@ -22,5 +24,10 @@ class Staff extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(StaffAssignment::class, 'primary_staff_id');
     }
 }
