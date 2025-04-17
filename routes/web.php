@@ -62,6 +62,8 @@ Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class
     ->name('adminActivity.approveRegistration');
 Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])
     ->name('adminActivity.approveForm');
+    Route::get('/children-enrollment', [AdminController::class, 'listEnrollments'])->name('listChildEnrollment');
+    Route::get('/enrollment-detail/{id}', [AdminController::class, 'enrollmentDetail'])->name('enrollmentDetail');
 
 
 Route::resource('rooms',RoomController::class);

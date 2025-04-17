@@ -23,6 +23,16 @@
 
                 @php
                     $totalEnrollments = \App\Models\Enrollment::count(); 
+                    $totalStaffs = \App\Models\Staff::count();
+                    $totalChildren = \App\Models\Child::count();
+
+                    //get total child for parents  
+                    $parentChildrenCount = auth()->user()->role === 'parents' 
+                        ? \App\Models\Child::whereHas('enrollment', function ($query) {
+                            $query->where('enrollment_id', auth()->user()->id);
+                        })->count()
+                        : 0;
+
                 @endphp
 
                 <!-- Display Greeting -->
@@ -30,11 +40,12 @@
                 
                 
 
-                @if(auth()->user()->role==='admin')
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @if(auth()->user()->role==='admin')
                     <!-- Children Registration Request Card -->
                     <a href="{{ route('childrenRegisterRequest') }}">
-                    <div class="border-2 border-gray-300 p-5 rounded-lg">
+                    <div class="border-2 border-gray-300 p-5 rounded-lg bg-white-100 hover:bg-blue-200 transition duration-300">
                         <p class="text-center font-medium">Children Registration<br/>Request</p>
                         <p class="text-center text-3xl font-bold mt-2">{{$totalEnrollments}}</p>
                     </div>
@@ -42,27 +53,58 @@
 
                     <!-- Total Staff Card -->
                      <a href="{{ route('staffs.index') }}">
-                    <div class="border-2 border-gray-300 p-8 rounded-lg">
+                    <div class="border-2 border-gray-300 p-8 rounded-lg bg-white-100 hover:bg-purple-200 transition duration-300">
                         <p class="text-center font-medium">Total Staff</p>
-                        <p class="text-center text-3xl font-bold mt-2">6</p>
+                        <p class="text-center text-3xl font-bold mt-2">{{$totalStaffs}}</p>
+                    </div>
+                    </a>
+
+                    <!-- Total Children Card -->
+                     
+                    <a href="{{ route('listChildEnrollment') }}">
+                    <div class="border-2 border-gray-300 p-5 rounded-lg bg-white-100 hover:bg-orange-200 transition duration-300">
+                    <p class="text-center font-medium">Total Registered<br/>Children</p>
+                    <p class="text-center text-3xl font-bold mt-2">{{$totalChildren}}</p>
                     </div>
                     </a>
                     @endif
 
-                    @if(auth()->user()->role==='admin')
-                    <!-- Total Children Card -->
-                    <div class="border-2 border-gray-300 p-4 rounded-lg">
-                        <p class="text-center font-medium">Total Children</p>
-                        <p class="text-center text-3xl font-bold mt-2">6</p>
+
+
+
+                    @if(auth()->user()->role==='staff')
+                    <div class="border-2 border-gray-300 p-4 rounded-lg w-30 h-20 flex flex-col justify-center items-center">
+                    <p class="text-center font-medium">Total Children</p>
+                        <p class="text-center text-3xl font-bold mt-2">7</p>
+                    </div>
+                        @php
+                        $specificStaffId = 7; 
+                        $totalAssignedChildren = \App\Models\StaffAssignment::where('primary_staff_id', $specificStaffId)->count();
+                        @endphp   
+
+                 <!-- Total Children Assigned to Staff -->
+                    <div class="border-2 border-gray-300 p-4 rounded-lg w-30 h-20 flex flex-col justify-center items-center">
+                        <p class="text-center font-medium">Total Children Assigned</p>
+                        <p class="text-center text-3xl font-bold mt-2">
+                            {{ $totalAssignedChildren }}
+                        </p>
+                    </div>
+
                     </div>
                     @endif
 
-                    @if(auth()->user()->role==='staff')
-                    <div class="border-2 border-gray-300 p-4 rounded-lg w-40 h-40 flex flex-col justify-center items-center">
-                    <p class="text-center font-medium">Total Children</p>
-                        <p class="text-center text-3xl font-bold mt-2">6</p>
+
+
+
+                    @if(auth()->user()->role === 'parents')
+                    <!-- Total Children for Parents -->
+                    <div class="border-2 border-gray-300 p-5 rounded-lg bg-white-100 hover:bg-green-200 transition duration-300">
+                        <p class="text-center font-medium">Your Total<br/>Children</p>
+                        <p class="text-center text-3xl font-bold mt-2">{{$parentChildrenCount}}</p>
+                        
                     </div>
                     @endif
+
                 </div>
             </div>
         </div>

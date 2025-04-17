@@ -28,6 +28,12 @@ class AdminController extends Controller
         return view('adminHomepage');
     }
 
+    public function listEnrollments() //total registered children 
+    {
+        $children = Child::paginate(20);
+        return view('adminActivity.listChildEnrollment', compact('children'));
+    }
+
 
     /**
      * Show the form for creating a new resource.

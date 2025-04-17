@@ -10,7 +10,13 @@
         </div>
         
         <!-- Breadcrumb -->
-        <p class="text-gray-500 text-sm mt-4">Registration > Parent Children Registration > View Details</p>
+        <div class="text-gray-500 text-sm mt-4">
+            <a href="{{ route('adminHomepage') }}" class="text-black-500 hover:underline">Home</a>
+            <span class="mx-2">></span>
+            <a href="{{ route('childrenRegisterRequest') }}" class="text-black-500 hover:underline">Parent Children Registration</a>
+            <span class="mx-2">></span>
+            <span class="text-gray-500">View Details</span>
+        </div>
         
         <!-- Main Content -->
         <div class="bg-white shadow-md rounded-md mt-4 p-6">
@@ -19,7 +25,80 @@
                 <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase">{{ $enrollment->status}}</span>
             </div>
             
-            <p class="text-gray-500 mt-2">Registration ID: REG-20240318-001 | Submitted: March 18, 2025</p>
+            <p class="text-gray-500 mt-2">
+                <strong>Registration ID:</strong> REG-20240318-{{ $enrollment->id ?? 'N/A' }} |
+                <strong>Submitted:</strong> {{ $enrollment->created_at ? $enrollment->created_at->format('F d, Y h:i A') : 'N/A' }}
+            </p>
+             <!-- Child Information -->
+             <div class="bg-gray-100 p-3 mt-6 rounded-md font-bold text-gray-700">Child Information</div>
+            <div class="mt-2 space-y-2">
+                                                    
+                <p class="text-gray-600"><strong>Child's Name:</strong> {{$enrollment->child->first()->child_name ?? 'N/A'}}</p>   <!-- since child relation id hasMany so using first() will retrieve the first collection first.  -->
+                <p class="text-gray-600"><strong>Date of Birth:</strong> {{$enrollment->child->first()->child_birthdate ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Age:</strong> {{$enrollment->child->first()->child_age ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Address:</strong> {{$enrollment->child->first()->child_address ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Sibling Number:</strong> {{$enrollment->child->first()->child_sibling_number ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Number in Sibling:</strong> {{$enrollment->child->first()->child_numberInSibling ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Allergies:</strong> {{$enrollment->child->first()->child_allergies ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Medical Conditions:</strong> {{$enrollment->child->first()->child_medical_conditions ?? 'N/A'}}</p>
+                <p class="text-gray-600"><strong>Previous Childcare:</strong> {{$enrollment->child->first()->child_previous_childcare ?? 'N/A'}}</p>
+                
+                <p class="text-gray-600"><strong>Birth Certification:</strong></p>
+                    @if ($enrollment->child->first()->child_birth_cert)
+                        <div class="flex items-center space-x-4">
+                            <!-- View Link -->
+                            <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" target="_blank"
+                                class="bg-green-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-green-600">
+                                View
+                            </a>
+                            <!-- Download Button -->
+                            <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" download
+                                class="bg-blue-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-blue-600">
+                                Download
+                            </a>
+                        </div>
+                    @else
+                        <p class="text-gray-600">No birth certificate available.</p>
+                    @endif
+
+                    <p class="text-gray-600"><strong>Immunization Record:</strong></p>
+                        @if ($enrollment->child->first()->child_immunization_record)
+                            <div class="flex items-center space-x-4">
+                               <!-- View Button -->
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" target="_blank"
+                                    class="bg-green-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-green-600">
+                                    View
+                                </a>
+                                <!-- Download Button -->
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" download
+                                    class="bg-blue-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-blue-600">
+                                    Download
+                                </a>
+                            </div>
+                        @else
+                            <p class="text-gray-600">No immunization record available.</p>
+                        @endif
+
+                        <p class="text-gray-600"><strong>Passport Photo:</strong></p>
+                        @if ($enrollment->child->first()->child_photo)
+                            <div class="flex items-center space-x-4">
+                               <!-- View Button -->
+                        
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_immunization_record) }}" target="_blank"
+                                    class="bg-green-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-green-600">
+                                    View
+                                </a>
+                                <!-- Download Button -->
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_photo) }}" download
+                                    class="bg-blue-500 text-white px-1 py-1 w-32  rounded text-center hover:bg-blue-600">
+                                    Download
+                                </a>
+                            </div>
+                        @else
+                            <p class="text-gray-600">No passport photo available.</p>
+                        @endif
+
+            </div>
             
             @if($enrollment->registration_type==='parents')
             <!-- Parent Information -->
@@ -78,50 +157,7 @@
             </div>
             @endif
             
-            <!-- Child Information -->
-            <div class="bg-gray-100 p-3 mt-6 rounded-md font-bold text-gray-700">Child Information</div>
-            <div class="mt-2 space-y-2">
-                                                    
-                <p class="text-gray-600"><strong>Child's Name:</strong> {{$enrollment->child->first()->child_name ?? 'N/A'}}</p>   <!-- since child relation id hasMany so using first() will retrieve the first collection first.  -->
-                <p class="text-gray-600"><strong>Date of Birth:</strong> {{$enrollment->child->first()->child_birthdate ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Age:</strong> {{$enrollment->child->first()->child_age ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Address:</strong> {{$enrollment->child->first()->child_address ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Sibling Number:</strong> {{$enrollment->child->first()->child_sibling_number ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Number in Sibling:</strong> {{$enrollment->child->first()->child_numberInSibling ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Allergies:</strong> {{$enrollment->child->first()->child_allergies ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Medical Conditions:</strong> {{$enrollment->child->first()->child_medical_conditions ?? 'N/A'}}</p>
-                <p class="text-gray-600"><strong>Previous Childcare:</strong> {{$enrollment->child->first()->child_previous_childcare ?? 'N/A'}}</p>
-                
-                <p class="text-gray-600"><strong>Birth Certification:</strong></p>
-                @if ($enrollment->child->first()->child_birth_cert)
-                    <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" target="_blank">
-                        <img src="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}"
-                            alt="Birth Certificate" class="w-32 h-32 object-cover rounded border"
-                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                    </a>
-                @else
-                    <p class="text-gray-600">No birth certificate available.</p>
-                @endif
-
-                <p class="text-gray-600"><strong>Immunization Record:</strong></p>
-                @if ($enrollment->child->first()->child_immunization_record)
-                    <img src="{{ asset('storage/' . $enrollment->child->first()->child_immunization_record) }}"
-                        alt="Immunization Record" class="w-32 h-32 object-cover rounded border"
-                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                @else
-                    <p class="text-gray-600">No immunization record available.</p>
-                @endif
-
-                <p class="text-gray-600"><strong>Passport Photo:</strong></p>
-                @if ($enrollment->child->first()->child_photo)
-                    <img src="{{ asset('storage/' . $enrollment->child->first()->child_photo) }}"
-                        alt="Passport Photo" class="w-32 h-32 object-cover rounded border"
-                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                @else
-                    <p class="text-gray-600">No passport photo available.</p>
-                @endif
-
-            </div>
+           
    
             <!-- Action Buttons -->
 
