@@ -40,7 +40,7 @@
                         <path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" />
                         <path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
                     </svg>
-                    <span>Kid Surveillance</span>
+                    <span>Live Camera</span>
                 </a>
 
                 <a href="{{ route('announcements.index') }}" class="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">

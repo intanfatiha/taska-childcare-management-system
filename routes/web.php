@@ -58,8 +58,12 @@ Route::get('/children-Register-Request', [AdminController::class, 'childrenRegis
 Route::get('/children-Register-Request-reject', [AdminController::class, 'rejection'])->name('adminActivity.rejection');
 // Route::post('/register-parents-success', [AdminController::class, 'registerParents'])->name('adminActivity.success');
 // Route::post('/register-parents-success', [ParentRegistrationController::class, 'registerParents'])->name('adminActivity.success');
-Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
+// Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
+//     ->name('adminActivity.approveRegistration');
+
+Route::post('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
     ->name('adminActivity.approveRegistration');
+
 Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])
     ->name('adminActivity.approveForm');
     Route::get('/children-enrollment', [AdminController::class, 'listEnrollments'])->name('listChildEnrollment');

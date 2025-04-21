@@ -124,6 +124,7 @@ class AdminController extends Controller
         return view('adminActivity.reject');
         //return 'Test: Route and Controller are working.';
 
+
     }
 
     //To register parents/guardian account
@@ -145,62 +146,82 @@ class AdminController extends Controller
 
     $users = [];
     $emails = []; 
+    $fatherId = null;
+    $motherId = null;
+    $guardianId = null;
 
     if ($validated['registration_type'] === 'parents') {
         if (!empty($validated['father_email'])) {
-            $users[] = User::create([
+            $father= User::create([
                 'name' => $validated['father_name'],
                 'email' => $validated['father_email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'parents',
             ]);
-            $emails[$validated['father_email']] = $validated['father_name']; // Add to email list
+            // $emails[$validated['father_email']] = $validated['father_name']; // Add to email list
+            $fatherId = $father->id;
         }
 
         if (!empty($validated['mother_email'])) {
-            $users[] = User::create([
+            $mother= User::create([
                 'name' => $validated['mother_name'],
                 'email' => $validated['mother_email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'parents',
             ]);
-            $emails[$validated['mother_email']] = $validated['mother_name']; // Add to email list
+            // $emails[$validated['mother_email']] = $validated['mother_name']; // Add to email list
+            $motherId = $mother->id;
         }
     } elseif ($validated['registration_type'] === 'guardian') {
         if (!empty($validated['guardian_email'])) {
-            $users[] = User::create([
+            $guardian= User::create([
                 'name' => $validated['guardian_name'],
                 'email' => $validated['guardian_email'], // Fixed typo here
                 'password' => Hash::make($validated['password']),
                 'role' => 'parents',
             ]);
-            $emails[$validated['guardian_email']] = $validated['guardian_name']; // Add to email list
+            // $emails[$validated['guardian_email']] = $validated['guardian_name']; // Add to email list
+            $guardianId = $guardian->id;
         }
     }
+
+     // Add data to the parent_records table
+    //  foreach ($enrollment->children as $child) {
+        ParentRecord::create([
+            'enrollment_id' => $enrollment->id,
+            'father_id' => $fatherId,
+            'mother_id' => $motherId,
+            'guardian_id' => $guardianId,
+            'child_id' => $child->id,
+        ]);
+    // }
+
+        // Redirect with success message
+        return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
 
     // Send emails
-    foreach ($emails as $email => $name) {
-        try {
-            Mail::html("
-                <h2>Dear $name,</h2>
-                <p>Your account has been approved. Below are your login credentials:</p>
-                <p><strong>Email:</strong> $email</p>
-                <p><strong>Password:</strong> {$validated['password']}</p>
-                <p>Please log in and change your password immediately for security reasons.</p>
-                <p>Thank you.</p>
-            ", function ($message) use ($email) {
-                $message->to($email)
-                    ->subject('Your Account Credentials');
-            });
+//     foreach ($emails as $email => $name) {
+//         try {
+//             Mail::html("
+//                 <h2>Dear $name,</h2>
+//                 <p>Your account has been approved. Below are your login credentials:</p>
+//                 <p><strong>Email:</strong> $email</p>
+//                 <p><strong>Password:</strong> {$validated['password']}</p>
+//                 <p>Please log in and change your password immediately for security reasons.</p>
+//                 <p>Thank you.</p>
+//             ", function ($message) use ($email) {
+//                 $message->to($email)
+//                     ->subject('Your Account Credentials');
+//             });
             
-            // Log successful email
-            Log::info("Email sent successfully to: $email");
-        } catch (\Exception $e) {
-            // Log email sending failures
-            Log::error("Failed to send email to $email. Error: " . $e->getMessage());
-        }
-    }
+//             // Log successful email
+//             Log::info("Email sent successfully to: $email");
+//         } catch (\Exception $e) {
+//             // Log email sending failures
+//             Log::error("Failed to send email to $email. Error: " . $e->getMessage());
+//         }
+//     }
 
-    return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
-}
+//     return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
+ }
 }

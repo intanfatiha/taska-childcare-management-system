@@ -19,7 +19,7 @@ class Enrollment extends Model
 
     public function child()
     {
-        return $this->hasMany(Child::class);
+        return $this->hasMany(Child::class, 'enrollment_id');
     }
 
     public function father()
