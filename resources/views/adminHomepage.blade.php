@@ -1,9 +1,7 @@
 <x-app-layout>
- 
-
-    <div class="py-12">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <!-- Configure Greetings Time-->
                 <!-- Configure Greetings Time-->
                 @php
                     $currentHour = \Carbon\Carbon::now()->format('H'); // Current hour in 24-hour format
@@ -34,137 +32,236 @@
                         : 0;
 
                 @endphp
+                    </div>
 
                 <!-- Display Greeting -->
-                <h1 id="greeting" class="text-5xl font-bold mb-10">{{ $greeting }}</h1>
+                <div class="flex items-center mb-8">
+                    <h1 id="greeting" class="text-4xl font-bold text-black-700">{{ $greeting }} <span id="greeting-icon"></span></h1>
+                </div>
                 
-                
+                <!-- Admin Dashboard -->
+                @if(auth()->user()->role === 'admin')
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                        <!-- Children Registration Request Card -->
+                        <a href="{{ route('childrenRegisterRequest') }}" class="transform transition duration-300 hover:scale-105">
+                            <div class="border-2 border-indigo-200 p-6 rounded-lg bg-gradient-to-br from-white to-indigo-50 shadow-md hover:shadow-lg">
+                                <div class="flex items-center justify-center mb-3">
+                                    <span class="text-3xl">👶</span>
+                                </div>
+                                <p class="text-center font-medium text-gray-700">Children Registration Request</p>
+                                <p class="text-center text-3xl font-bold mt-2 text-indigo-600">{{$totalEnrollments}}</p>
+                            </div>
+                        </a>
 
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @if(auth()->user()->role==='admin')
-                    <!-- Children Registration Request Card -->
-                    <a href="{{ route('childrenRegisterRequest') }}">
-                    <div class="border-2 border-gray-300 p-5 rounded-lg bg-white-100 hover:bg-blue-200 transition duration-300">
-                        <p class="text-center font-medium">Children Registration<br/>Request</p>
-                        <p class="text-center text-3xl font-bold mt-2">{{$totalEnrollments}}</p>
+                        <!-- Total Staff Card -->
+                        <a href="{{ route('staffs.index') }}" class="transform transition duration-300 hover:scale-105">
+                            <div class="border-2 border-purple-200 p-6 rounded-lg bg-gradient-to-br from-white to-purple-50 shadow-md hover:shadow-lg">
+                                <div class="flex items-center justify-center mb-3">
+                                    <span class="text-3xl">👩‍🏫</span>
+                                </div>
+                                <p class="text-center font-medium text-gray-700">Total Staff</p>
+                                <p class="text-center text-3xl font-bold mt-2 text-purple-600">{{$totalStaffs}}</p>
+                            </div>
+                        </a>
+
+                        <!-- Total Children Card -->
+                        <a href="{{ route('listChildEnrollment') }}" class="transform transition duration-300 hover:scale-105">
+                            <div class="border-2 border-pink-200 p-6 rounded-lg bg-gradient-to-br from-white to-pink-50 shadow-md hover:shadow-lg">
+                                <div class="flex items-center justify-center mb-3">
+                                    <span class="text-3xl">🧒</span>
+                                </div>
+                                <p class="text-center font-medium text-gray-700">Total Registered Children</p>
+                                <p class="text-center text-3xl font-bold mt-2 text-pink-600">{{$totalChildren}}</p>
+                            </div>
+                        </a>
                     </div>
-                    </a>
+                @endif
 
-                    <!-- Total Staff Card -->
-                     <a href="{{ route('staffs.index') }}">
-                    <div class="border-2 border-gray-300 p-8 rounded-lg bg-white-100 hover:bg-purple-200 transition duration-300">
-                        <p class="text-center font-medium">Total Staff</p>
-                        <p class="text-center text-3xl font-bold mt-2">{{$totalStaffs}}</p>
-                    </div>
-                    </a>
-
-                    <!-- Total Children Card -->
-                     
-                    <a href="{{ route('listChildEnrollment') }}">
-                    <div class="border-2 border-gray-300 p-5 rounded-lg bg-white-100 hover:bg-orange-200 transition duration-300">
-                    <p class="text-center font-medium">Total Registered<br/>Children</p>
-                    <p class="text-center text-3xl font-bold mt-2">{{$totalChildren}}</p>
-                    </div>
-                    </a>
-                    @endif
-
-
-
-
-                    @if(auth()->user()->role === 'staff')
-                        @php
-                            $userId = auth()->id();
-                            $staff = App\Models\Staff::where('user_id', $userId)->first();
-                            $totalAssignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->count() : 0;
-                            $assignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->with('child')->get() : [];
-                        @endphp
-                        
-                            
-                            <!-- Total Children Assigned to Staff -->
-                        <div class="border-2 border-gray-300 p-4 rounded-lg w-30 h-20 flex flex-col justify-center items-center">
-                            <p class="text-center font-medium">Total Children</p>
+                <!-- Staff Dashboard -->
+                @if(auth()->user()->role === 'staff')
+                    @php
+                        $userId = auth()->id();
+                        $staff = App\Models\Staff::where('user_id', $userId)->first();
+                        $totalAssignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->count() : 0;
+                        $assignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->with('child')->get() : [];
+                    @endphp
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <!-- Total Children Card -->
+                        <div class="border-2 border-blue-200 p-6 rounded-lg bg-gradient-to-br from-white to-blue-50 shadow-md">
+                            <div class="flex items-center justify-center mb-2">
+                                <span class="text-3xl">🧒</span>
+                            </div>
+                            <p class="text-center font-medium text-gray-700">Total Children</p>
                             <p class="text-center text-4xl font-bold mt-2 text-blue-600">{{ $totalChildren }}</p>
-
                         </div>
 
-                        <!-- Total Children Assigned to Staff -->
-                        <div class="border-2 border-gray-300 p-4 rounded-lg w-30 h-20 flex flex-col justify-center items-center">
-                            <p class="text-center font-medium">Total Children Assigned</p>
+                        <!-- Total Children Assigned Card -->
+                        <div class="border-2 border-green-200 p-6 rounded-lg bg-gradient-to-br from-white to-green-50 shadow-md">
+                            <div class="flex items-center justify-center mb-2">
+                                <span class="text-3xl">👩‍👦</span>
+                            </div>
+                            <p class="text-center font-medium text-gray-700">Total Children Assigned</p>
                             <p class="text-center text-4xl font-bold mt-2 text-green-600">{{ $totalAssignedChildren }}</p>
-
                         </div>
+                    </div>
 
-                        <br>
-
-                        <!-- Assigned Children Table -->
-                        <div class="w-full bg-white border border-gray-300 rounded-lg shadow overflow-x-auto ">
+                    <!-- Assigned Children Table -->
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mt-6">
+                        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+                            <h2 class="text-xl font-semibold text-white flex items-center">
+                                <span class="mr-2">👨‍👩‍👧‍👦</span> Assigned Children
+                            </h2>
+                        </div>
+                        <div class="overflow-x-auto">
                             <table class="w-full table-auto">
-                                <thead class="bg-gray-100">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="py-3 px-9 text-left font-semibold text-gray-700">Picture</th>
-                                        <th class="py-3 px-9 text-left font-semibold text-gray-700">Name</th>
-                                        <th class="py-3 px-9 text-left font-semibold text-gray-700">Age</th>
-                                        <th class="py-3 px-9 text-left font-semibold text-gray-700">Status</th>
+                                        <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Picture</th>
+                                        <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Name</th>
+                                        <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Age</th>
+                                        <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($assignedChildren as $assignment)
                                         @php $child = $assignment->child; @endphp
                                         <tr class="hover:bg-gray-50">
-                                        <td class="border border-gray-300 px-4 py-2">
-                                            @if($assignment->child->child_photo)
-                                                <div class="flex justify-center">
-                                                    <img src="{{ asset('storage/' . $assignment->child->child_photo) }}" 
-                                                        alt="Child Photo" 
-                                                        class="w-16 h-16 object-cover rounded-full border"
-                                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                                            <td class="px-6 py-4 border-b">
+                                                @if($assignment->child->child_photo)
+                                                    <div class="flex justify-center">
+                                                        <img src="{{ asset('storage/' . $assignment->child->child_photo) }}" 
+                                                            alt="Child Photo" 
+                                                            class="w-16 h-16 object-cover rounded-full border-2 border-indigo-200"
+                                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                                                    </div>
+                                                @else
+                                                    <div class="flex justify-center">
+                                                        <img src="{{ asset('images/no-image.png') }}" 
+                                                            alt="No Image" 
+                                                            class="w-16 h-16 object-cover rounded-full border-2 border-gray-200">
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 border-b font-medium">{{ $assignment->child->child_name }}</td>
+                                            <td class="px-6 py-4 border-b">{{ $assignment->child->child_age }} y/o</td>
+                                            <td class="px-6 py-4 border-b">
+                                                <span class="inline-block px-3 py-1 text-sm rounded-full 
+                                                    {{ $child->status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $assignment->status}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="py-6 px-6 text-center text-gray-500">
+                                                <div class="flex flex-col items-center">
+                                                    <span class="text-2xl mb-2">🔍</span>
+                                                    <p>No children assigned yet.</p>
                                                 </div>
-                                            @else
-                                                <div class="flex justify-center">
-                                                    <img src="{{ asset('images/no-image.png') }}" 
-                                                        alt="No Image" 
-                                                        class="w-16 h-16 object-cover rounded-full border">
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td class="py-2 px-4 border-t">{{ $assignment->child->child_name }}</td>
-                                        <td class="py-2 px-4 border-t">{{ $assignment->child->child_age }} y/o</td>
-                                        <td class="py-2 px-4 border-t">
-                                            <span class="inline-block px-3 py-1 text-sm rounded-full 
-                                                {{ $child->status === 'Active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800' }}">
-                                                {{ $assignment->status}}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="py-4 px-4 text-center text-gray-500">No children assigned.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
-                    @endif
+                    </div>
+                @endif
 
-           
-                 
+                <!-- Parent Dashboard -->
+                @if(auth()->user()->role === 'parents')
+                    
+                    @php
+                        $userId = auth()->id();
 
+                        $totalChildren = \App\Models\ParentRecord::where(function ($query) use ($userId) {
+                            $query->where('father_id', $userId)
+                                ->orWhere('mother_id', $userId)
+                                ->orWhere('guardian_id', $userId);
+                        })->count();
 
-                    @if(auth()->user()->role === 'parents')
-                    <!-- Total Children for Parents -->
-                    <div class="border-2 border-gray-300 p-4 rounded-lg w-30 h-20 flex flex-col justify-center items-center">
-                            <p class="text-center font-medium">Total Children</p>
-                            <p class="text-center text-4xl font-bold mt-2 text-green-600">0</p>
+                        $children = \App\Models\ParentRecord::where(function ($query) use ($userId) {
+                            $query->where('father_id', $userId)
+                                ->orWhere('mother_id', $userId)
+                                ->orWhere('guardian_id', $userId);
+                        })->with('child')->get();
+                    @endphp
 
+                    <div class="bg-white rounded-lg overflow-hidden">
+                        <!-- Header with button -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <span class="text-3xl mr-3">👨‍👩‍👧‍👦</span>
+                                <h2 class="text-2xl font-bold text-black-700">My Children</h2>
+                            </div>
+                           
+                            <a href="#" 
+                                class="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center">
+                                    <span class="mr-1">➕</span> Register New Child
+                                
+
+                            </a>
+                        </div>
+                        
+                        <!-- Total Children Card -->
+                        <div class="mb-8 border-2 border-pink-200 p-6 rounded-lg bg-gradient-to-br from-white to-pink-50 shadow-md w-48">
+                            <div class="flex items-center justify-center mb-2">
+                                <span class="text-3xl">👶</span>
+                            </div>
+                            <p class="text-center font-medium text-gray-700">Your Children</p>
+                            <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $totalChildren }}</p>
                         </div>
 
-                    @endif
-
-                </div>
+                        <!-- Children Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            @forelse($children as $record)
+                                @php $child = $record->child; @endphp
+                                <div class="border-2 border-indigo-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 bg-white">
+                                    <div class="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                                        @if($child && $child->child_photo)
+                                            <img src="{{ asset('storage/' . $child->child_photo) }}"
+                                                alt="Child Photo"
+                                                class="w-full h-full object-cover"
+                                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                                        @else
+                                            <img src="{{ asset('images/no-image.png') }}"
+                                                alt="No Image"
+                                                class="w-full h-full object-cover">
+                                        @endif
+                                    </div>
+                                    <div class="p-4">
+                                        <p class="font-bold text-center text-lg text-indigo-700 mb-2">{{ $child->child_name ?? 'No Name' }}</p>
+                                        <div class="space-y-1 text-sm">
+                                            <p class="flex items-center"><span class="mr-2">🎂</span> Age: {{ $child->child_age ?? 'N/A' }} years old</p>
+                                            <p class="flex items-center"><span class="mr-2">📅</span> Birthday: {{ $child->birthdate ?? '-' }}</p>
+                                            <p class="flex items-center">
+                                                <span class="mr-2">
+                                                    @if($child->gender == 'Male')
+                                                        👦
+                                                    @elseif($child->gender == 'Female')
+                                                        👧
+                                                    @else
+                                                        👶
+                                                    @endif
+                                                </span>
+                                                Gender: {{ $child->gender ?? '-' }}
+                                            </p>
+                                            <p class="flex items-center"><span class="mr-2">⚠️</span> Allergic: {{ $child->allergy ?? 'No allergies' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-span-full py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                    <span class="text-4xl mb-4">🔍</span>
+                                    <p class="text-gray-500 text-center">No children found. Register your child to see them here.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
-    </div>
+    
 
     <!-- real-time updates without refreshing -->
     <script>

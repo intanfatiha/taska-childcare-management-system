@@ -14,7 +14,7 @@
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-5 rounded-lg shadow-md">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <svg class="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-10 w-10 text-green-500" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M15 19l2 2l4 -4" /></svg>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m0 0a9 9 0 11-6.32 15.9M13 7h.01" />
                     </svg>
                 </div>
@@ -29,7 +29,7 @@
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-5 rounded-lg shadow-md">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
-                    <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-calendar-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 21h-7a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6.5" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M22 22l-5 -5" /><path d="M17 22l5 -5" /></svg>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 11-12.728 0M15 12h.01M9 12h.01M12 15h.01" />
                     </svg>
                 </div>
@@ -45,13 +45,32 @@
         <div class="max-w-7xl mx-auto sm:px-2 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <!-- Date Filter -->
-                    <form method="GET" action="{{ route('attendances.index') }}" class="mb-6">
-                        <label for="date" class="block text-sm font-medium text-gray-700">Filter by Date</label>
-                        <input type="date" name="date" id="date" value="{{ request('date', now()->format('Y-m-d')) }}"
-                               class="mt-1 block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                               onchange="this.form.submit()">
+                    <!-- Date Filter with Check In and Check Out Buttons -->
+                    <form method="GET" action="{{ route('attendances.index') }}" class="mb-6 flex items-center justify-between">
+                        <!-- Date Filter -->
+                        <div class="flex flex-col">
+                            <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                            <input type="date" name="date" id="date"
+                                value="{{ request('date', now()->format('Y-m-d')) }}"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex gap-4">
+                        <a href="{{ route('attendances.checkIn') }}" 
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
+                                Check In
+                            </a>
+
+                            <a href="" 
+                            class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
+                                Check Out
+                            </a>
+                        </div>
                     </form>
+
+
 
                     <!-- Attendance Table -->
                     <div class="overflow-x-auto">
@@ -83,6 +102,9 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($children as $child)
+                                @php
+                                    $attendance = $child->attendances->where('attendance_date', now()->format('Y-m-d'))->first();
+                                @endphp
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if ($child->child_photo)
@@ -95,7 +117,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $child->attendance_status ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $child->time_in ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $child->time_out ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->attendance_date }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->attendance_date ?? now()->format('Y-m-d') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <form action="" method="POST" onsubmit="return confirm('Are you sure?');">
                                             @csrf

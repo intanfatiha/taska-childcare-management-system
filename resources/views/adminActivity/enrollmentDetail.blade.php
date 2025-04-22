@@ -22,7 +22,14 @@
         <div class="bg-white shadow-md rounded-md mt-4 p-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold text-gray-700">Registration Details</h2>
-                <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase">{{ $enrollment->status}}</span>
+                @if($enrollment->status==='pending')
+                    <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase">{{ $enrollment->status}}</span>
+                @elseif($enrollment->status==='approved')
+                    <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase">{{ $enrollment->status}}</span>
+                @elseif($enrollment->status==='rejected')
+                    <span class="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase">{{ $enrollment->status}}</span>
+                 @endif
+
             </div>
             
             <p class="text-gray-500 mt-2">
@@ -139,7 +146,7 @@
 
         @if ($enrollment->registration_type==='guardian')
              <!-- Guardian Information -->
-             <div class="bg-gray-100 p-3 mt-4 rounded-md font-bold text-gray-700">Parent Information - Father</div>
+             <div class="bg-gray-100 p-3 mt-4 rounded-md font-bold text-gray-700">Parent Information - Guardian</div>
             <div class="mt-2 space-y-2">
                 <p class="text-gray-600"><strong>Guardian Name:</strong>  {{ $enrollment->guardian->guardian_name}}</p>
                 <p class="text-gray-600"><strong>Relation:</strong>  {{ $enrollment->guardian->guardian_relation}}</p>
@@ -151,9 +158,9 @@
                 <p class="text-gray-600"><strong>Religion:</strong> {{ $enrollment->guardian->guardian_religion}}</p>
                 <p class="text-gray-600"><strong>Occupation:</strong> {{ $enrollment->guardian->guardian_occupation}}</p>
                 <p class="text-gray-600"><strong>Monthly Income:</strong> {{ $enrollment->guardian->guardian_monthly_income}}</p>
-                <p class="text-gray-600"><strong>Staff Number:</strong> {{ $enrollment->guardian->guardian_staff_number}}</p>
-                <p class="text-gray-600"><strong>PTJ:</strong> {{ $enrollment->guardian->guardian_ptj}}</p>
-                <p class="text-gray-600"><strong>Office Number:</strong> {{ $enrollment->guardian->guardian_office_number}}</p>
+                <p class="text-gray-600"><strong>Staff Number:</strong> {{ $enrollment->guardian->guardian_staff_number ?? '-'}}</p>
+                <p class="text-gray-600"><strong>PTJ:</strong> {{ $enrollment->guardian->guardian_ptj ?? '-'}}</p>
+                <p class="text-gray-600"><strong>Office Number:</strong> {{ $enrollment->guardian->guardian_office_number ?? '-'}}</p>
             </div>
             @endif
             

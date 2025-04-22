@@ -97,7 +97,15 @@ class AdminController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $enrollment = Enrollment::findOrFail($id);
+
+        // Optionally delete related children or other data
+        $enrollment->child()->delete(); // If there is a relationship defined in the Enrollment model
+    
+        $enrollment->delete();
+    
+        return redirect()->route('childrenRegisterRequest')->with('message', 'Enrollment deleted successfully.');
+    
     }
 
     
@@ -122,6 +130,64 @@ class AdminController extends Controller
     {
         return view('adminActivity.reject');
         //return 'Test: Route and Controller are working.';
+    }
+
+    public function rejectRegistration(Request $request, $enrollmentId)
+    {   
+        $validated = $request->validate([
+            'father_email' => 'nullable|email',
+            'mother_email' => 'nullable|email',
+            'guardian_email' => 'nullable|email',
+            'father_name' => 'nullable|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
+            'registration_type' => 'required|string|in:parents,guardian',
+            'rejectReason' => 'required|string|max:255',
+        ]);
+
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+
+        // Update the enrollment status to "rejected"
+        $enrollment->status = 'rejected';
+        $enrollment->save();
+
+        // Collect emails to send the rejection message
+        $emails = [];
+        if (!empty($enrollment->father->father_email)) {
+            $emails[$enrollment->father->father_email] = $enrollment->father->father_name;
+        }
+        if (!empty($enrollment->mother->mother_email)) {
+            $emails[$enrollment->mother->mother_email] = $enrollment->mother->mother_name;
+        }
+        if (!empty($enrollment->guardian->guardian_email)) {
+            $emails[$enrollment->guardian->guardian_email] = $enrollment->guardian->guardian_name;
+        }
+
+            // Send rejection emails
+        foreach ($emails as $email => $name) {
+            try {
+                Mail::html("
+                    <h2>Dear $name,</h2>
+                    <p>We regret to inform you that your application has been rejected for the following reason:</p>
+                    <p><strong>Reason:</strong> {$validated['rejectReason']}</p>
+                    <p>If you have any questions, please contact us for further clarification.</p>
+                    <p>Thank you.</p>
+                ", function ($message) use ($email) {
+                    $message->to($email)
+                        ->subject('Application Rejected');
+                });
+
+                // Log successful email
+                Log::info("Rejection email sent successfully to: $email");
+            } catch (\Exception $e) {
+                // Log email sending failures
+                Log::error("Failed to send rejection email to $email. Error: " . $e->getMessage());
+            }
+        }
+
+        // Redirect back with a success message
+        return redirect()->route('childrenRegisterRequest')->with('message', 'Application rejected successfully.');
+
 
 
     }
@@ -138,10 +204,18 @@ class AdminController extends Controller
             'mother_name' => 'nullable|string|max:255',
             'guardian_name' => 'nullable|string|max:255',
             'registration_type' => 'required|string|in:parents,guardian',
+            'role' => 'required|string|max:255',
             'password' => 'required|min:6',
+
         ]);
 
+        $validated['role'] = $validated['role'] ?? 'parents'; // Ensure 'role' is set to 'parents' by default
+
         $enrollment = Enrollment::findOrFail($enrollmentId);
+
+         // Update the enrollment status to "rejected"
+         $enrollment->status = 'approved';
+         $enrollment->save();
 
         $users = [];
         $emails = []; 
@@ -161,7 +235,7 @@ class AdminController extends Controller
                         'name' => $validated['father_name'],
                         'email' => $validated['father_email'],
                         'password' => Hash::make($validated['password']),
-                        'role' => 'parents',
+                        'role' => $validated['role'],
                     ]);
 
                     $fatherId = $father->id;
@@ -177,7 +251,7 @@ class AdminController extends Controller
                         'name' => $validated['mother_name'],
                         'email' => $validated['mother_email'],
                         'password' => Hash::make($validated['password']),
-                        'role' => 'parents',
+                        'role' =>  $validated['role'],
                     ]);
                     $motherId = $mother->id;
                 }
@@ -191,7 +265,7 @@ class AdminController extends Controller
                         'name' => $validated['guardian_name'],
                         'email' => $validated['guardian_email'],
                         'password' => Hash::make($validated['password']),
-                        'role' => 'parents',
+                        'role' =>  $validated['role'],
                     ]);
                     $guardianId = $guardian->id;
                 }

@@ -56,6 +56,9 @@ Route::resource('adminActivity', AdminController::class);
 
 Route::get('/children-Register-Request', [AdminController::class, 'childrenRegisterRequest'])->name('childrenRegisterRequest');
 Route::get('/children-Register-Request-reject', [AdminController::class, 'rejection'])->name('adminActivity.rejection');
+Route::post('/admin/reject-registration/{enrollmentId}', [AdminController::class, 'rejectRegistration'])
+    ->name('adminActivity.rejectRegistration');
+
 // Route::post('/register-parents-success', [AdminController::class, 'registerParents'])->name('adminActivity.success');
 // Route::post('/register-parents-success', [ParentRegistrationController::class, 'registerParents'])->name('adminActivity.success');
 // Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
@@ -89,6 +92,9 @@ Route::resource('daily_activities', DailyActivitiesController::class);
 Route::resource('camera_footages', CameraFootageController::class);
 
 Route::resource('attendances', AttendanceController::class);
+Route::get('/attendances/check-in', [AttendanceController::class, 'showCheckInForm'])->name('attendances.checkIn');
+Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn'])->name('attendances.checkIn');
+Route::post('/attendances/checkout', [AttendanceController::class, 'checkOut'])->name('attendances.checkout');
 
 Route::resource('payments', PaymentController::class);
 

@@ -74,11 +74,26 @@
                                         Approve
                                     </button>
 
-                                    <button onclick="openModal('reject', {{ $enrollment->id }})" 
+                                        <!-- Reject Button -->
+                                    <button onclick="openModal('reject', {{ $enrollment->id }}, '{{ $enrollment->father->father_email ?? '' }}', '{{ $enrollment->mother->mother_email ?? '' }}', '{{ $enrollment->guardian->guardian_email ?? '' }}', '{{ $enrollment->registration_type ?? '' }}', '{{ $enrollment->father->father_name ?? '' }}', '{{ $enrollment->mother->mother_name ?? '' }}', '{{ $enrollment->guardian->guardian_name ?? '' }}')" 
+
                                         class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-4 rounded text-sm">
                                         Reject
                                     </button>
+                                    <form action="{{ route('adminActivity.destroy', $enrollment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this enrollment?');">
+                                        <!-- Delete Button -->
+                                         @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1 px-4 rounded text-sm">
+                                            Delete
+                                        </button>
                                     </div>
+                                    </form>
+                                </div>
+                            </td>
+
+
+
                                 </td>
                             </tr>
                             @endforeach
@@ -105,8 +120,8 @@
                 <div id="modalContent" class="mb-4"></div>
                 <div class="flex justify-end gap-4">
                     <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded">Cancel</button>
-                    <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded" style="background-color:purple">Submit</button>
-                </div>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-800 text-white font-semibold py-2 px-4 rounded">Submit</button>
+                    </div>
             </form>
         </div>
     </div>
@@ -142,6 +157,37 @@
                     <input type="hidden" name="father_name" value="${fatherName}">
                     <input type="hidden" name="mother_name" value="${motherName}">
                     <input type="hidden" name="registration_type" value="parents">
+                    <input type="hidden" name="role" value="parents">
+
+                `;
+            } else if (registrationType === 'guardian') {
+                modalContent.innerHTML += `
+                    <input type="hidden" name="guardian_name" value="${guardianName}">
+                    <input type="hidden" name="registration_type" value="guardian">
+                    <input type="hidden" name="role" value="parents">
+
+                `;
+            }
+        } else if (action === 'reject') {
+            modalTitle.textContent = 'Reject Enrollment';
+            modalForm.action = `{{ route('adminActivity.rejectRegistration', '') }}/${enrollmentId}`;
+            modalContent.innerHTML = `
+                <label for="father_email" class="block text-gray-700 font-semibold mb-2">Father Email:</label>
+                <input type="email" name="father_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${fatherEmail}">
+                <label for="mother_email" class="block text-gray-700 font-semibold mb-2">Mother Email:</label>
+                <input type="email" name="mother_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${motherEmail}">
+                <label for="guardian_email" class="block text-gray-700 font-semibold mb-2">Guardian Email (if necessary):</label>
+                <input type="email" name="guardian_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${guardianEmail}">
+                <label for="rejectReason" class="block text-gray-700 font-semibold mb-2">Reason for Rejection:</label>
+                <textarea name="rejectReason" rows="4" class="w-full border rounded px-3 py-2" placeholder="Enter reason for rejection"></textarea>
+            `;
+
+             // Add hidden inputs based on registration type
+             if (registrationType === 'parents') {
+                modalContent.innerHTML += `
+                    <input type="hidden" name="father_name" value="${fatherName}">
+                    <input type="hidden" name="mother_name" value="${motherName}">
+                    <input type="hidden" name="registration_type" value="parents">
                 `;
             } else if (registrationType === 'guardian') {
                 modalContent.innerHTML += `
@@ -149,13 +195,6 @@
                     <input type="hidden" name="registration_type" value="guardian">
                 `;
             }
-        } else if (action === 'reject') {
-            modalTitle.textContent = 'Reject Enrollment';
-            modalForm.action = `{{ url('adminActivity/reject-registration') }}/${enrollmentId}`;
-            modalContent.innerHTML = `
-                <label for="reason" class="block text-gray-700 font-semibold mb-2">Reason for Rejection:</label>
-                <textarea name="reason" rows="4" class="w-full border rounded px-3 py-2" placeholder="Enter reason for rejection"></textarea>
-            `;
         }
 
         enrollmentIdInput.value = enrollmentId;
