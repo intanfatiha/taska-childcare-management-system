@@ -8,13 +8,12 @@ use App\Models\Father;
 use App\Models\Mother;
 use App\Models\Guardian;
 use App\Models\User;
+use App\Models\ParentRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
-
-
+use Illuminate\Support\Facades\Log;
 
 
 class AdminController extends Controller
@@ -40,7 +39,7 @@ class AdminController extends Controller
      */
     public function create()
     {
-        
+         
 
     }
 
@@ -129,99 +128,132 @@ class AdminController extends Controller
 
     //To register parents/guardian account
     public function approveRegistration(Request $request, $enrollmentId)
-{
-    // Validate inputs
-    $validated = $request->validate([
-        'father_email' => 'nullable|email|unique:users,email',
-        'mother_email' => 'nullable|email|unique:users,email',
-        'guardian_email' => 'nullable|email|unique:users,email',
-        'father_name' => 'nullable|string|max:255',
-        'mother_name' => 'nullable|string|max:255',
-        'guardian_name' => 'nullable|string|max:255',
-        'registration_type' => 'required|string|in:parents,guardian',
-        'password' => 'required|min:6|confirmed',
-    ]);
-
-    $enrollment = Enrollment::findOrFail($enrollmentId);
-
-    $users = [];
-    $emails = []; 
-    $fatherId = null;
-    $motherId = null;
-    $guardianId = null;
-
-    if ($validated['registration_type'] === 'parents') {
-        if (!empty($validated['father_email'])) {
-            $father= User::create([
-                'name' => $validated['father_name'],
-                'email' => $validated['father_email'],
-                'password' => Hash::make($validated['password']),
-                'role' => 'parents',
-            ]);
-            // $emails[$validated['father_email']] = $validated['father_name']; // Add to email list
-            $fatherId = $father->id;
-        }
-
-        if (!empty($validated['mother_email'])) {
-            $mother= User::create([
-                'name' => $validated['mother_name'],
-                'email' => $validated['mother_email'],
-                'password' => Hash::make($validated['password']),
-                'role' => 'parents',
-            ]);
-            // $emails[$validated['mother_email']] = $validated['mother_name']; // Add to email list
-            $motherId = $mother->id;
-        }
-    } elseif ($validated['registration_type'] === 'guardian') {
-        if (!empty($validated['guardian_email'])) {
-            $guardian= User::create([
-                'name' => $validated['guardian_name'],
-                'email' => $validated['guardian_email'], // Fixed typo here
-                'password' => Hash::make($validated['password']),
-                'role' => 'parents',
-            ]);
-            // $emails[$validated['guardian_email']] = $validated['guardian_name']; // Add to email list
-            $guardianId = $guardian->id;
-        }
-    }
-
-     // Add data to the parent_records table
-    //  foreach ($enrollment->children as $child) {
-        ParentRecord::create([
-            'enrollment_id' => $enrollment->id,
-            'father_id' => $fatherId,
-            'mother_id' => $motherId,
-            'guardian_id' => $guardianId,
-            'child_id' => $child->id,
+    {
+        // Validate inputs
+        $validated = $request->validate([
+            'father_email' => 'nullable|email',
+            'mother_email' => 'nullable|email',
+            'guardian_email' => 'nullable|email',
+            'father_name' => 'nullable|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
+            'registration_type' => 'required|string|in:parents,guardian',
+            'password' => 'required|min:6',
         ]);
-    // }
 
-        // Redirect with success message
+        $enrollment = Enrollment::findOrFail($enrollmentId);
+
+        $users = [];
+        $emails = []; 
+        $fatherId = null;
+        $motherId = null;
+        $guardianId = null;
+
+        // dd($validated);
+
+
+        if ($validated['registration_type'] === 'parents') {
+            if (!empty($validated['father_email'])) {
+
+                $father= User::where('email', $validated['father_email'])->first();
+                if (empty($father)) {
+                    $father= User::create([
+                        'name' => $validated['father_name'],
+                        'email' => $validated['father_email'],
+                        'password' => Hash::make($validated['password']),
+                        'role' => 'parents',
+                    ]);
+
+                    $fatherId = $father->id;
+                }
+                
+            }
+
+            if (!empty($validated['mother_email'])) {
+                
+                $mother= User::where('email', $validated['mother_email'])->first(); 
+                if (empty($mother)) {
+                    $mother= User::create([
+                        'name' => $validated['mother_name'],
+                        'email' => $validated['mother_email'],
+                        'password' => Hash::make($validated['password']),
+                        'role' => 'parents',
+                    ]);
+                    $motherId = $mother->id;
+                }
+            }
+        } elseif ($validated['registration_type'] === 'guardian') {
+            if (!empty($validated['guardian_email'])) {
+
+                $guardian= User::where('email', $validated['guardian_email'])->first(); 
+                if (empty($guardian)) {
+                    $guardian= User::create([
+                        'name' => $validated['guardian_name'],
+                        'email' => $validated['guardian_email'],
+                        'password' => Hash::make($validated['password']),
+                        'role' => 'parents',
+                    ]);
+                    $guardianId = $guardian->id;
+                }
+            }
+        }
+
+        // grt children id from the enrollment
+        $child = Child::where('enrollment_id', $enrollment->id)->first();
+
+        // Add data to the parent_records table
+        //  foreach ($enrollment->children as $child) {
+            ParentRecord::create([
+                'enrollment_id' => $enrollment->id,
+                'father_id' => $fatherId,
+                'mother_id' => $motherId,
+                'guardian_id' => $guardianId,
+                'child_id' => $child->id,
+            ]);
+        // }
+
+            // Redirect with success message
+            // return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!')if
+
+        // Send emails
+        if(!empty($validated['father_email'])){
+            $emails[$validated['father_email']] = $validated['father_name'];
+        }
+
+        if(!empty($validated['mother_email'])){
+            $emails[$validated['mother_email']] = $validated['mother_name'];
+        }
+
+        if(!empty($validated['guardian_email'])){
+            $emails[$validated['guardian_email']] = $validated['guardian_name'];
+        }
+
+        // dd($emails);
+        // dd(openssl_get_cert_locations());
+
+        foreach ($emails as $email => $name) {
+            try {
+                Mail::html("
+                    <h2>Dear $name,</h2>
+                    <p>Your account has been approved. Below are your login credentials:</p>
+                    <p><strong>Email:</strong> $email</p>
+                    <p><strong>Password:</strong> {$validated['password']}</p>
+                    <p>Please log in and change your password immediately for security reasons.</p>
+                    <p>Thank you.</p>
+                ", function ($message) use ($email) {
+                    $message->to($email)
+                        ->subject('Your Account Credentials');
+                });
+                
+                // Log successful email
+                Log::info("Email sent successfully to: $email");
+            } catch (\Exception $e) {
+                // Log email sending failures
+                Log::error("Failed to send email to $email. Error: " . $e->getMessage());
+                dd($e->getMessage());
+            }
+        }
+
         return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
-
-    // Send emails
-//     foreach ($emails as $email => $name) {
-//         try {
-//             Mail::html("
-//                 <h2>Dear $name,</h2>
-//                 <p>Your account has been approved. Below are your login credentials:</p>
-//                 <p><strong>Email:</strong> $email</p>
-//                 <p><strong>Password:</strong> {$validated['password']}</p>
-//                 <p>Please log in and change your password immediately for security reasons.</p>
-//                 <p>Thank you.</p>
-//             ", function ($message) use ($email) {
-//                 $message->to($email)
-//                     ->subject('Your Account Credentials');
-//             });
-            
-//             // Log successful email
-//             Log::info("Email sent successfully to: $email");
-//         } catch (\Exception $e) {
-//             // Log email sending failures
-//             Log::error("Failed to send email to $email. Error: " . $e->getMessage());
-//         }
-//     }
-
-//     return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
  }
 }

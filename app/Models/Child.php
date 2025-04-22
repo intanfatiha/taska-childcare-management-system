@@ -44,4 +44,9 @@ class Child extends Model
         return $this->hasOne(StaffAssignment::class, 'child_id');
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
 }

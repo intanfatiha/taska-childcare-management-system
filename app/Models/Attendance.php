@@ -12,22 +12,17 @@ class Attendance extends Model
 
     protected $fillable = [
         'children_id',
-        'parent_infos_id',
         'attendance_date',
         'time_in',
         'time_out',
-        'status'
+        'attendance_status'
     ];
     
       // Relationship with Child model
       public function child()
       {
-          return $this->belongsTo(Children::class, 'children_id');
+          return $this->belongsTo(Child::class, 'children_id');
       }
   
-      // Relationship with ParentInfo model
-      public function parentInfo()
-      {
-          return $this->belongsTo(ParentInfo::class, 'parent_infos_id');
-      }
+      
 }

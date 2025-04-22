@@ -4,6 +4,24 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h2 class="text-2xl font-bold mb-6">Parent Children Registration</h2>
 
+                <!-- show error validatiom -->
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if (session('message'))
+                    <div class="alert alert-success" style="margin-bottom:20px">
+                        {{ session('message') }}
+                    </div>
+                @endif
+
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto border-collapse border border-gray-300">
                         <thead>
@@ -11,6 +29,7 @@
                                 <th class="border px-4 py-2 text-left">#</th>
                                 <th class="border px-4 py-2 text-left">Parent Name</th>
                                 <th class="border px-4 py-2 text-left">Children</th>
+                                <th class="border px-4 py-2 text-left">Reg. Type</th>
                                 <th class="border px-4 py-2 text-left">Details</th>
                                 <th class="border px-4 py-2 text-left">Action</th>
                             </tr>
@@ -40,6 +59,8 @@
                                         No children registered
                                     @endif
                                 </td>
+
+                                <td class="border px-4 py-2">{{ $enrollment->registration_type ?? '' }}</td>
 
                                 <!-- Actions -->
                                 <td class="border px-4 py-2">
@@ -84,7 +105,7 @@
                 <div id="modalContent" class="mb-4"></div>
                 <div class="flex justify-end gap-4">
                     <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded">Cancel</button>
-                    <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">Submit</button>
+                    <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded" style="background-color:purple">Submit</button>
                 </div>
             </form>
         </div>
