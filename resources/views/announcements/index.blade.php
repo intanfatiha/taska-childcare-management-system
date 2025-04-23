@@ -1,7 +1,7 @@
 <x-app-layout>
    
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="text-3xl font-bold mb-6">
                 {{ __('Announcement') }}
             </h2>
             <a href="{{ route('announcements.create') }}" class="btn btn-primary btn-sm">

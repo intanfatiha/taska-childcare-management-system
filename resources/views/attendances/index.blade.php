@@ -3,9 +3,9 @@
         <h2 class="text-4xl font-bold mb-6">
             {{ __('Attendance Management') }}
         </h2>
-        <a href="{{ route('attendances.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+        <!-- <a href="{{ route('attendances.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
             Add Attendance
-        </a>
+        </a> -->
     </div>
 
     <!-- Attendance Summary Cards -->
@@ -40,6 +40,7 @@
             </div>
         </div>
     </div>
+    
 
     <div class="py-1">
         <div class="max-w-7xl mx-auto sm:px-2 lg:px-8">
@@ -58,7 +59,7 @@
 
                         <!-- Buttons -->
                         <div class="flex gap-4">
-                        <a href="{{ route('attendances.checkIn') }}" 
+                        <!-- <a href="{{ route('attendances.checkIn') }}" 
                         class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
                                 Check In
                             </a>
@@ -66,6 +67,9 @@
                             <a href="" 
                             class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
                                 Check Out
+                            </a> -->
+                            <a href="{{ route('attendances.create') }}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">
+                                Add Attendance
                             </a>
                         </div>
                     </form>
@@ -101,34 +105,42 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach ($children as $child)
-                                @php
-                                    $attendance = $child->attendances->where('attendance_date', now()->format('Y-m-d'))->first();
-                                @endphp
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if ($child->child_photo)
-                                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="Child Photo" class="w-16 h-16 object-cover rounded-full border" onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                                        @else
-                                            <div class="h-10 w-10 bg-gray-200 rounded-lg"></div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->child_name ?? 'No Name' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->attendance_status ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->time_in ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->time_out ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->attendance_date ?? now()->format('Y-m-d') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <form action="" method="POST" onsubmit="return confirm('Are you sure?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
+            @foreach ($children as $child)
+                @php
+                    $attendance = $child->attendances->first();
+                @endphp
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if ($child->child_photo)
+                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="Child Photo" class="w-16 h-16 object-cover rounded-full border" onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                        @else
+                            <div class="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->child_name ?? 'No Name' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @php
+                            $status = optional($attendance)->attendance_status;
+                        @endphp
 
-                            </tbody>
+                        @if($status === 'attend')
+                            <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold ">
+                                Attend
+                            </span>
+                        @elseif($status === 'absent')
+                            <span class="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold ">
+                                Absent
+                            </span>
+                        @else
+                            <span class="text-gray-500">-</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->time_in ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->time_out ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->attendance_date ?? $date }}</td>
+                </tr>
+            @endforeach
+        </tbody>
                         </table>
                     </div>
                 </div>

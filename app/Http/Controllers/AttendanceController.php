@@ -16,21 +16,12 @@ class AttendanceController extends Controller
      */
     public function index(Request $request) 
     {
-        //
-        // $date = $request->get('date', now()->format('Y-m-d'));
-        // $children = Attendance::where('attendance_date', $date)
-        // ->with('child')
-        // ->get();
+        $date = $request->get('date', now()->format('Y-m-d')); // Default to today's date
+        $children = Child::with(['attendances' => function ($query) use ($date) {
+            $query->where('attendance_date', $date);
+        }])->get();
 
-        // $children = Child::with('enrollment')
-        //     ->whereHas('enrollment', function ($query) {
-        //         $query->where('status', 'active');
-        //     })
-        //     ->get();
-
-        $children = Child::all();
-
-        return view('attendances.index', compact('children'));
+        return view('attendances.index', compact('children', 'date'));
     }
 
     /**
@@ -39,15 +30,42 @@ class AttendanceController extends Controller
     public function create()
     {
         //
-        return view('attendances.create');
+        $children = Child::paginate(30);
+        return view('attendances.create',compact('children'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request) 
     {
-        //
+        $validated = $request->validate([
+                'status' => 'required|array',
+                'status.*' => 'required|in:attend,absent',
+                'time_in' => 'nullable|array',
+                'time_in.*' => 'nullable|date_format:H:i',
+                'time_out' => 'nullable|array',
+                'time_out.*' => 'nullable|date_format:H:i',
+            ]);
+    
+            $attendanceDate = now()->format('Y-m-d'); // Use today's date for attendance
+
+            foreach ($validated['status'] as $childId => $status) {
+                Attendance::updateOrCreate(
+                    [
+                        'children_id' => $childId,
+                        'attendance_date' => $attendanceDate,
+                    ],
+                    [
+                        'attendance_status' => $status, // Use 'present' or 'absent' directly
+                        'time_in' => $validated['time_in'][$childId] ?? null,
+                        'time_out' => $validated['time_out'][$childId] ?? null,
+                    ]
+                );
+            }
+        
+            return redirect()->route('attendances.create')->with('success', 'Attendance saved successfully!');
+        
     }
 
     /**

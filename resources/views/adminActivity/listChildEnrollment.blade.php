@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout> 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -30,9 +30,9 @@
                                 @endif
                             </td>
                             <td class="border border-gray-300 px-4 py-2 text-center">{{ $child->child_name }}</td>
-                            <td class="border border-gray-300 px-4 py-2 text-center">{{ $child->child_age }}</td>
+                            <td class="border border-gray-300 px-4 py-2 text-center">{{ $child->child_age }} y/o</td>
                             <td class="border border-gray-300 px-4 py-2 text-center">
-                                <a href="{{ route('enrollmentDetail', $child->id) }}" class="text-blue-500 hover:underline">More Details</a>
+                            <a href="{{ route('adminActivity.show', ['adminActivity' => $child->enrollment->id]) }}" class="text-blue-500 hover:underline">More Details</a>
                             </td>
                         </tr>
                         @empty

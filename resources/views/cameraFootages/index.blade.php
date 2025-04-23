@@ -4,7 +4,7 @@
     <div class="max-w-[1150px] m-auto px-3">
         <!-- Title and Date/Time -->
         <div class="text-left mt-5">
-            <h1 class="text-5xl font-bold">Kid Surveillance</h1>
+            <h1 class="text-5xl font-bold">Kid Live Camera</h1>
             <p id="currentDateTime" class="text-gray-600 mt-2"></p>
         </div>
 
