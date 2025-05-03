@@ -9,7 +9,48 @@
     </div>
 
     <!-- Attendance Summary Cards -->
-    <div class="grid grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-3 gap-6 mb-6">
+
+
+      <!-- Parent Dashboard -->
+      @if(auth()->user()->role === 'staff')
+
+        @php
+                        $userId = auth()->id();
+                        $staff = App\Models\Staff::where('user_id', $userId)->first();
+                        $totalAssignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->count() : 0;
+                        $assignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->with('child')->get() : [];
+        @endphp
+            <!-- Total children Card -->
+        <div class="bg-purple-100 border border-purple-400 text-purple-700 px-4 py-5 rounded-lg shadow-md">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                    
+                        <svg class="h-10 w-10 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>    
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium"> Total Children</h3>
+                        <p class="text-2xl font-bold">{{ $totalAssignedChildren}}</p>
+                    </div>
+                </div>
+            </div>
+      @endif
+
+     <!-- Total children Card -->
+     <div class="bg-purple-100 border border-purple-400 text-purple-700 px-4 py-5 rounded-lg shadow-md">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                
+                    <svg class="h-10 w-10 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>    
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium"> Total Children</h3>
+                    <p class="text-2xl font-bold">{{ $totalAbsent}}</p>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Total Attend Card -->
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-5 rounded-lg shadow-md">
             <div class="flex items-center">
@@ -20,7 +61,7 @@
                 </div>
                 <div class="ml-4">
                     <h3 class="text-lg font-medium"> Present Today</h3>
-                    <p class="text-2xl font-bold">8</p>
+                    <p class="text-2xl font-bold">{{ $totalAttend }}</p>
                 </div>
             </div>
         </div>
@@ -35,11 +76,13 @@
                 </div>
                 <div class="ml-4">
                     <h3 class="text-lg font-medium"> Absence Today</h3>
-                    <p class="text-2xl font-bold">0</p>
+                    <p class="text-2xl font-bold">{{ $totalAbsent}}</p>
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
+
+    
     
 
     <div class="py-1">
@@ -52,7 +95,7 @@
                         <div class="flex flex-col">
                             <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
                             <input type="date" name="date" id="date"
-                                value="{{ request('date', now()->format('Y-m-d')) }}"
+                                value="{{ request('date', now()->format('d-m-Y')) }}"
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
                         </div>
@@ -74,13 +117,11 @@
                         </div>
                     </form>
 
-
-
                     <!-- Attendance Table -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
-                                <tr>
+                                <tr class="bg-gray-50">
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Picture
                                     </th>
@@ -109,10 +150,10 @@
                 @php
                     $attendance = $child->attendances->first();
                 @endphp
-                <tr>
+                <tr class="hover:bg-blue-50 border-b border-gray-200 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if ($child->child_photo)
-                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="Child Photo" class="w-16 h-16 object-cover rounded-full border" onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="Child Photo" class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md" onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
                         @else
                             <div class="h-10 w-10 bg-gray-200 rounded-lg"></div>
                         @endif
@@ -135,8 +176,8 @@
                             <span class="text-gray-500">-</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->time_in ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->time_out ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') : '-' }}</td>                   
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') : '-' }}</td>                    
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->attendance_date ?? $date }}</td>
                 </tr>
             @endforeach

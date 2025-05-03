@@ -56,21 +56,21 @@
                     </thead>
                     <tbody>
                         @forelse($children as $index => $child)
+                       
+                        @php
+                            $attendance = $child->attendances->first(); // Get the attendance record for today
+                        @endphp
                         <tr class="hover:bg-blue-50 border-b border-gray-200 transition-colors">
                             <td class="px-4 py-3 text-center">{{ $children->firstItem() + $index }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex justify-center">
                                     @if($child->child_photo)
-                                        <div class="w-16 h-16 relative">
-                                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="{{ $child->child_name }}" 
-                                                class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md" 
-                                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                                        </div>
+                                        <img src="{{ asset('storage/' . $child->child_photo) }}" alt="{{ $child->child_name }}" 
+                                            class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md" 
+                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
                                     @else
-                                        <div class="w-16 h-16 relative">
-                                            <img src="{{ asset('images/no-image.png') }}" alt="No Image" 
-                                                class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md">
-                                        </div>
+                                        <img src="{{ asset('images/no-image.png') }}" alt="No Image" 
+                                            class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md">
                                     @endif
                                 </div>
                             </td>
@@ -78,34 +78,40 @@
                             <td class="px-4 py-3 text-center">
                                 <div class="flex justify-center space-x-2">
                                     <label class="inline-flex items-center">
-                                        <input type="radio" name="status[{{ $child->id }}]" value="attend" class="form-radio h-5 w-5 text-green-600">
+                                        <input type="radio" name="status[{{ $child->id }}]" value="attend" 
+                                            class="form-radio h-5 w-5 text-green-600 status-radio"
+                                            data-child-id="{{ $child->id }}"
+                                            {{ (optional($attendance)->attendance_status === 'attend') ? 'checked' : '' }}>
                                         <span class="ml-2 text-green-700 font-medium">Present</span>
                                     </label>
                                     <label class="inline-flex items-center">
-                                        <input type="radio" name="status[{{ $child->id }}]" value="absent" class="form-radio h-5 w-5 text-red-600">
+                                        <input type="radio" name="status[{{ $child->id }}]" value="absent" 
+                                            class="form-radio h-5 w-5 text-red-600 status-radio"
+                                            data-child-id="{{ $child->id }}"
+                                            {{ (optional($attendance)->attendance_status === 'absent') ? 'checked' : '' }}>
                                         <span class="ml-2 text-red-700 font-medium">Absent</span>
                                     </label>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50" 
-                                    name="time_in[{{ $child->id }}]" value="{{ old('time_in.' . $child->id) }}">
+                                <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50 time-in" 
+                                    name="time_in[{{ $child->id }}]" 
+                                    value="{{ optional($attendance)->time_in ? date('H:i', strtotime($attendance->time_in)) : '' }}"
+                                    {{ (optional($attendance)->attendance_status === 'absent') ? 'disabled' : '' }}
+                                    data-child-id="{{ $child->id }}">
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50" 
-                                    name="time_out[{{ $child->id }}]">
+                                <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50 time-out" 
+                                    name="time_out[{{ $child->id }}]" 
+                                    value="{{ optional($attendance)->time_out ? date('H:i', strtotime($attendance->time_out)) : '' }}"
+                                    {{ (optional($attendance)->attendance_status === 'absent') ? 'disabled' : '' }}
+                                    data-child-id="{{ $child->id }}">
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-10">
-                                <div class="flex flex-col items-center justify-center text-gray-500">
-                                    <svg class="w-16 h-16 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <p class="text-xl font-medium">No children found.</p>
-                                    <p class="text-sm">Please add children to the system or adjust your search filters.</p>
-                                </div>
+                            <td colspan="6" class="text-center py-10">
+                                <p class="text-gray-500">No children found.</p>
                             </td>
                         </tr>
                         @endforelse
@@ -154,4 +160,29 @@
 
     <!-- Add Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script>
+         document.addEventListener('DOMContentLoaded', function () {
+        // Get all status radio buttons
+        const statusRadios = document.querySelectorAll('.status-radio');
+
+        // Add event listeners to each radio button
+        statusRadios.forEach(radio => {
+            radio.addEventListener('change', function () {
+                const childId = this.dataset.childId;
+                const timeInField = document.querySelector(`.time-in[data-child-id="${childId}"]`);
+                const timeOutField = document.querySelector(`.time-out[data-child-id="${childId}"]`);
+
+                if (this.value === 'attend') {
+                    // Enable time_in and time_out fields if "attend" is selected
+                    timeInField.removeAttribute('disabled');
+                    timeOutField.removeAttribute('disabled');
+                } else if (this.value === 'absent') {
+                    // Disable time_in and time_out fields if "absent" is selected
+                    timeInField.setAttribute('disabled', 'disabled');
+                    timeOutField.setAttribute('disabled', 'disabled');
+                }
+            });
+        });
+    });
+    </script>
 </x-app-layout>

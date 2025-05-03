@@ -16,12 +16,16 @@ class AttendanceController extends Controller
      */
     public function index(Request $request) 
     {
-        $date = $request->get('date', now()->format('Y-m-d')); // Default to today's date
+        $date = $request->get('date', now()->format('d-m-Y')); // Default to today's date
+
         $children = Child::with(['attendances' => function ($query) use ($date) {
             $query->where('attendance_date', $date);
         }])->get();
 
-        return view('attendances.index', compact('children', 'date'));
+        $totalAttend = Attendance::where('attendance_date', $date)->where('attendance_status', 'attend')->count();
+        $totalAbsent = Attendance::where('attendance_date', $date)->where('attendance_status', 'absent')->count();
+    
+        return view('attendances.index', compact('children', 'date', 'totalAttend', 'totalAbsent'));    
     }
 
     /**
@@ -29,9 +33,13 @@ class AttendanceController extends Controller
      */
     public function create()
     {
-        //
-        $children = Child::paginate(30);
-        return view('attendances.create',compact('children'));
+        $date = now()->format('Y-m-d'); // Get today's date
+        $children = Child::with(['attendances' => function ($query) use ($date) {
+            $query->where('attendance_date', $date);
+        }])->paginate(30);
+
+
+        return view('attendances.create',compact('children','date'));
     }
 
     /**
@@ -57,14 +65,15 @@ class AttendanceController extends Controller
                         'attendance_date' => $attendanceDate,
                     ],
                     [
-                        'attendance_status' => $status, // Use 'present' or 'absent' directly
-                        'time_in' => $validated['time_in'][$childId] ?? null,
-                        'time_out' => $validated['time_out'][$childId] ?? null,
+                        //If the child is marked as "absent," these fields should be set to NULL.
+                        'attendance_status' => $status,
+                        'time_in' => $status === 'attend' ? ($validated['time_in'][$childId] ?? null) : null,
+                        'time_out' => $status === 'attend' ? ($validated['time_out'][$childId] ?? null) : null,
                     ]
                 );
             }
         
-            return redirect()->route('attendances.create')->with('success', 'Attendance saved successfully!');
+            return redirect()->route('attendances.index')->with('success', 'Attendance saved successfully!');
         
     }
 
