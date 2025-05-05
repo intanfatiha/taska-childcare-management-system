@@ -4,18 +4,50 @@ namespace App\Http\Controllers;
 
 use App\Models\daily_activities;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class DailyActivitiesController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
        // $daily_activities = daily_activities::all();
-       $daily_activities = daily_activities::orderBy('created_at', 'desc')->get();
-       return view('daily_activities.index', compact('daily_activities'));    }
+    //    $daily_activities = daily_activities::orderBy('created_at', 'desc')->get();
+    //    return view('daily_activities.index', compact('daily_activities'));  
+    
+        $filter = $request->get('filter_type', 'all'); // Default to 'all'
+
+        // Initialize date range variables
+        $startDate = null;
+        $endDate = null;
+        if ($filter === 'date') {
+            $startDate = Carbon::parse($request->get('date'))->startOfDay();
+            $endDate = Carbon::parse($request->get('date'))->endOfDay();
+        } elseif ($filter === 'month') {
+            $startDate = Carbon::parse($request->get('month'))->startOfMonth();
+            $endDate = Carbon::parse($request->get('month'))->endOfMonth();
+        } elseif ($filter === 'year') {
+            $startDate = Carbon::createFromDate($request->get('year'))->startOfYear();
+            $endDate = Carbon::createFromDate($request->get('year'))->endOfYear();
+        }
+        // Fetch activities based on the filter
+        $query = daily_activities::query();
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('post_date', [$startDate, $endDate]);
+        }
+    
+
+        $daily_activities = $query->orderBy('created_at', 'desc')->paginate(10); // Adjust the number of items per page as needed
+
+        return view('daily_activities.index', compact('daily_activities','filter'));
+
+
+    
+    }
 
     /**
      * Show the form for creating a new resource.
