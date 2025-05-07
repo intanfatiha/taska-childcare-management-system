@@ -160,7 +160,7 @@
                     <span>Home</span>
                 </a>
 
-                <a href="{{ route('attendances.index') }}" class="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <a href="{{ route('attendances.parentsIndex') }}" class="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
                         <path d="M16 3v4" />

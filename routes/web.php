@@ -93,9 +93,7 @@ Route::resource('daily_activities', DailyActivitiesController::class);
 Route::resource('camera_footages', CameraFootageController::class);
 
 Route::resource('attendances', AttendanceController::class);
-Route::get('/attendances/check-in', [AttendanceController::class, 'showCheckInForm'])->name('attendances.checkIn');
-Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn'])->name('attendances.checkIn');
-Route::post('/attendances/checkout', [AttendanceController::class, 'checkOut'])->name('attendances.checkout');
+Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
 
 Route::resource('payments', PaymentController::class);
 

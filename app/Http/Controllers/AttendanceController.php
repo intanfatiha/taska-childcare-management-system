@@ -28,6 +28,40 @@ class AttendanceController extends Controller
         return view('attendances.index', compact('children', 'date', 'totalAttend', 'totalAbsent'));    
     }
 
+    public function parentsIndex(Request $request)
+    {
+        $userId = auth()->id();
+        $parent = \App\Models\ParentRecord::where('user_id', $userId)->first();
+
+        if (!$parent) {
+            return redirect()->route('dashboard')->with('error', 'Parent record not found.');
+        }
+
+        // Get all children of the parent
+        $myChildren = \App\Models\Child::where('parent_id', $parent->id)->get();
+
+        // Get the selected date or default to today
+        $filterDate = $request->get('date', now()->format('Y-m-d'));
+
+        // Calculate attendance summary
+        $totalChildren = $myChildren->count();
+        $presentToday = 0;
+        $absentToday = 0;
+
+        foreach ($myChildren as $child) {
+            $attendance = \App\Models\Attendance::where('child_id', $child->id)
+                ->where('attendance_date', $filterDate)
+                ->first();
+
+            if ($attendance && $attendance->attendance_status === 'attend') {
+                $presentToday++;
+            } elseif ($attendance && $attendance->attendance_status === 'absent') {
+                $absentToday++;
+            }
+        }
+
+        return view('attendances.parentsIndex', compact('myChildren', 'filterDate', 'totalChildren', 'presentToday', 'absentToday'));
+    }
     /**
      * Show the form for creating a new resource.
      */

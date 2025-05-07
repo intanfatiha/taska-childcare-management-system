@@ -12,7 +12,7 @@
     <div class="grid grid-cols-3 gap-6 mb-6">
 
 
-      <!-- Parent Dashboard -->
+      <!-- Staff Dashboard -->
       @if(auth()->user()->role === 'staff')
 
         @php
@@ -188,12 +188,8 @@
             </div>
         </div>
     </div>
+
+
+    
 </x-app-layout>
 
-<!-- <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="h-12 w-12 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                                            <img src="{{ asset('uploads/images/kid.jpg') }}" 
-                                                 alt="Profile" 
-                                                 class="h-10 w-10 rounded-lg object-cover">
-                                        </div>
-                                    </td> -->
