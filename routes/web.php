@@ -87,6 +87,7 @@ Route::resource('childrens', ChildrenController::class);
 
 Route::resource('announcements',AnnouncementsController::class);
 
+
 Route::resource('daily_activities', DailyActivitiesController::class);
 
 Route::resource('camera_footages', CameraFootageController::class);

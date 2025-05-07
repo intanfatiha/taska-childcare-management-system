@@ -12,6 +12,7 @@ class Announcements extends Model
     protected $table = 'announcements';
 
     protected $fillable = [
+        'announcement_title',
         'announcement_location',
         'announcement_date',
         'announcement_time',
