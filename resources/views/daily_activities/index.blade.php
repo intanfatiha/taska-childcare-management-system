@@ -91,9 +91,13 @@
                 <div class="bg-white p-6 rounded-lg shadow-md mb-6">
                     <div class="flex justify-between items-start">
                         <!-- Post creator -->
-                        <div>
-                            <p class="text-sm text-gray-600">Created by: Admin</p>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Created by: Teacher {{ explode(' ', $activity->user->name ?? 'Unknown')[0] }}
                         </div>
+                            
                         <!-- Post date and time -->
                         <div>
                             <!-- <p class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($activity->created_at)->format('d.m.Y g:i a') }}</p> -->
@@ -121,6 +125,7 @@
                         <p class="text-gray-700">{{ $activity->post_desc }}</p>
                     </div>
 
+                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                     <!-- Action buttons -->
                     <div class="flex justify-between mt-4">
                         <!-- Edit button -->
@@ -149,6 +154,7 @@
                                 </button>
                         </form>
                     </div>
+                    @endif
                 </div>
             @empty
                 <p class="text-center text-gray-600">No activities available.</p>
@@ -208,7 +214,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Admin
+                                Teacher {{ explode(' ', $activity->user->name ?? 'Unknown')[0] }}
                             </div>
                         </div>
                         

@@ -102,15 +102,7 @@
 
                         <!-- Buttons -->
                         <div class="flex gap-4">
-                        <!-- <a href="{{ route('attendances.checkIn') }}" 
-                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
-                                Check In
-                            </a>
-
-                            <a href="" 
-                            class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded shadow w-28 text-center">
-                                Check Out
-                            </a> -->
+                        
                             <a href="{{ route('attendances.create') }}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">
                                 Add Attendance
                             </a>

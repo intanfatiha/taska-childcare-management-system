@@ -21,7 +21,7 @@
     </div>
 </x-app-layout> -->
 
-<form method="POST" action="{{ route('attendances.checkIn') }}">
+<form method="POST" action="">
     @csrf
     <div class="flex items-center gap-4">
         <select name="children_id" required class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
