@@ -15,6 +15,11 @@ class ParentRecord extends Model
         'child_id',
     ];
 
+        public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // Relationship with Enrollment
     public function enrollment()
     {

@@ -7,7 +7,14 @@ use App\Models\Child;
 use App\Models\Father;
 use App\Models\Mother;
 use App\Models\Guardian;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\ParentRecord;
+
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -28,17 +35,20 @@ class AttendanceController extends Controller
         return view('attendances.index', compact('children', 'date', 'totalAttend', 'totalAbsent'));    
     }
 
+   
     public function parentsIndex(Request $request)
     {
         $userId = auth()->id();
-        $parent = \App\Models\ParentRecord::where('user_id', $userId)->first();
 
-        if (!$parent) {
-            return redirect()->route('dashboard')->with('error', 'Parent record not found.');
-        }
+        // Find all ParentRecords where the logged-in user is a father, mother, or guardian
+        $parentRecords = \App\Models\ParentRecord::where(function ($query) use ($userId) {
+            $query->where('father_id', $userId)
+                ->orWhere('mother_id', $userId)
+                ->orWhere('guardian_id', $userId);
+        })->with('child')->get();
 
-        // Get all children of the parent
-        $myChildren = \App\Models\Child::where('parent_id', $parent->id)->get();
+        // Get all children associated with the parent
+        $myChildren = $parentRecords->pluck('child');
 
         // Get the selected date or default to today
         $filterDate = $request->get('date', now()->format('Y-m-d'));
@@ -49,7 +59,7 @@ class AttendanceController extends Controller
         $absentToday = 0;
 
         foreach ($myChildren as $child) {
-            $attendance = \App\Models\Attendance::where('child_id', $child->id)
+            $attendance = \App\Models\Attendance::where('children_id', $child->id)
                 ->where('attendance_date', $filterDate)
                 ->first();
 
@@ -79,37 +89,92 @@ class AttendanceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) 
-    {
-        $validated = $request->validate([
-                'status' => 'required|array',
-                'status.*' => 'required|in:attend,absent',
-                'time_in' => 'nullable|array',
-                'time_in.*' => 'nullable|date_format:H:i',
-                'time_out' => 'nullable|array',
-                'time_out.*' => 'nullable|date_format:H:i',
-            ]);
     
-            $attendanceDate = now()->format('Y-m-d'); // Use today's date for attendance
+public function store(Request $request) 
+{
+    $validated = $request->validate([
+        'status' => 'required|array',
+        'status.*' => 'required|in:attend,absent',
+        'time_in' => 'nullable|array',
+        'time_in.*' => 'nullable|date_format:H:i',
+        'time_out' => 'nullable|array',
+        'time_out.*' => 'nullable|date_format:H:i',
+    ]);
 
-            foreach ($validated['status'] as $childId => $status) {
-                Attendance::updateOrCreate(
-                    [
-                        'children_id' => $childId,
-                        'attendance_date' => $attendanceDate,
-                    ],
-                    [
-                        //If the child is marked as "absent," these fields should be set to NULL.
-                        'attendance_status' => $status,
-                        'time_in' => $status === 'attend' ? ($validated['time_in'][$childId] ?? null) : null,
-                        'time_out' => $status === 'attend' ? ($validated['time_out'][$childId] ?? null) : null,
-                    ]
-                );
+    $attendanceDate = now()->format('Y-m-d'); // Use today's date for attendance
+
+    foreach ($validated['status'] as $childId => $status) {
+        $attendance = Attendance::updateOrCreate(
+            [
+                'children_id' => $childId,
+                'attendance_date' => $attendanceDate,
+            ],
+            [
+                'attendance_status' => $status,
+                'time_in' => $status === 'attend' ? ($validated['time_in'][$childId] ?? now()->format('H:i:s')) : null,
+                'time_out' => $status === 'attend' ? ($validated['time_out'][$childId] ?? null) : null,
+            ]
+        );
+
+        // Send email to parents only if the child attended
+        if ($status === 'attend') {
+            $child = \App\Models\Child::find($childId); // Retrieve the child's details
+
+            // Retrieve parent IDs (father, mother, guardian)
+            $parents = \App\Models\ParentRecord::where('child_id', $childId)
+                ->select('father_id', 'mother_id', 'guardian_id')
+                ->first();
+
+            if ($parents) {
+                $parentIds = [$parents->father_id, $parents->mother_id, $parents->guardian_id];
+
+                // Retrieve users with the parents role
+                $parentUsers = User::whereIn('id', $parentIds)
+                    ->where('role', 'parents')
+                    ->get();
+
+                    dd([
+                        'Child ID' => $childId,
+                        'Father ID' => $parents->father_id,
+                        'Mother ID' => $parents->mother_id,
+                        'Guardian ID' => $parents->guardian_id,
+                    ]);
+                foreach ($parentUsers as $parentUser) {
+                    try {
+                        $htmlContent = "
+                            <h2>Dear {$parentUser->name},</h2>
+                            <p>We hope this message finds you well.</p>
+                            <p>Please be informed that your child has attended Taska Hikmah with the following details:</p>
+                            <p><strong>Child Name:</strong> {$child->child_name}</p>
+                            <p><strong>Date:</strong> {$attendanceDate}</p>
+                            <p><strong>Time-In:</strong> {$attendance->time_in}</p>
+                            <p><strong>Time-Out:</strong> " . ($attendance->time_out ?? 'Not yet checked out') . "</p>
+                            <p>Warm regards,<br>
+                            Taska Hikmah</p>
+                            <hr>
+                            <p style=\"font-size: 0.9em; color: #555;\">
+                            <p>This is an automated message. Please do not reply to this email.</p>
+                            For any inquiries, please contact us or call us at 07-1234567.<br>
+                            </p>
+                        ";
+
+                        Mail::send([], [], function ($message) use ($parentUser, $htmlContent) {
+                            $message->to($parentUser->email)
+                                    ->subject('Attendance Information From Taska Hikmah')
+                                    ->html($htmlContent);
+                        });
+
+                        Log::info("Attendance email sent successfully to: {$parentUser->email}");
+                    } catch (\Exception $e) {
+                        Log::error("Failed to send attendance email to {$parentUser->email}. Error: " . $e->getMessage());
+                    }
+                }
             }
-        
-            return redirect()->route('attendances.index')->with('success', 'Attendance saved successfully!');
-        
+        }
     }
+
+    return redirect()->route('attendances.index')->with('success', 'Attendance saved successfully!');
+}
 
     /**
      * Display the specified resource.

@@ -60,7 +60,7 @@ class AnnouncementsController extends Controller
             'announcement_type'=>'required|string|max:50',
         ]);
 
-        // Create the announcement
+    // Create the announcement
     $announcement = Announcements::create($validatedData);
 
     // Send email to all users with the 'parents' role

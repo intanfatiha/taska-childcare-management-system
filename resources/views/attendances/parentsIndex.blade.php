@@ -72,7 +72,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach ($myChildren as $child)
                     @php
-                        $attendance = \App\Models\Attendance::where('child_id', $child->id)
+                        $attendance = \App\Models\Attendance::where('children_id', $child->id)
                             ->where('attendance_date', $filterDate)
                             ->first();
                     @endphp
