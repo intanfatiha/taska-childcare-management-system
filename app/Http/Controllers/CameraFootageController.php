@@ -12,12 +12,10 @@ class CameraFootageController extends Controller
      */
     public function index(Request $request)
     {
-        //
-        // $Camera_footages = Camera_footage::all();
-        // return view('cameraFootages.index', compact('Camera_footages'));
+        $cameraFootages = Camera_footage::orderBy('created_at', 'desc')->get();
+        return view('cameraFootages.index', compact('cameraFootages'));
 
-        return view('cameraFootages.index'); 
-      
+
     }
 
     /**
@@ -33,7 +31,44 @@ class CameraFootageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+        $request->validate([
+            'footage' => 'required|file|mimes:webm|max:20480',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'date' => 'required|date'
+        ]);
+
+        $file = $request->file('footage');
+        $directory = public_path('uploads/cameraFootages');
+        $filename = time() . '_' . $file->getClientOriginalName();
+
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $file->move($directory, $filename);
+
+        $footage = \App\Models\CameraFootage::create([
+            'user_id' => auth()->id(),
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'date' => $request->date,
+            'file_location' => 'uploads/cameraFootages/' . $filename,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Footage saved successfully!',
+            'data' => $footage
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }       
+          
     }
 
     /**
@@ -65,6 +100,18 @@ class CameraFootageController extends Controller
      */
     public function destroy(Camera_footage $camera_footage)
     {
-        //
+         $footage = Camera_footage::findOrFail($id);
+
+        // Delete the file from the server
+        $filePath = public_path($footage->file_location);
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        // Delete the record from the database
+        $footage->delete();
+
+        return redirect()->route('cameraFootages.index')->with('success', 'Footage deleted successfully!');
+    
     }
 }

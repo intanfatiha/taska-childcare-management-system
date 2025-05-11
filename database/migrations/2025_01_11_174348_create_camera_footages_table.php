@@ -13,11 +13,7 @@ return new class extends Migration
     {
         Schema::create('camera_footages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->start_time();
-            $table->end_time();
-            $table->date();
-            $table->file_location();
+           
             $table->timestamps();
         });
     }
