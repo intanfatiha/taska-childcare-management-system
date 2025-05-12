@@ -29,27 +29,52 @@ class CameraFootageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        try {
+
+public function store(Request $request)
+{
+    try {
+        dd();
+        // Ensure the user is authenticated
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated.'
+            ], 401);
+        }
+
+        // Validate the request
         $request->validate([
-            'footage' => 'required|file|mimes:webm|max:20480',
+            'footagedocument' => 'required|file|mimetypes:video/webm',
             'start_time' => 'required',
             'end_time' => 'required',
             'date' => 'required|date'
         ]);
 
-        $file = $request->file('footage');
+        
+
+        // Debugging: Log file details
+        if ($request->hasFile('footagedocument')) {
+            $file = $request->file('footagedocument');
+            \Log::info('Uploaded file MIME type: ' . $file->getMimeType());
+            \Log::info('Uploaded file extension: ' . $file->getClientOriginalExtension());
+            \Log::info('Uploaded file size: ' . $file->getSize());
+        }
+
+        // Get the uploaded file
+        $file = $request->file('footagedocument');
         $directory = public_path('uploads/cameraFootages');
         $filename = time() . '_' . $file->getClientOriginalName();
 
+        // Ensure the directory exists
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
 
+        // Move the file to the directory
         $file->move($directory, $filename);
 
-        $footage = \App\Models\CameraFootage::create([
+        // Save the footage details in the database
+        $footage = Camera_footage::create([
             'user_id' => auth()->id(),
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
@@ -63,13 +88,13 @@ class CameraFootageController extends Controller
             'data' => $footage
         ]);
     } catch (\Exception $e) {
+        \Log::error('Error in CameraFootageController@store:', ['error' => $e->getMessage()]);
         return response()->json([
             'success' => false,
             'message' => 'Error: ' . $e->getMessage()
         ], 500);
-    }       
-          
     }
+}
 
     /**
      * Display the specified resource.

@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <div class="max-w-[1150px] m-auto px-3">
         <!-- Title and Date/Time -->
@@ -36,6 +37,7 @@
 
             let mediaRecorder;
             let recordedChunks = [];
+            let start_time;
 
             // Check for webcam support and initialize
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -54,16 +56,38 @@
                         // Handle recording stop
                         mediaRecorder.onstop = function () {
                             const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                            console.log(blob.type); // Should output "video/webm"
                             recordedChunks = [];
 
                             const url = URL.createObjectURL(blob);
                             playback.src = url;
 
-                            // Download the recorded video
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `recording_${new Date().toISOString().slice(0, 10)}.webm`;
-                            a.click();
+                            const formData = new FormData();
+                            formData.append('footagedocument', blob, `recording_${Date.now()}.webm`);
+                            formData.append('start_time', start_time);
+                            formData.append('end_time', new Date().toLocaleTimeString());
+                            formData.append('date', new Date().toISOString().slice(0, 10));
+
+                            // Send the recorded video to the server
+                            fetch('{{ route('cameraFootages.store') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    location.reload(); // Reload the page to display the new footage
+                                } else {
+                                    alert('Failed to save footage.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error saving footage:', error);
+                            });
                         };
                     })
                     .catch(function (error) {
@@ -72,11 +96,12 @@
                     });
             } else {
                 console.error("getUserMedia not supported");
-                alert("Error: No supported webcam interface found.");
+                alert("Error: getUserMedia No supported webcam interface found.");
             }
 
             // Start recording
             startBtn.addEventListener('click', function () {
+                start_time = new Date().toLocaleTimeString();
                 mediaRecorder.start();
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
