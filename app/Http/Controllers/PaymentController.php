@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -12,38 +14,20 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        //
-        $payments = [
-            [
-                'id' => 1,
-                'title' => 'November Monthly Fees',
-                'parent_names' => 'Nuraidah & Azwan',
-                'children_names' => 'Sarah Qistina',
-                'total_amount' => 500.00,
-                'due_date' => '2023-12-31',
-                'status' => 'Pending'
-            ],
-            [
-                'id' => 2,
-                'title' => 'December Monthly Fees',
-                'parent_names' => 'Ahmad & Sarah',
-                'children_names' => 'Ali Ahmad',
-                'total_amount' => 450.00,
-                'due_date' => '2024-01-31',
-                'status' => 'Paid'
-            ],
-            [
-                'id' => 3,
-                'title' => 'Registration Fees',
-                'parent_names' => 'John & Mary',
-                'children_names' => 'James Smith',
-                'total_amount' => 200.00,
-                'due_date' => '2024-01-15',
-                'status' => 'Pending'
-            ]
-        ];
+       
+          // Fetch payments with optional filtering
+        $query = Payment::query();
 
-        return view('payments.index', compact('payments'));
+        // Filter by month if requested
+        // if (request()->has('month')) {
+        //     $query->whereMonth('due_date', request('month'));
+        // }
+
+        // // Sort payments
+        $payments = Payment::orderBy('payment_duedate', 'desc')->get();
+
+        return view('payments.index',compact('payments'));
+
     }
     
 
@@ -61,7 +45,35 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+          // Validate the request
+        $validatedData = $request->validate([
+            'parent_names' => 'required|string|max:255',
+            'child_name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'due_date' => 'required|date|after:today',
+        ]);
+
+        // Determine payment status
+        $status = $this->determinePaymentStatus($validatedData['due_date']);
+
+        // Create the payment
+        $payment = Payment::create([
+            'parent_names' => $validatedData['parent_names'],
+            'child_name' => $validatedData['child_name'],
+            'amount' => $validatedData['amount'],
+            'due_date' => $validatedData['due_date'],
+            'status' => $status,
+            'created_by' => Auth::id()
+        ]);
+
+        // Optionally send confirmation email
+        $this->sendPaymentConfirmationEmail($payment);
+
+        // Return response
+        return response()->json([
+            'message' => 'Payment added successfully',
+            'payment' => $payment
+        ], 201);
     }
 
     /**

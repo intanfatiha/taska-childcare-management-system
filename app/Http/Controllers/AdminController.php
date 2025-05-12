@@ -74,7 +74,7 @@ class AdminController extends Controller
         
         return view('adminActivity.enrollmentDetail', compact('enrollment', 'user'));
     }
-
+ 
 
     /**
      * Show the form for editing the specified resource.
