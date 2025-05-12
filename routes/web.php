@@ -90,15 +90,19 @@ Route::resource('announcements',AnnouncementsController::class);
 
 Route::resource('daily_activities', DailyActivitiesController::class);
 
-Route::resource('cameraFootages', CameraFootageController::class);
-// Route for displaying camera footage page
-Route::get('/camera-footages', [CameraFootageController::class, 'index'])->name('cameraFootages.index');
+// Route::resource('cameraFootages', CameraFootageController::class);
 
-// Route for storing camera footage (make sure it accepts POST requests)
-Route::post('/camera-footages', [CameraFootageController::class, 'store'])->name('cameraFootages.store');
+Route::resource('camera-footages', CameraFootageController::class);
+// Route::post('/camera-footages', [CameraFootageController::class, 'testfunction'])->name('testfunction');
 
-// Route for deleting camera footage
-Route::delete('/camera-footages/{id}', [CameraFootageController::class, 'destroy'])->name('cameraFootages.destroy');
+// // Route for displaying camera footage page
+// Route::get('/camera-footages', [CameraFootageController::class, 'index'])->name('cameraFootages.index');
+
+// // Route for storing camera footage (make sure it accepts POST requests)
+// Route::post('/camera-footages', [CameraFootageController::class, 'store'])->name('cameraFootages.store');
+
+// // Route for deleting camera footage
+// Route::delete('/camera-footages/{id}', [CameraFootageController::class, 'destroy'])->name('cameraFootages.destroy');
 
 Route::resource('attendances', AttendanceController::class);
 Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');

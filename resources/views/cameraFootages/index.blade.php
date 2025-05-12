@@ -5,7 +5,7 @@
         <div class="text-left mt-5">
             <h1 class="text-5xl font-bold">Kid Live Camera</h1>
             <p id="currentDateTime" class="text-gray-600 mt-2"></p>
-        </div>
+        </div> 
 
         <!-- Camera Feed Section -->
         <div id="camera_section" class="mt-10 flex flex-col items-center">
@@ -49,7 +49,7 @@
                                 <video src="{{ asset($footage->file_location) }}" controls class="w-20 h-12"></video>
                             </td>
                             <td class="border px-4 py-2 text-center">
-                                <form method="POST" action="{{ route('cameraFootages.destroy', $footage->id) }}">
+                                <form method="POST" action="{{ route('camera-footages.destroy', $footage->id) }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded">Delete</button>
@@ -66,7 +66,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const video = document.querySelector("#videoElement");
-            const playback = document.querySelector("#playback");
+            // const playback = document.querySelector("#playback");
             const startBtn = document.querySelector("#startBtn");
             const stopBtn = document.querySelector("#stopBtn");
 
@@ -94,8 +94,8 @@
                             console.log(blob.type); // Should output "video/webm"
                             recordedChunks = [];
 
-                            const url = URL.createObjectURL(blob);
-                            playback.src = url;
+                            // const url = URL.createObjectURL(blob);
+                            // playback.src = url;
 
                             const formData = new FormData();
                             formData.append('footagedocument', blob, `recording_${Date.now()}.webm`);
@@ -104,7 +104,7 @@
                             formData.append('date', new Date().toISOString().slice(0, 10));
 
                             // Send the recorded video to the server
-                            fetch('{{ route('cameraFootages.store') }}', {
+                            fetch('{{ route("camera-footages.store") }}', {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
