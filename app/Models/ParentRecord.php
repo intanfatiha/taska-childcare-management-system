@@ -47,6 +47,6 @@ class ParentRecord extends Model
     // Relationship with Child
     public function child()
     {
-        return $this->belongsTo(Child::class, 'child_id');
+        return $this->hasMany(Child::class, 'enrollment_id','id');
     }
 }

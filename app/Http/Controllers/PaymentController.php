@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\ParentRecord;
+use App\Models\Child;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -36,8 +38,32 @@ class PaymentController extends Controller
      */
     public function create()
     {
-        //
-        return view('payments.create');
+        $parentRecords = ParentRecord::with(['father', 'mother', 'guardian', 'child'])->get();
+         // Format the data for the view
+   // Format the data for the view
+    // $formattedParents = $parentRecords->map(function ($parentRecord) {
+    //     $parentName = 'No Data';
+
+    //     if ($parentRecord->father && $parentRecord->mother) {
+    //         $parentName = $parentRecord->father->father_name . ' & ' . $parentRecord->mother->mother_name;
+    //     } elseif ($parentRecord->guardian) {
+    //         $parentName = $parentRecord->guardian->guardian_name;
+    //     }
+
+    //     return [
+    //         'id' => $parentRecord->id,
+    //         'parent_name' => $parentName,
+    //         'children' => $parentRecord->children->map(function ($child) {
+    //             return [
+    //                 'id' => $child->id,
+    //                 'name' => $child->child_name,
+    //             ];
+    //         }),
+    //     ];
+    // });
+
+    return view('payments.create', compact('parentRecords'));
+
     }
 
     /**
