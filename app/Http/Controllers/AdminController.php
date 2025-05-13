@@ -9,6 +9,7 @@ use App\Models\Mother;
 use App\Models\Guardian;
 use App\Models\User;
 use App\Models\ParentRecord;
+use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -330,4 +331,30 @@ class AdminController extends Controller
 
         return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
  }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Log the login details
+        LoginHistory::create([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'login_time' => now(),
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        // Update the logout time for the user's most recent login history
+        LoginHistory::where('user_id', auth()->id())
+            ->latest('login_time')
+            ->first()
+            ->update(['logout_time' => now()]);
+
+        // Perform the logout
+        auth()->logout();
+
+        return redirect('/login');
+    }
+
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+use App\Models\LoginHistory;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -28,6 +29,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+         // Log the login details
+        LoginHistory::create([
+            'user_id' => Auth::id(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
+            'login_time' => now(),
+        ]);
+
         return redirect()->intended(route('adminHomepage', absolute: false));
     }
 
@@ -36,7 +45,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+       // Update the logout time for the user's most recent login history
+        LoginHistory::where('user_id', Auth::id())
+            ->latest('login_time')
+            ->first()
+            ->update(['logout_time' => now()]);
+
         Auth::guard('web')->logout();
+
+         
+
 
         $request->session()->invalidate();
 

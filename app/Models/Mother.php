@@ -33,4 +33,9 @@ class Mother extends Model
     {
         return $this->belongsTo(Enrollment::class);
     }
+
+    public function parentRecord()
+    {
+        return $this->hasMany(ParentRecord::class, 'mother_id');
+    }
 }

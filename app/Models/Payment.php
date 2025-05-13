@@ -15,7 +15,7 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'parent_id',
-        'child_id',
+        'child_id', 
         'paymentByParents_date',
         'payment_amount',
         'payment_duedate',
@@ -38,6 +38,8 @@ class Payment extends Model
     {
         return $this->belongsTo(ParentRecord::class, 'parent_id');
     }
+
+
 
     /**
      * Define the relationship with the Child model.

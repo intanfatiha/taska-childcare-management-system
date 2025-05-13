@@ -35,4 +35,9 @@ class Guardian extends Model
     {
         return $this->belongsTo(Enrollment::class);
     }
+
+    public function parentRecord()
+    {
+        return $this->hasMany(ParentRecord::class, 'guardian_id');
+    }
 }

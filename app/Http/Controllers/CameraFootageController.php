@@ -123,7 +123,7 @@ class CameraFootageController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage. 
      */
     public function destroy(Camera_footage $camera_footage)
     {

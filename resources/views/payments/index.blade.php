@@ -2,13 +2,13 @@
     <div class="container mx-auto px-4 py-8">
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
             {{-- Header Section --}}
-            <div class="bg-blue-600 text-white p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
                 <div class="flex justify-between items-center">
                     <h1 class="text-4xl font-bold flex items-center">
-                        <span class="material-icons mr-4 text-5xl">Payment Management</span>
+                        <span class="text-3xl font-bold text-indigo-800">Payment Management</span>
                         
                     </h1>
-                    <div class="flex items-center space-x-4">
+                    <!-- <div class="flex items-center space-x-4">
                         @if(auth()->check())
                             <div class="bg-blue-500 rounded-full p-2">
                                 <span class="material-icons text-white">notifications</span>
@@ -17,12 +17,12 @@
                                 <span class="material-icons text-white">account_circle</span>
                             </div>
                         @endif
-                    </div>
+                    </div> -->
                 </div>
-                <h2 class="text-2xl mt-4 flex items-center">
+                <!-- <h2 class="text-2xl mt-4 flex items-center">
                     <span class="material-icons mr-3"></span>
                     Payment Dashboard
-                </h2>
+                </h2> -->
             </div>
 
             <div class="p-6">
@@ -35,7 +35,7 @@
                         <select 
                             id="month-filter" 
                             onchange="filterByMonth()" 
-                            class="bg-blue-50 border border-blue-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 p-2.5"
+                            class="bg-purple-50 border border-purple-200 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-48 p-2.5"
                         >
                             <option value="">All Months</option>
                             <option value="01">January</option>
@@ -66,15 +66,15 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
-                        <thead class="bg-blue-100">
+                        <thead class="bg-indigo-600  text-white">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Parents</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Children</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Payment (RM)</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Due Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Parents</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Children</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Payment (RM)</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Due Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Status</th>
                                 @if(auth()->user()->role === 'admin')
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Actions</th>
                                 @endif
                             </tr>
                         </thead>

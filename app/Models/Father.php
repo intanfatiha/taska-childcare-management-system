@@ -32,4 +32,10 @@ class Father extends Model
     {
         return $this->belongsTo(Enrollment::class);
     }
+
+    public function parentRecord()
+    {
+        return $this->hasMany(ParentRecord::class, 'father_id');
+    }
+
 }

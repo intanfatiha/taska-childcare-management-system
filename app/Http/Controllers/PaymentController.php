@@ -37,33 +37,64 @@ class PaymentController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-    {
+    { 
+          // Retrieve parent records with eager loading of relationships
         $parentRecords = ParentRecord::with(['father', 'mother', 'guardian', 'child'])->get();
-         // Format the data for the view
-   // Format the data for the view
-    // $formattedParents = $parentRecords->map(function ($parentRecord) {
-    //     $parentName = 'No Data';
+        
+        // Create array for dropdown
+        $formattedParents = [];
+        
+       
+foreach ($parentRecords as $parentRecord) {
+    \Log::info('Parent Record ID: ' . $parentRecord->id);
+    \Log::info('Guardian: ' . optional($parentRecord->guardian)->guardian_name);
+    \Log::info('Father: ' . optional($parentRecord->father)->father_name);
+    \Log::info('Mother: ' . optional($parentRecord->mother)->mother_name);
+}
+        // Process each parent record
+        foreach ($parentRecords as $parentRecord) {
 
-    //     if ($parentRecord->father && $parentRecord->mother) {
-    //         $parentName = $parentRecord->father->father_name . ' & ' . $parentRecord->mother->mother_name;
-    //     } elseif ($parentRecord->guardian) {
-    //         $parentName = $parentRecord->guardian->guardian_name;
-    //     }
-
-    //     return [
-    //         'id' => $parentRecord->id,
-    //         'parent_name' => $parentName,
-    //         'children' => $parentRecord->children->map(function ($child) {
-    //             return [
-    //                 'id' => $child->id,
-    //                 'name' => $child->child_name,
-    //             ];
-    //         }),
-    //     ];
-    // });
-
-    return view('payments.create', compact('parentRecords'));
-
+            // Determine parent name
+            // $parentName = 'No Data';
+              $parentName = 'No Data';
+            if ($parentRecord->father && $parentRecord->mother) {
+                $parentName = $parentRecord->father->father_name . ' & ' . $parentRecord->mother->mother_name;
+            } elseif ($parentRecord->guardian) {
+                $parentName = $parentRecord->guardian->guardian_name;
+            } elseif ($parentRecord->father) {
+                $parentName = $parentRecord->father->father_name;
+            } elseif ($parentRecord->mother) {
+                $parentName = $parentRecord->mother->mother_name;
+            }
+            
+            // Simply store the ID and parent name for the dropdown
+            // This is all you need if you're just populating a dropdown
+            $formattedParents[] = [
+                'id' => $parentRecord->id,
+                'parent_name' => $parentName
+            ];
+            
+            // If you still need children data, add it like this:
+            /*
+            $formattedParents[count($formattedParents)-1]['children'] = [];
+            foreach ($parentRecord->child as $child) {
+                $formattedParents[count($formattedParents)-1]['children'][] = [
+                    'id' => $child->id,
+                    'name' => $child->child_name
+                ];
+            }
+            */
+        }
+        
+        // Optionally, you can sort the array by parent name if needed
+        usort($formattedParents, function($a, $b) {
+            return strcmp($a['parent_name'], $b['parent_name']);
+        });
+        
+        // For debugging (uncomment if needed)
+        // dd($formattedParents);
+        
+        return view('payments.create', compact('formattedParents'));
     }
 
     /**

@@ -49,4 +49,9 @@ class Child extends Model
         return $this->hasMany(Attendance::class, 'children_id');
     }
 
+    public function parentRecords()
+    {
+        return $this->hasMany(ParentRecord::class, 'child_id');
+    }
+
 }

@@ -29,25 +29,16 @@
 
                     <!-- Parent Dropdown -->
                     <div class="mb-5">
-                         class="mb-5">
                         <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent</label>
                         <select id="parent_id" name="parent_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                            <option value="">Select a Parent</option>
-                            @foreach($parentRecords as $parentRecord)
-                                <option value="{{ $parentRecord->id }}">
-                                    @if($parentRecord->father && $parentRecord->mother)
-                                        {{ $parentRecord->father->father_name }} & {{ $parentRecord->mother->mother_name }}
-                                    @elseif($parentRecord->guardian)
-                                        {{ $parentRecord->guardian->guardian_name }}
-                                    @else
-                                        No Data
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('parent_id')
-                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-                        @enderror
+        <option value="">Select a Parent</option>
+        @foreach($formattedParents as $parent)
+    <option value="{{ $parent['id'] }}">{{ $parent['parent_name'] }}</option>
+        @endforeach
+    </select>
+    @error('parent_id')
+        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+    @enderror
                     </div>
 
                     <!-- Child Dropdown -->
