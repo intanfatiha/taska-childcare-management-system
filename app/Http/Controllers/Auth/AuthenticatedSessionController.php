@@ -46,15 +46,11 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
        // Update the logout time for the user's most recent login history
-        LoginHistory::where('user_id', Auth::id())
-            ->latest('login_time')
-            ->first()
-            ->update(['logout_time' => now()]);
+       LoginHistory::where('user_id', Auth::id())
+        ->whereNull('logout_time')
+        ->update(['logout_time' => now()]);
 
         Auth::guard('web')->logout();
-
-         
-
 
         $request->session()->invalidate();
 
