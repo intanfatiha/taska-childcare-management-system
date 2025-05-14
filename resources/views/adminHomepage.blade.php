@@ -76,53 +76,53 @@
                         </a>
                     </div>
 
-           
-<!-- Login History -->
-<div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mt-6">
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-1">
-        <h2 class="text-xl font-semibold text-white flex items-center">
-            <span class="mr-2">📜</span> Login History
-        </h2>
-    </div>
-    <div class="overflow-x-auto" style="max-height: 200px; overflow-y: auto;">
-        <table class="w-full table-auto">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">User</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Role</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">IP Address</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">User Agent</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Login Time</th>
-                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Logout Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    $loginHistories = \App\Models\LoginHistory::with('user')->orderBy('login_time', 'desc')->take(10)->get();
-                @endphp
-                @forelse($loginHistories as $history)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 border-b">{{ $history->user->name }}</td>
-                        <td class="px-6 py-4 border-b">{{ $history->user->role }}</td>
-                        <td class="px-6 py-4 border-b">{{ $history->ip_address }}</td>
-                        <td class="px-6 py-4 border-b">{{ $history->user_agent }}</td>
-                        <td class="px-6 py-4 border-b">{{ $history->login_time }}</td>
-                        <td class="px-6 py-4 border-b">{{ $history->logout_time ?? 'Still Logged In' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="py-6 px-6 text-center text-gray-500">
-                            <div class="flex flex-col items-center">
-                                <span class="text-2xl mb-2">🔍</span>
-                                <p>No login history found.</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
+                        
+                <!-- Login History -->
+                <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mt-6">
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-1">
+                        <h2 class="text-xl font-semibold text-white flex items-center">
+                            <span class="mr-2">📜</span> Login History
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto" style="max-height: 200px; overflow-y: auto;">
+                        <table class="w-full table-auto">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">User</th>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Role</th>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">IP Address</th>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">User Agent</th>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Login Time</th>
+                                    <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Logout Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $loginHistories = \App\Models\LoginHistory::with('user')->orderBy('login_time', 'desc')->take(10)->get();
+                                @endphp
+                                @forelse($loginHistories as $history)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 border-b">{{ $history->user->name }}</td>
+                                        <td class="px-6 py-4 border-b">{{ $history->user->role }}</td>
+                                        <td class="px-6 py-4 border-b">{{ $history->ip_address }}</td>
+                                        <td class="px-6 py-4 border-b">{{ $history->user_agent }}</td>
+                                        <td class="px-6 py-4 border-b">{{ $history->login_time }}</td>
+                                        <td class="px-6 py-4 border-b">{{ $history->logout_time ?? 'Still Logged In' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="py-6 px-6 text-center text-gray-500">
+                                            <div class="flex flex-col items-center">
+                                                <span class="text-2xl mb-2">🔍</span>
+                                                <p>No login history found.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 @endif
 
                 <!-- Staff Dashboard -->

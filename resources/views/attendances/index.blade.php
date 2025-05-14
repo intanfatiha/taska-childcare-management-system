@@ -12,43 +12,63 @@
     <div class="grid grid-cols-3 gap-6 mb-6">
 
 
-      <!-- Staff Dashboard -->
-      @if(auth()->user()->role === 'staff')
+      
 
         @php
                         $userId = auth()->id();
                         $staff = App\Models\Staff::where('user_id', $userId)->first();
+                        $totalChildren = \App\Models\Child::count();
                         $totalAssignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->count() : 0;
                         $assignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->with('child')->get() : [];
         @endphp
+
+    
+<!-- Total Children Card -->
+<div class="bg-purple-100 border border-purple-400 text-purple-700 px-4 py-5 rounded-lg shadow-md">
+    <div class="flex items-center">
+        <div class="flex-shrink-0">
+            <svg class="h-10 w-10 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l-2 0l9 -9l9 9l-2 0M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+            </svg>
+        </div>
+        <div class="ml-4">
+            <h3 class="text-lg font-medium">
+                @if(auth()->user()->role === 'staff')
+                    Total Children
+                @elseif(auth()->user()->role === 'admin')
+                    Total Children
+                @endif
+            </h3>
+            <p class="text-2xl font-bold">
+                @if(auth()->user()->role === 'staff')
+                    {{ $totalChildren }}
+                @elseif(auth()->user()->role === 'admin')
+                    {{ $totalChildren }}
+                @endif
+            </p>
+        </div>
+    </div>
+</div>
+        <!-- Staff Dashboard -->
+      @if(auth()->user()->role === 'staff')
             <!-- Total children Card -->
-        <div class="bg-purple-100 border border-purple-400 text-purple-700 px-4 py-5 rounded-lg shadow-md">
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-5 rounded-lg shadow-md">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                     
-                        <svg class="h-10 w-10 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>    
+                        <svg class="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11M9 21V3m0 0L3 10m6-7l6 7" />
+                                        </svg>                    
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-lg font-medium"> Total Children</h3>
+                        <h3 class="text-lg font-medium"> Total Assigned Children</h3>
                         <p class="text-2xl font-bold">{{ $totalAssignedChildren}}</p>
                     </div>
                 </div>
             </div>
       @endif
 
-     <!-- Total children Card -->
-     <div class="bg-purple-100 border border-purple-400 text-purple-700 px-4 py-5 rounded-lg shadow-md">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                
-                    <svg class="h-10 w-10 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>    
-                </div>
-                <div class="ml-4">
-                    <h3 class="text-lg font-medium"> Total Children</h3>
-                    <p class="text-2xl font-bold">{{ $totalAbsent}}</p>
-                </div>
-            </div>
-        </div>
+    
 
 
         <!-- Total Attend Card -->
@@ -95,14 +115,13 @@
                         <div class="flex flex-col">
                             <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
                             <input type="date" name="date" id="date"
-                                value="{{ request('date', now()->format('d-m-Y')) }}"
+                                value="{{ request('date', now()->format('Y-m-d')) }}"
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
                         </div>
 
                         <!-- Buttons -->
                         <div class="flex gap-4">
-                        
                             <a href="{{ route('attendances.create') }}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">
                                 Add Attendance
                             </a>

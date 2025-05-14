@@ -29,10 +29,11 @@ class AttendanceController extends Controller
             $query->where('attendance_date', $date);
         }])->get();
 
+        $totalChildren = Child::count();
         $totalAttend = Attendance::where('attendance_date', $date)->where('attendance_status', 'attend')->count();
         $totalAbsent = Attendance::where('attendance_date', $date)->where('attendance_status', 'absent')->count();
     
-        return view('attendances.index', compact('children', 'date', 'totalAttend', 'totalAbsent'));    
+        return view('attendances.index', compact('children', 'date', 'totalChildren', 'totalAttend', 'totalAbsent'));    
     }
 
    
