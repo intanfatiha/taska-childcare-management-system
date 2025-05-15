@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class AttendanceController extends Controller
 {
@@ -211,65 +213,66 @@ public function store(Request $request)
     }
 
    
+   
     public function showCheckInForm()
     {
         $children = Child::all();
         return view('attendances.timeIn', compact('children'));
     }
 
-public function checkIn(Request $request)
-{
-    $validated = $request->validate([
-        'children_id' => 'required|exists:children,id',
-        'attendance_date' => 'required|date',
-    ]);
+    public function checkIn(Request $request)
+    {
+        $validated = $request->validate([
+            'children_id' => 'required|exists:children,id',
+            'attendance_date' => 'required|date',
+        ]);
 
-    // Check if the child already has a record for the day
-    $attendance = Attendance::where('children_id', $validated['children_id'])
-        ->where('attendance_date', $validated['attendance_date'])
-        ->first();
+        // Check if the child already has a record for the day
+        $attendance = Attendance::where('children_id', $validated['children_id'])
+            ->where('attendance_date', $validated['attendance_date'])
+            ->first();
 
-    if ($attendance) {
-        return redirect()->route('attendances.index')->with('error', 'Child has already checked in today.');
+        if ($attendance) {
+            return redirect()->route('attendances.index')->with('error', 'Child has already checked in today.');
+        }
+
+        // Create a new attendance record with check-in time
+        Attendance::create([
+            'children_id' => $validated['children_id'],
+            'attendance_date' => $validated['attendance_date'],
+            'time_in' => now()->format('H:i:s'),
+            'attendance_status' => 'Checked In',
+        ]);
+
+        return redirect()->route('attendances.index')->with('success', 'Check In successful!');
     }
 
-    // Create a new attendance record with check-in time
-    Attendance::create([
-        'children_id' => $validated['children_id'],
-        'attendance_date' => $validated['attendance_date'],
-        'time_in' => now()->format('H:i:s'),
-        'attendance_status' => 'Checked In',
-    ]);
+    public function checkOut(Request $request)
+    {
+        $validated = $request->validate([
+            'children_id' => 'required|exists:children,id',
+            'attendance_date' => 'required|date',
+        ]);
 
-    return redirect()->route('attendances.index')->with('success', 'Check In successful!');
-}
+        // Find the attendance record for the child and date
+        $attendance = Attendance::where('children_id', $validated['children_id'])
+            ->where('attendance_date', $validated['attendance_date'])
+            ->first();
 
-public function checkOut(Request $request)
-{
-    $validated = $request->validate([
-        'children_id' => 'required|exists:children,id',
-        'attendance_date' => 'required|date',
-    ]);
+        if (!$attendance) {
+            return redirect()->route('attendances.index')->with('error', 'No check-in record found for this child today.');
+        }
 
-    // Find the attendance record for the child and date
-    $attendance = Attendance::where('children_id', $validated['children_id'])
-        ->where('attendance_date', $validated['attendance_date'])
-        ->first();
+        if ($attendance->time_out) {
+            return redirect()->route('attendances.index')->with('error', 'Child has already checked out today.');
+        }
 
-    if (!$attendance) {
-        return redirect()->route('attendances.index')->with('error', 'No check-in record found for this child today.');
+        // Update the attendance record with check-out time
+        $attendance->update([
+            'time_out' => now()->format('H:i:s'),
+            'attendance_status' => 'Checked Out',
+        ]);
+
+        return redirect()->route('attendances.index')->with('success', 'Check Out successful!');
     }
-
-    if ($attendance->time_out) {
-        return redirect()->route('attendances.index')->with('error', 'Child has already checked out today.');
-    }
-
-    // Update the attendance record with check-out time
-    $attendance->update([
-        'time_out' => now()->format('H:i:s'),
-        'attendance_status' => 'Checked Out',
-    ]);
-
-    return redirect()->route('attendances.index')->with('success', 'Check Out successful!');
-}
 }

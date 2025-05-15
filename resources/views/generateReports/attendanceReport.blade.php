@@ -1,14 +1,5 @@
+
 <x-app-layout>
-    
-        <div class="flex justify-between items-center">
-            <h2 class="text-3xl font-bold mb-6">
-                {{ __('Generate Report') }}
-            </h2>
-         
-        </div>
-  
-
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -18,19 +9,20 @@
 
                     <!-- Buttons -->
                     <div class="space-x-2">
-                        <a href="" class="btn btn-primary btn-sm">PDF/Print</a>
+                        <a href="{{ route('attendance.report.pdf', ['selected_date' => $selectedDate]) }}" class="btn btn-primary btn-sm">PDF/Print</a>
                         <a href="" class="btn btn-primary btn-sm">Excel</a>
                     </div>
                 </div>
 
                 <!-- Date Selector and Apply Button -->
-                <div class="flex justify-between items-center mb-6">
+                <form method="GET" action="{{ route('attendance.report') }}" class="flex justify-between items-center mb-6">
                     <div class="flex space-x-4 items-center">
                         <label for="select-date" class="text-sm font-semibold">Select Date:</label>
-                        <input type="date" id="select-date" name="selected_date" class="form-input border-gray-300 rounded-lg">
+                        <input type="date" id="select-date" name="selected_date" class="form-input border-gray-300 rounded-lg"
+                            value="{{ $selectedDate }}">
                     </div>
-                    <button class="btn btn-success btn-sm">Apply Filter</button>
-                </div>
+                    <button type="submit" class="btn btn-success btn-sm">Apply Filter</button>
+                </form>
 
                 <!-- Error or Success Messages -->
                 @if(session('error'))
@@ -58,7 +50,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Add dynamic rows here -->
+                            @forelse($attendances as $attendance)
+                                <tr>
+                                    <td class="border px-4 py-2">{{ $attendance->child->child_name }}</td>
+                                    <td class="border px-4 py-2">{{ $attendance->time_in ?? 'N/A' }}</td>
+                                    <td class="border px-4 py-2">{{ $attendance->time_out ?? 'N/A' }}</td>
+                                    <td class="border px-4 py-2">{{ $attendance->attendance_date }}</td>
+                                    <td class="border px-4 py-2">
+                                        <span class="px-2 py-1 rounded-full text-white {{ $attendance->attendance_status === 'attend' ? 'bg-green-500' : 'bg-red-500' }}">
+                                            {{ ucfirst($attendance->attendance_status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="border px-4 py-2 text-center">No attendance records found for the selected date.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

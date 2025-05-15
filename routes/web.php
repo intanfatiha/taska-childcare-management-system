@@ -110,7 +110,9 @@ Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 
 Route::resource('payments', PaymentController::class);
 
 Route::resource('generateReports', GenerateReportController::class);
+Route::get('/attendance-report', [GenerateReportController::class, 'index'])->name('attendance.report');
 Route::get('/generate-reports/payment', [GenerateReportController::class, 'showPayment'])->name('generateReports.payment');
+Route::get('/attendance-report/pdf', [GenerateReportController::class, 'exportPdf'])->name('attendance.report.pdf');
 
 Route::get('/camera', [CameraFootageController::class, 'index'])->name('camera.index');
 
