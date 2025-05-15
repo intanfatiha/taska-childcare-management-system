@@ -195,7 +195,7 @@
                                             <td class="px-6 py-4 border-b">{{ $assignment->child->child_age }} y/o</td>
                                             <td class="px-6 py-4 border-b">
                                                 <span class="inline-block px-3 py-1 text-sm rounded-full 
-                                                    {{ $child->status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $assignment->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                     {{ $assignment->status}}
                                                 </span>
                                             </td>

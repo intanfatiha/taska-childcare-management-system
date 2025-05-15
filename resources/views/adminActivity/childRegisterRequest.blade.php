@@ -69,7 +69,8 @@
                                 <td>
                                     <div class="mt-1 flex justify-center gap-4">
                                         <!-- Approve Button -->
-                                        <button onclick="openModal('approve', {{ $enrollment->id }}, '{{ $enrollment->father->father_email ?? '' }}', '{{ $enrollment->mother->mother_email ?? '' }}', '{{ $enrollment->guardian->guardian_email ?? '' }}', '{{ $enrollment->registration_type ?? '' }}', '{{ $enrollment->father->father_name ?? '' }}', '{{ $enrollment->mother->mother_name ?? '' }}', '{{ $enrollment->guardian->guardian_name ?? '' }}')" 
+                                        <button onclick="openModal('approve', {{ $enrollment->id }}, '{{ $enrollment->father->father_email ?? '' }}', '{{ $enrollment->mother->mother_email ?? '' }}', '{{ $enrollment->guardian->guardian_email ?? '' }}', '{{ $enrollment->registration_type ?? '' }}', '{{ $enrollment->father->father_name ?? '' }}', '{{ $enrollment->mother->mother_name ?? '' }}', '{{ $enrollment->guardian->guardian_name ?? '' }}'
+                                        ,'{{ $enrollment->father->father_ic ?? $enrollment->mother->mother_ic ?? $enrollment->guardian->guardian_ic ?? '' }}')" 
                                         class="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-4 rounded text-sm">
                                         Approve
                                     </button>
@@ -128,7 +129,7 @@
 
     <!-- JavaScript -->
     <script>
-       function openModal(action, enrollmentId, fatherEmail = '', motherEmail = '', guardianEmail = '', registrationType = '', fatherName = '', motherName = '', guardianName = '') {
+       function openModal(action, enrollmentId, fatherEmail = '', motherEmail = '', guardianEmail = '', registrationType = '', fatherName = '', motherName = '', guardianName = '',fatherIc = '', motherIc = '', guardianIc = '') {
         console.log('openModal called with action:', action, 'enrollmentId:', enrollmentId);
 
         const modalOverlay = document.getElementById('modalOverlay');
@@ -142,14 +143,14 @@
             modalForm.action = `{{ route('adminActivity.approveRegistration', '') }}/${enrollmentId}`;
             modalContent.innerHTML = `
                 <label for="father_email" class="block text-gray-700 font-semibold mb-2">Father Email:</label>
-                <input type="email" name="father_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${fatherEmail}">
+                <input type="email" name="father_email" class="w-full border rounded px-3 py-2 mb-4" value="${fatherEmail}">
                 <label for="mother_email" class="block text-gray-700 font-semibold mb-2">Mother Email:</label>
-                <input type="email" name="mother_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${motherEmail}">
+                <input type="email" name="mother_email" class="w-full border rounded px-3 py-2 mb-4" value="${motherEmail}">
                 <label for="guardian_email" class="block text-gray-700 font-semibold mb-2">Guardian Email (if necessary):</label>
-                <input type="email" name="guardian_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${guardianEmail}">
+                <input type="email" name="guardian_email" class="w-full border rounded px-3 py-2 mb-4" value="${guardianEmail}">
                 <label for="password" class="block text-gray-700 font-semibold mb-2">Password:</label>
-                <input type="password" name="password" class="w-full border rounded px-3 py-2 mb-4" placeholder="Enter password" required>
-            `;
+                <input type="password" name="password"  class="w-full border rounded px-3 py-2 mb-4 bg-gray-100 text-gray-500 cursor-not-allowed" placeholder="Password set to identity card number" readonly>
+            `; 
 
             // Add hidden inputs based on registration type
             if (registrationType === 'parents') {
@@ -158,6 +159,8 @@
                     <input type="hidden" name="mother_name" value="${motherName}">
                     <input type="hidden" name="registration_type" value="parents">
                     <input type="hidden" name="role" value="parents">
+                    <input type="hidden" name="father_ic" value="${fatherIc}">
+                    <input type="hidden" name="mother_ic" value="${motherIc}">
 
                 `;
             } else if (registrationType === 'guardian') {
@@ -165,6 +168,7 @@
                     <input type="hidden" name="guardian_name" value="${guardianName}">
                     <input type="hidden" name="registration_type" value="guardian">
                     <input type="hidden" name="role" value="parents">
+                    <input type="hidden" name="guardian_ic" value="${guardianIc}">
 
                 `;
             }
@@ -173,11 +177,11 @@
             modalForm.action = `{{ route('adminActivity.rejectRegistration', '') }}/${enrollmentId}`;
             modalContent.innerHTML = `
                 <label for="father_email" class="block text-gray-700 font-semibold mb-2">Father Email:</label>
-                <input type="email" name="father_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${fatherEmail}">
+                <input type="email" name="father_email" class="w-full border rounded px-3 py-2 mb-4" value="${fatherEmail}">
                 <label for="mother_email" class="block text-gray-700 font-semibold mb-2">Mother Email:</label>
-                <input type="email" name="mother_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${motherEmail}">
+                <input type="email" name="mother_email" class="w-full border rounded px-3 py-2 mb-4" value="${motherEmail}">
                 <label for="guardian_email" class="block text-gray-700 font-semibold mb-2">Guardian Email (if necessary):</label>
-                <input type="email" name="guardian_email" class="w-full border rounded px-3 py-2 mb-4" placeholder="${guardianEmail}">
+                <input type="email" name="guardian_email" class="w-full border rounded px-3 py-2 mb-4" value="${guardianEmail}">
                 <label for="rejectReason" class="block text-gray-700 font-semibold mb-2">Reason for Rejection:</label>
                 <textarea name="rejectReason" rows="4" class="w-full border rounded px-3 py-2" placeholder="Enter reason for rejection"></textarea>
             `;

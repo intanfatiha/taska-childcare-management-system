@@ -204,9 +204,12 @@ class AdminController extends Controller
             'father_name' => 'nullable|string|max:255',
             'mother_name' => 'nullable|string|max:255',
             'guardian_name' => 'nullable|string|max:255',
+            'father_ic' => 'nullable|string|max:20', // Validate IC number
+            'mother_ic' => 'nullable|string|max:20', // Validate IC number
+            'guardian_ic' => 'nullable|string|max:20', // Validate IC number
             'registration_type' => 'required|string|in:parents,guardian',
             'role' => 'required|string|max:255',
-            'password' => 'required|min:6',
+            // 'password' => 'required|min:6',
 
         ]);
 
@@ -224,8 +227,6 @@ class AdminController extends Controller
         $motherId = null;
         $guardianId = null;
 
-        // dd($validated);
-
 
         if ($validated['registration_type'] === 'parents') {
             if (!empty($validated['father_email'])) {
@@ -235,7 +236,7 @@ class AdminController extends Controller
                     $father= User::create([
                         'name' => $validated['father_name'],
                         'email' => $validated['father_email'],
-                        'password' => Hash::make($validated['password']),
+                        'password' => Hash::make($validated['father_ic']),
                         'role' => $validated['role'],
                     ]);
 
@@ -251,7 +252,7 @@ class AdminController extends Controller
                     $mother= User::create([
                         'name' => $validated['mother_name'],
                         'email' => $validated['mother_email'],
-                        'password' => Hash::make($validated['password']),
+                        'password' => Hash::make($validated['mother_ic']),
                         'role' =>  $validated['role'],
                     ]);
                     $motherId = $mother->id;
@@ -265,7 +266,7 @@ class AdminController extends Controller
                     $guardian= User::create([
                         'name' => $validated['guardian_name'],
                         'email' => $validated['guardian_email'],
-                        'password' => Hash::make($validated['password']),
+                        'password' => Hash::make($validated['guardian_ic']),
                         'role' =>  $validated['role'],
                     ]);
                     $guardianId = $guardian->id;
@@ -312,7 +313,7 @@ class AdminController extends Controller
                     <h2>Dear $name,</h2>
                     <p>Your account has been approved. Below are your login credentials:</p>
                     <p><strong>Email:</strong> $email</p>
-                    <p><strong>Password:</strong> {$validated['password']}</p>
+                    <p><strong>Password:</strong> Your IC Number</p>
                     <p>Please log in and change your password immediately for security reasons.</p>
                     <p>Thank you.</p>
                 ", function ($message) use ($email) {
