@@ -11,11 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('childrens', function (Blueprint $table) {
-            //
-            $table->dropColumn('children_id');
         
-        });
     }
 
     /**
@@ -23,10 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('childrens', function (Blueprint $table) {
-            //
-            $table->unsignedBigInteger('children_id')->nullable(); // Recreate the column if rolled back
-
-        });
+        
     }
 };

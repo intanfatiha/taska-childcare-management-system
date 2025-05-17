@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('attendances', function (Blueprint $table) {
         
+            $table->foreignId('children_id')->constrained();
             $table->enum('attendance_status', ['attend', 'absent'])->default('absent');
         });
     }

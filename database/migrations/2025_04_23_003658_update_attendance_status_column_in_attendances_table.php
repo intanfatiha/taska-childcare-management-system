@@ -9,22 +9,19 @@ return new class extends Migration
     /**
      * Update the attendance time in & out to nullable in the attendances table.
      */
-    public function up(): void
+   public function up(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->time('time_in')->nullable()->change();
-            $table->time('time_out')->nullable()->change();
+            $table->time('time_in')->nullable();
+            $table->time('time_out')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->time('time_in')->nullable(false)->change();
-            $table->time('time_out')->nullable(false)->change();
+            $table->dropColumn(['time_in', 'time_out']);
         });
     }
+
 };

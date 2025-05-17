@@ -13,12 +13,8 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('children_id')->constrained();
-            $table->foreignId('parent_infos_id')->constrained()->onDelete('cascade');
             $table->date('attendance_date');
-            $table->time('time_in');
-            $table->time('time_out');
-            $table->string('status')->deafult('complete');
+            $table->string('status')->default('complete');
             $table->timestamps();
         });
     }
