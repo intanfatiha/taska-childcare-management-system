@@ -23,8 +23,8 @@
 
 
                 <div class="flex gap-4 mb-6">
-                    <a href="{{ route('childrenRegisterRequest', ['status' => 'request']) }}"
-                    class="px-4 py-2 rounded {{ $status === 'request' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                    <a href="{{ route('childrenRegisterRequest', ['status' => 'pending']) }}"
+                    class="px-4 py-2 rounded {{ $status === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
                         Request
                     </a>
                     <a href="{{ route('childrenRegisterRequest', ['status' => 'approved']) }}"
@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
     </div>
 
     <!-- Approve/Reject Modal -->

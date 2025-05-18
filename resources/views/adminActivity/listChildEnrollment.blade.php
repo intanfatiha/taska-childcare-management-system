@@ -11,6 +11,7 @@
                             <th class="border border-gray-300 px-4 py-2 text-center">Picture</th>
                             <th class="border border-gray-300 px-4 py-2 text-center">Name</th>
                             <th class="border border-gray-300 px-4 py-2 text-center">Age</th>
+                            <th class="border border-gray-300 px-4 py-2 text-center">Parents Name</th>
                             <th class="border border-gray-300 px-4 py-2 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -31,6 +32,22 @@
                             </td>
                             <td class="border border-gray-300 px-4 py-2 text-center">{{ $child->child_name }}</td>
                             <td class="border border-gray-300 px-4 py-2 text-center">{{ $child->child_age }} y/o</td>
+                             <td class="border border-gray-300 px-4 py-2 text-center">
+                                @php
+                                    $enrollment = $child->enrollment;
+                                @endphp
+                                @if($enrollment)
+                                    @if($enrollment->father && $enrollment->mother)
+                                        {{ $enrollment->father->father_name }} & {{ $enrollment->mother->mother_name }}
+                                    @elseif($enrollment->guardian)
+                                        {{ $enrollment->guardian->guardian_name }}
+                                    @else
+                                        No Data
+                                    @endif
+                                @else
+                                    No Data
+                                @endif
+                            </td>
                             <td class="border border-gray-300 px-4 py-2 text-center">
                             <a href="{{ route('adminActivity.show', ['adminActivity' => $child->enrollment->id]) }}" class="text-blue-500 hover:underline">More Details</a>
                             </td>

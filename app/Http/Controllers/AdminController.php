@@ -30,7 +30,10 @@ class AdminController extends Controller
 
     public function listEnrollments() //total registered children 
     {
-        $children = Child::paginate(20);
+        $children = \App\Models\Child::whereHas('enrollment', function($query) {
+                $query->where('status', 'approved');
+            })->with('enrollment')->paginate(15);
+
         return view('adminActivity.listChildEnrollment', compact('children'));
     }
 

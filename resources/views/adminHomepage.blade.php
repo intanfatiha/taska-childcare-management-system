@@ -24,6 +24,10 @@
                     $totalStaffs = \App\Models\Staff::count();
                     $totalChildren = \App\Models\Child::count();
 
+                    $totalRegisteredChildren = \App\Models\Child::whereHas('enrollment', function($query) {
+                        $query->where('status', 'approved');
+                    })->count();
+
                     //get total child for parents  
                     $parentChildrenCount = auth()->user()->role === 'parents' 
                         ? \App\Models\Child::whereHas('enrollment', function ($query) {
@@ -71,7 +75,7 @@
                                     <span class="text-3xl">🧒</span>
                                 </div>
                                 <p class="text-center font-medium text-gray-700">Total Registered Children</p>
-                                <p class="text-center text-3xl font-bold mt-2 text-pink-600">{{$totalChildren}}</p>
+                                <p class="text-center text-3xl font-bold mt-2 text-pink-600">{{$totalRegisteredChildren}}</p>
                             </div>
                         </a>
                     </div>
