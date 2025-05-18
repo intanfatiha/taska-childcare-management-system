@@ -225,24 +225,32 @@
                     
                     @php
                         $userId = auth()->id();
+                        $role = auth()->user()->role;
 
-                        $totalChildren = \App\Models\ParentRecord::where(function ($query) use ($userId) {
-                            $query->where('father_id', $userId)
-                                ->orWhere('mother_id', $userId)
-                                ->orWhere('guardian_id', $userId);
-                        })->count();
+                        $father = \App\Models\Father::where('user_id', $userId)->first();
+                        $mother = \App\Models\Mother::where('user_id', $userId)->first();
+                        $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
 
-                        $children = \App\Models\ParentRecord::where(function ($query) use ($userId) {
-                            $query->where('father_id', $userId)
-                                ->orWhere('mother_id', $userId)
-                                ->orWhere('guardian_id', $userId);
-                        })->with('child')->get();
+                        $childrenRecords = \App\Models\ParentRecord::with('child')
+                            ->where(function ($query) use ($father, $mother, $guardian) {
+                                if ($father) $query->orWhere('father_id', $father->id);
+                                if ($mother) $query->orWhere('mother_id', $mother->id);
+                                if ($guardian) $query->orWhere('guardian_id', $guardian->id);
+                            })
+                            ->get();
+
+                        $childrenTot = $childrenRecords->count();
+
 
                          //get total child for parents  
                         $parentChildrenCount = auth()->user()->role === 'parents' 
                             ? \App\Models\Child::whereHas('enrollment', function ($query) {
                                 $query->where('enrollment_id', auth()->user()->id);
                             })->count() : 0;
+
+                        
+                        $latestAnnouncements = \App\Models\Announcements::orderBy('announcement_date', 'desc')->take(5)->get();
+
 
 
                     @endphp
@@ -269,58 +277,93 @@
                                 <span class="text-3xl">👶</span>
                             </div>
                             <p class="text-center font-medium text-gray-700">Your Children</p>
-                            <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $parentChildrenCount }}</p>
+                            <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $childrenTot }}</p>
                         </div>
 
-                        <!-- Children Cards -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            @forelse($children as $record)
-                                @php $child = $record->child; @endphp
-                                <div class="border-2 border-indigo-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 bg-white">
-                                    <div class="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                        @if($child && $child->child_photo)
-                                            <img src="{{ asset('storage/' . $child->child_photo) }}"
-                                                alt="Child Photo"
-                                                class="w-full h-full object-cover"
-                                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                                        @else
-                                            <img src="{{ asset('images/no-image.png') }}"
-                                                alt="No Image"
-                                                class="w-full h-full object-cover">
-                                        @endif
-                                    </div>
-                                    <div class="p-4">
-                                        <p class="font-bold text-center text-lg text-indigo-700 mb-2">{{ $child->child_name ?? 'No Name' }}</p>
-                                        <div class="space-y-1 text-sm">
-                                            <p class="flex items-center"><span class="mr-2">🎂</span> Age: {{ $child->child_age ?? 'N/A' }} years old</p>
-                                            <p class="flex items-center"><span class="mr-2">📅</span> Birthday: {{ $child->birthdate ?? '-' }}</p>
-                                            <p class="flex items-center">
-                                                <span class="mr-2">
-                                                    @if($child->gender == 'Male')
-                                                        👦
-                                                    @elseif($child->gender == 'Female')
-                                                        👧
-                                                    @else
-                                                        👶
-                                                    @endif
-                                                </span>
-                                                Gender: {{ $child->gender ?? '-' }}
-                                            </p>
-                                            <p class="flex items-center"><span class="mr-2">⚠️</span> Allergic: {{ $child->allergy ?? 'No allergies' }}</p>
-                                        </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        @forelse($childrenRecords as $record)
+                            @php $child = $record->child; @endphp
+                            @if($child)
+                            <div class="border-2 border-indigo-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 bg-white">
+                                <div class="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                                    @if($child->child_photo)
+                                        <img src="{{ asset('storage/' . $child->child_photo) }}"
+                                            alt="Child Photo"
+                                            class="w-full h-full object-cover"
+                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                                    @else
+                                        <img src="{{ asset('images/no-image.png') }}"
+                                            alt="No Image"
+                                            class="w-full h-full object-cover">
+                                    @endif
+                                </div>
+                                <div class="p-4">
+                                    <p class="font-bold text-center text-lg text-indigo-700 mb-2">{{ $child->child_name ?? 'No Name' }}</p>
+                                    <div class="space-y-1 text-sm">
+                                        <p class="flex items-center"><span class="mr-2">🎂</span> Age: {{ $child->child_age ?? 'N/A' }} years old</p>
+                                        <p class="flex items-center"><span class="mr-2">📅</span> Birthday: {{ $child->child_birthdate ?? '-' }}</p>
+                                        <p class="flex items-center">
+                                            <span class="mr-2">
+                                                @if($child->child_gender == 'Male')
+                                                    👦
+                                                @elseif($child->child_gender == 'Female')
+                                                    👧
+                                                @else
+                                                    👶
+                                                @endif
+                                            </span>
+                                            Gender: {{ $child->child_gender ?? '-' }}
+                                        </p>
+                                        <p class="flex items-center"><span class="mr-2">⚠️</span> Allergic: {{ $child->allergy ?? 'No allergies' }}</p>
                                     </div>
                                 </div>
+                            </div>
+                            @endif
+                        @empty
+                            <div class="col-span-full py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <span class="text-4xl mb-4">🔍</span>
+                                <p class="text-gray-500 text-center">No children found. Register your child to see them here.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    </div>
+
+                    <!-- Announcements Section -->
+                    <div class="mt-10">
+                        <h3 class="text-xl font-bold mb-4 text-indigo-700">Latest Announcements</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            @forelse($latestAnnouncements as $announcement)
+                                <div class="border-2 border-indigo-200 rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition">
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <span class="text-sm px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">
+                                            {{ ucfirst($announcement->announcement_type) }}
+                                        </span>
+                                        <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($announcement->announcement_date)->format('d M Y') }}</span>
+                                    </div>
+                                    <h4 class="font-bold text-lg text-indigo-800 mb-1">{{ $announcement->announcement_title }}</h4>
+                                    <p class="text-gray-700 mb-2">{{ $announcement->activity_description }}</p>
+                                    @if($announcement->announcement_location)
+                                        <p class="text-sm text-gray-500 mb-1"><span class="font-semibold">Location:</span> {{ $announcement->announcement_location }}</p>
+                                    @endif
+                                    @if($announcement->announcement_time)
+                                        <p class="text-sm text-gray-500"><span class="font-semibold">Time:</span> {{ $announcement->announcement_time }}</p>
+                                    @endif
+                                </div>
                             @empty
-                                <div class="col-span-full py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                                    <span class="text-4xl mb-4">🔍</span>
-                                    <p class="text-gray-500 text-center">No children found. Register your child to see them here.</p>
+                                <div class="col-span-full text-center text-gray-500 py-8">
+                                    <span class="text-2xl mb-2">🔔</span>
+                                    <p>No announcements found.</p>
                                 </div>
                             @endforelse
                         </div>
                     </div>
+
+
                 @endif
             </div>
         </div>
+
+        
     
 
     <!-- real-time updates without refreshing -->

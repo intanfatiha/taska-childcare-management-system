@@ -51,7 +51,7 @@ class Child extends Model
 
     public function parentRecord()
     {
-        return $this->hasOne(ParentRecord::class, 'child_id');
+        return $this->belongsTo(ParentRecord::class, 'child_id');
     }
 
 }

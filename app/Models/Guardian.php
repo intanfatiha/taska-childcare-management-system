@@ -13,6 +13,7 @@ class Guardian extends Model
     // Define the fillable attributes
     protected $fillable = [
         'enrollment_id',
+        'user_id',
         'guardian_name',
         'guardian_relation',
         'guardian_email',
