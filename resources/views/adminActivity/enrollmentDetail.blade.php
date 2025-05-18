@@ -72,12 +72,12 @@
                         @if ($enrollment->child->first()->child_immunization_record)
                             <div class="flex items-center space-x-4">
                                <!-- View Button -->
-                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" target="_blank"
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_immunization_record) }}" target="_blank"
                                     class="bg-green-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-green-600">
                                     View
                                 </a>
                                 <!-- Download Button -->
-                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_birth_cert) }}" download
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_immunization_record) }}" download
                                     class="bg-blue-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-blue-600">
                                     Download
                                 </a>
@@ -91,7 +91,7 @@
                             <div class="flex items-center space-x-4">
                                <!-- View Button -->
                         
-                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_immunization_record) }}" target="_blank"
+                                <a href="{{ asset('storage/' . $enrollment->child->first()->child_photo) }}" target="_blank"
                                     class="bg-green-500 text-white px-1 py-1 w-32 text-center rounded hover:bg-green-600">
                                     View
                                 </a>

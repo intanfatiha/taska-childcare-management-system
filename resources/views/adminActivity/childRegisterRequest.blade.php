@@ -22,6 +22,23 @@
                 @endif
 
 
+                <div class="flex gap-4 mb-6">
+                    <a href="{{ route('childrenRegisterRequest', ['status' => 'request']) }}"
+                    class="px-4 py-2 rounded {{ $status === 'request' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                        Request
+                    </a>
+                    <a href="{{ route('childrenRegisterRequest', ['status' => 'approved']) }}"
+                    class="px-4 py-2 rounded {{ $status === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                        Approved
+                    </a>
+                    <a href="{{ route('childrenRegisterRequest', ['status' => 'rejected']) }}"
+                    class="px-4 py-2 rounded {{ $status === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                        Rejected
+                    </a>
+                </div>
+
+                        
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full table-auto border-collapse border border-gray-300">
                         <thead>
@@ -33,7 +50,7 @@
                                 <th class="border px-4 py-2 text-left">Details</th>
                                 <th class="border px-4 py-2 text-left">Action</th>
                             </tr>
-                        </thead>
+                        </thead> 
                         <tbody id="registrationTable">
                             @foreach($enrollments as $index => $enrollment)
                             <tr class="border-b hover:bg-gray-50">

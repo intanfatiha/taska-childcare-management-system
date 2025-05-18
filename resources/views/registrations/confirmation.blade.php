@@ -1,21 +1,25 @@
+
 <x-guest-layout>
-<div class="mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Registration Confirmation') }}
-        </h2>
-    </x-slot>
-
-    <div class="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">Your registration has been submitted!</h3>
-        <p class="text-gray-600">Your registration is under review. We will notify you once it is approved.</p>
-
-        <div class="mt-6">
-            <a href="{{ route('login') }}" 
-               class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-                Back to Login
-            </a>
+    <div class="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-yellow-100 via-pink-100 to-blue-100">
+        <div class="w-full max-w-md p-8 rounded-3xl shadow-xl bg-white border-4 border-yellow-200">
+            <div class="flex flex-col items-center">
+                <img src="{{ asset('images/childcare-happy.svg') }}" alt="Happy Kids" class="w-24 h-24 mb-4">
+                <h2 class="font-extrabold text-2xl text-pink-600 mb-2">Registration Confirmation</h2>
+            </div>
+            <div class="flex flex-col items-center mt-4">
+                <h3 class="text-lg font-semibold text-blue-700 mb-2">🎉 Your registration has been submitted! 🎉</h3>
+                <p class="text-gray-700 text-center mb-4">
+                    Thank you for joining our childcare family!<br>
+                    Your registration is under review.<br>
+                    We will notify you once it is approved.
+                </p>
+                <div class="mt-6">
+                    <a href="{{ url('/') }}"
+                       class="bg-gradient-to-r from-pink-400 to-yellow-400 text-white px-8 py-2 rounded-full font-bold shadow hover:from-pink-500 hover:to-yellow-500 transition">
+                        Back to Homepage
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 </x-guest-layout>

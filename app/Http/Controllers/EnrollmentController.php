@@ -10,6 +10,10 @@ use App\Models\Guardian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 
 class EnrollmentController extends Controller
@@ -260,6 +264,41 @@ class EnrollmentController extends Controller
               ]);
 
               DB::commit();
+
+              //Send email notification to admin when new request is made
+              try {
+                  $loginUrl = route('login');
+                    Mail::html("
+                        <div style='font-family: Arial, sans-serif; background: #f9fafb; padding: 24px;'>
+                            <div style='max-width: 520px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #e5e7eb; padding: 32px;'>
+                                <h2 style='color: #2563eb; margin-bottom: 16px;'>📝 New Registration Request</h2>
+                                <p style='color: #374151; font-size: 16px; margin-bottom: 16px;'>
+                                    A new childcare registration request has been submitted.
+                                </p>
+                                
+                                <p style='color: #374151; margin-bottom: 24px;'>
+                                    Please log in to the admin panel to review and process this request.
+                                </p>
+                                <div style='text-align: center; margin-bottom: 24px;'>
+                                    <a href='{$loginUrl}' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                        🔑 Login to Admin Panel
+                                    </a>
+                                </div>
+                                <p style='color: #9ca3af; font-size: 13px; margin-top: 32px;'>
+                                    This is an automated notification from Taska Childcare Management System.
+                                </p>
+                            </div>
+                        </div>
+                    ", function ($message) {
+                        $message->to('kimminseok512@gmail.com')
+                            ->subject('New Childcare Registration Request');
+                    });
+
+                    Log::info("Request Submitted!");
+                } catch (\Exception $e) {
+                    Log::error("Failed to send admin notification email. Error: " . $e->getMessage());
+                }
+
 
               return redirect()->route('enrollments.confirmation')->with('success', 'Registration submitted successfully.');
             } catch (\Exception $e) {

@@ -111,11 +111,14 @@ class AdminController extends Controller
 
     
 
-    public function childrenRegisterRequest()
+    public function childrenRegisterRequest(Request $request)
     {
-        $enrollments = Enrollment::with(['father','mother','guardian','child'])->paginate(10);
-        return view('adminActivity.childRegisterRequest', compact('enrollments'));
-        //return 'Test: Route and Controller are working.';
+         $status = $request->query('status', 'request'); // default to 'request'
+         $enrollments = Enrollment::with(['father','mother','guardian','child'])
+            ->where('status', $status)
+            ->paginate(10);
+        
+        return view('adminActivity.childRegisterRequest', compact('enrollments', 'status'));
 
     }
 
@@ -228,68 +231,66 @@ class AdminController extends Controller
         $guardianId = null;
 
 
+            
         if ($validated['registration_type'] === 'parents') {
             if (!empty($validated['father_email'])) {
-
-                $father= User::where('email', $validated['father_email'])->first();
+                $father = User::where('email', $validated['father_email'])->first();
                 if (empty($father)) {
-                    $father= User::create([
+                    $father = User::create([
                         'name' => $validated['father_name'],
                         'email' => $validated['father_email'],
                         'password' => Hash::make($validated['father_ic']),
                         'role' => $validated['role'],
                     ]);
-
-                    $fatherId = $father->id;
                 }
-                
+
+                // $fatherId = $father ? $father->id : null;
             }
 
             if (!empty($validated['mother_email'])) {
-                
-                $mother= User::where('email', $validated['mother_email'])->first(); 
+                $mother = User::where('email', $validated['mother_email'])->first();
                 if (empty($mother)) {
-                    $mother= User::create([
+                    $mother = User::create([
                         'name' => $validated['mother_name'],
                         'email' => $validated['mother_email'],
                         'password' => Hash::make($validated['mother_ic']),
-                        'role' =>  $validated['role'],
+                        'role' => $validated['role'],
                     ]);
-                    $motherId = $mother->id;
                 }
+                // $motherId = $mother ? $mother->id : null;
             }
         } elseif ($validated['registration_type'] === 'guardian') {
             if (!empty($validated['guardian_email'])) {
-
-                $guardian= User::where('email', $validated['guardian_email'])->first(); 
+                $guardian = User::where('email', $validated['guardian_email'])->first();
                 if (empty($guardian)) {
-                    $guardian= User::create([
+                    $guardian = User::create([
                         'name' => $validated['guardian_name'],
                         'email' => $validated['guardian_email'],
                         'password' => Hash::make($validated['guardian_ic']),
-                        'role' =>  $validated['role'],
+                        'role' => $validated['role'],
                     ]);
-                    $guardianId = $guardian->id;
                 }
+                // $guardianId = $guardian ? $guardian->id : null;
             }
         }
 
-        // grt children id from the enrollment
+        // get children id from the enrollment
         $child = Child::where('enrollment_id', $enrollment->id)->first();
+       // Get parent/guardian records by enrollment_id
+        $father = Father::where('enrollment_id', $enrollment->id)->first();
+        $mother = Mother::where('enrollment_id', $enrollment->id)->first();
+        $guardian = Guardian::where('enrollment_id', $enrollment->id)->first();
 
         // Add data to the parent_records table
-        //  foreach ($enrollment->children as $child) {
+       
             ParentRecord::create([
                 'enrollment_id' => $enrollment->id,
-                'father_id' => $fatherId,
-                'mother_id' => $motherId,
-                'guardian_id' => $guardianId,
+                'father_id' => $father ? $father->id : null,
+                'mother_id' => $mother ? $mother->id : null,
+                'guardian_id' => $guardian ? $guardian->id : null,
                 'child_id' => $child->id,
             ]);
-        // }
-
-            // Redirect with success message
-            // return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!')if
+   
 
         // Send emails
         if(!empty($validated['father_email'])){
@@ -331,8 +332,9 @@ class AdminController extends Controller
         }
 
         return redirect()->route('childrenRegisterRequest')->with('message', 'Parents registered successfully!');
- }
+    }
 
+    //LOGIN HISTORY FOR ADMIN 
     protected function authenticated(Request $request, $user)
     {
         // Log the login details
