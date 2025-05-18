@@ -17,7 +17,6 @@
         @php
                         $userId = auth()->id();
                         $staff = App\Models\Staff::where('user_id', $userId)->first();
-                        $totalChildren = \App\Models\Child::count();
                         $totalAssignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->count() : 0;
                         $assignedChildren = $staff ? App\Models\StaffAssignment::where('primary_staff_id', $staff->id)->with('child')->get() : [];
         @endphp

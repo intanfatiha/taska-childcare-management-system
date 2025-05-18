@@ -27,33 +27,25 @@
                 <form action="{{ route('payments.store') }}" method="POST">
                     @csrf
 
-                    <!-- Parent Dropdown -->
+                   <!-- Child Dropdown -->
                     <div class="mb-5">
-                        <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent</label>
-                        <select id="parent_id" name="parent_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-        <option value="">Select a Parent</option>
-        @foreach($formattedParents as $parent)
-    <option value="{{ $parent['id'] }}">{{ $parent['parent_name'] }}</option>
-        @endforeach
-    </select>
-    @error('parent_id')
-        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-    @enderror
-                    </div>
-
-                    <!-- Child Dropdown -->
-                    <div class="mb-5">
-                        <label for="child_name" class="block text-sm font-medium text-gray-700 mb-1">Child Name</label>
-                        <select id="child_name" name="child_name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                        <label for="child_id" class="block text-sm font-medium text-gray-700 mb-1">Child Name</label>
+                        <select id="child_id" name="child_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
                             <option value="">Select a Child</option>
-                            <!-- Example options, dynamically generated -->
-                            <option value="1">Anis</option>
-                            <option value="2">Irfan</option>
-                            <option value="3">Zahra</option>
+                            @foreach($formattedChildren as $child)
+                                <option value="{{ $child['id'] }}">{{ $child['name'] }}</option>
+                            @endforeach
                         </select>
-                        @error('child_name')
+                        @error('child_id')
                             <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                         @enderror
+                    </div>
+
+                    <!-- Parent Dropdown (auto-filled, read-only) -->
+                    <div class="mb-5">
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent(s)</label>
+                        <input type="text" id="parent_display" class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100" readonly>
+                        <input type="hidden" id="parent_id" name="parent_id">
                     </div>
 
                     <!-- Payment Amount -->
@@ -87,4 +79,15 @@
             </div>
         </div>
     </div>
+ 
+<script>
+    const parentsByChild = @json($parentsByChild);
+
+    document.getElementById('child_id').addEventListener('change', function() {
+        const childId = this.value;
+        const parentDisplay = document.getElementById('parent_display');
+        parentDisplay.value = parentsByChild[childId] || '';
+        // If you need to set a hidden parent_id for form submission, you can add logic here
+    });
+</script>
 </x-app-layout>

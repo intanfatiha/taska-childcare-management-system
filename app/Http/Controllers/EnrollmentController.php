@@ -174,7 +174,8 @@ class EnrollmentController extends Controller
                         'father_monthly_income' => $request->father_income,
                         'father_staff_number' => $request->father_staff_number,
                         'father_ptj' => $request->father_ptj,
-                        'father_office_number' => $request->father_office_number
+                        'father_office_number' => $request->father_office_number,
+                        'user_id' => null,
                     ]);
                 }
 
@@ -202,7 +203,8 @@ class EnrollmentController extends Controller
                         'mother_monthly_income' => $request->mother_income,
                         'mother_staff_number' => $request->mother_staff_number,
                         'mother_ptj' => $request->mother_ptj,
-                        'mother_office_number' => $request->mother_office_number
+                        'mother_office_number' => $request->mother_office_number,
+                        'user_id' => null,
                     ]);
 
                 }
@@ -230,7 +232,8 @@ class EnrollmentController extends Controller
                             'guardian_monthly_income' => $request->guardian_monthly_income,
                             'guardian_staff_number' => $request->guardian_staff_number,
                             'guardian_ptj' => $request->guardian_ptj,
-                            'guardian_office_number' => $request->guardian_office_number
+                            'guardian_office_number' => $request->guardian_office_number,
+                            'user_id' => null,
                         ]);
 
                     }

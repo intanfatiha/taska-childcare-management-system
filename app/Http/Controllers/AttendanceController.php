@@ -25,13 +25,18 @@ class AttendanceController extends Controller
      */
     public function index(Request $request) 
     {
-        $date = $request->get('date', now()->format('d-m-Y')); // Default to today's date
+        $date = $request->get('date', now()->format('Y-m-d')); // Default to today's date
 
-        $children = Child::with(['attendances' => function ($query) use ($date) {
+        $children = Child::whereHas('enrollment', function($query) {
+            $query->where('status', 'approved');
+        })->with(['enrollment', 'attendances' => function ($query) use ($date) {
             $query->where('attendance_date', $date);
         }])->get();
 
-        $totalChildren = Child::count();
+        // Get the total number of children
+        $totalChildren = Child::whereHas('enrollment', function($query) {
+            $query->where('status', 'approved');
+        })->count();
         $totalAttend = Attendance::where('attendance_date', $date)->where('attendance_status', 'attend')->count();
         $totalAbsent = Attendance::where('attendance_date', $date)->where('attendance_status', 'absent')->count();
     
@@ -81,12 +86,13 @@ class AttendanceController extends Controller
     public function create()
     {
         $date = now()->format('Y-m-d'); // Get today's date
-        $children = Child::with(['attendances' => function ($query) use ($date) {
+        $children = Child::whereHas('enrollment', function($query) {
+            $query->where('status', 'approved');
+        })->with(['attendances' => function ($query) use ($date) {
             $query->where('attendance_date', $date);
         }])->paginate(30);
 
-
-        return view('attendances.create',compact('children','date'));
+        return view('attendances.create', compact('children', 'date'));
     }
 
     /**
@@ -119,61 +125,69 @@ public function store(Request $request)
             ]
         );
 
-        // Send email to parents only if the child attended
-        if ($status === 'attend') {
-            $child = \App\Models\Child::find($childId); // Retrieve the child's details
+         $child = \App\Models\Child::find($childId);
+        $parentRecord = \App\Models\ParentRecord::where('child_id', $childId)->first();
 
-            // Retrieve parent IDs (father, mother, guardian)
-            $parents = \App\Models\ParentRecord::where('child_id', $childId)
-                ->select('father_id', 'mother_id', 'guardian_id')
-                ->first();
+    $parentEmails = [];
+    if ($parentRecord) {
+        if ($parentRecord->father_id) {
+            $father = \App\Models\Father::find($parentRecord->father_id);
+            if ($father && $father->email) $parentEmails[] = $father->email;
+                    \Log::info('Father email for child ID ' . $childId . ': ' . $father->email);
 
-            if ($parents) {
-                $parentIds = [$parents->father_id, $parents->mother_id, $parents->guardian_id];
+        }
+        if ($parentRecord->mother_id) {
+            $mother = \App\Models\Mother::find($parentRecord->mother_id);
+            if ($mother && $mother->email) $parentEmails[] = $mother->email;
+            \Log::info('Mother email for child ID ' . $childId . ': ' . $mother->email);
+        }
+        if ($parentRecord->guardian_id) {
+            $guardian = \App\Models\Guardian::find($parentRecord->guardian_id);
+            if ($guardian && $guardian->email) $parentEmails[] = $guardian->email;
+            \Log::info('Guardian email for child ID ' . $childId . ': ' . $guardian->email);
+        }
+    }
 
-                // Retrieve users with the parents role
-                $parentUsers = User::whereIn('id', $parentIds)
-                    ->where('role', 'parents')
-                    ->get();
+    // Only send email if "attend" or time_out is set
+    if ($status === 'attend' || !empty($validated['time_out'][$childId])) {
+        $childName = $child->child_name ?? 'Your child';
+        $attendanceTime = $status === 'attend'
+            ? (!empty($validated['time_in'][$childId]) ? date('g:i A', strtotime($validated['time_in'][$childId])) : now()->format('g:i A'))
+            : (!empty($validated['time_out'][$childId]) ? date('g:i A', strtotime($validated['time_out'][$childId])) : now()->format('g:i A'));
+        $attendanceType = $status === 'attend' ? 'checked in' : 'checked out';
 
-                    dd([
-                        'Child ID' => $childId,
-                        'Father ID' => $parents->father_id,
-                        'Mother ID' => $parents->mother_id,
-                        'Guardian ID' => $parents->guardian_id,
-                    ]);
-                foreach ($parentUsers as $parentUser) {
-                    try {
-                        $htmlContent = "
-                            <h2>Dear {$parentUser->name},</h2>
-                            <p>We hope this message finds you well.</p>
-                            <p>Please be informed that your child has attended Taska Hikmah with the following details:</p>
-                            <p><strong>Child Name:</strong> {$child->child_name}</p>
-                            <p><strong>Date:</strong> {$attendanceDate}</p>
-                            <p><strong>Time-In:</strong> {$attendance->time_in}</p>
-                            <p><strong>Time-Out:</strong> " . ($attendance->time_out ?? 'Not yet checked out') . "</p>
-                            <p>Warm regards,<br>
-                            Taska Hikmah</p>
-                            <hr>
-                            <p style=\"font-size: 0.9em; color: #555;\">
-                            <p>This is an automated message. Please do not reply to this email.</p>
-                            For any inquiries, please contact us or call us at 07-1234567.<br>
+        foreach ($parentEmails as $email) {
+            try {
+                \Mail::html("
+                    <div style='font-family: Arial, sans-serif; background: #f9fafb; padding: 24px;'>
+                        <div style='max-width: 520px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #e5e7eb; padding: 32px;'>
+                            <h2 style='color: #2563eb; margin-bottom: 16px;'>Attendance Notification</h2>
+                            <p style='color: #374151; font-size: 16px; margin-bottom: 16px;'>
+                                $childName has <strong>$attendanceType</strong> on <strong>$attendanceDate</strong> at <strong>$attendanceTime</strong>.
                             </p>
-                        ";
-
-                        Mail::send([], [], function ($message) use ($parentUser, $htmlContent) {
-                            $message->to($parentUser->email)
-                                    ->subject('Attendance Information From Taska Hikmah')
-                                    ->html($htmlContent);
-                        });
-
-                        Log::info("Attendance email sent successfully to: {$parentUser->email}");
-                    } catch (\Exception $e) {
-                        Log::error("Failed to send attendance email to {$parentUser->email}. Error: " . $e->getMessage());
-                    }
-                }
+                            <p style='color: #374151; margin-bottom: 24px;'>
+                                Please log in to your account for more details.
+                            </p>
+                            <a href='" . route('login') . "' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                🔑 Login to Parent Portal
+                            </a>
+                            <p style='color: #9ca3af; font-size: 13px; margin-top: 32px;'>
+                                This is an automated notification from Taska Childcare Management System.
+                            </p>
+                        </div>
+                    </div>
+                ", function ($message) use ($email, $childName, $attendanceType) {
+                    $message->to($email)
+                        ->subject("Attendance Update: $childName $attendanceType");
+                });
+            } catch (\Exception $e) {
+                \Log::error("Failed to send attendance email to $email. Error: " . $e->getMessage());
             }
         }
+    }
+
+
+        
     }
 
     return redirect()->route('attendances.index')->with('success', 'Attendance saved successfully!');
@@ -214,65 +228,13 @@ public function store(Request $request)
 
    
    
-    public function showCheckInForm()
-    {
-        $children = Child::all();
-        return view('attendances.timeIn', compact('children'));
-    }
+    // public function showCheckInForm()
+    // {
+    //     $children = Child::all();
+    //     return view('attendances.timeIn', compact('children'));
+    // }
 
-    public function checkIn(Request $request)
-    {
-        $validated = $request->validate([
-            'children_id' => 'required|exists:children,id',
-            'attendance_date' => 'required|date',
-        ]);
+   
 
-        // Check if the child already has a record for the day
-        $attendance = Attendance::where('children_id', $validated['children_id'])
-            ->where('attendance_date', $validated['attendance_date'])
-            ->first();
-
-        if ($attendance) {
-            return redirect()->route('attendances.index')->with('error', 'Child has already checked in today.');
-        }
-
-        // Create a new attendance record with check-in time
-        Attendance::create([
-            'children_id' => $validated['children_id'],
-            'attendance_date' => $validated['attendance_date'],
-            'time_in' => now()->format('H:i:s'),
-            'attendance_status' => 'Checked In',
-        ]);
-
-        return redirect()->route('attendances.index')->with('success', 'Check In successful!');
-    }
-
-    public function checkOut(Request $request)
-    {
-        $validated = $request->validate([
-            'children_id' => 'required|exists:children,id',
-            'attendance_date' => 'required|date',
-        ]);
-
-        // Find the attendance record for the child and date
-        $attendance = Attendance::where('children_id', $validated['children_id'])
-            ->where('attendance_date', $validated['attendance_date'])
-            ->first();
-
-        if (!$attendance) {
-            return redirect()->route('attendances.index')->with('error', 'No check-in record found for this child today.');
-        }
-
-        if ($attendance->time_out) {
-            return redirect()->route('attendances.index')->with('error', 'Child has already checked out today.');
-        }
-
-        // Update the attendance record with check-out time
-        $attendance->update([
-            'time_out' => now()->format('H:i:s'),
-            'attendance_status' => 'Checked Out',
-        ]);
-
-        return redirect()->route('attendances.index')->with('success', 'Check Out successful!');
-    }
+   
 }

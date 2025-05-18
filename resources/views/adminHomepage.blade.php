@@ -37,7 +37,7 @@
 
                 @endphp
                     </div>
-
+ 
                 <!-- Display Greeting -->
                 <div class="flex items-center mb-8">
                     <h1 id="greeting" class="text-4xl font-bold text-black-700">{{ $greeting }} <span id="greeting-icon"></span></h1>
@@ -237,6 +237,14 @@
                                 ->orWhere('mother_id', $userId)
                                 ->orWhere('guardian_id', $userId);
                         })->with('child')->get();
+
+                         //get total child for parents  
+                        $parentChildrenCount = auth()->user()->role === 'parents' 
+                            ? \App\Models\Child::whereHas('enrollment', function ($query) {
+                                $query->where('enrollment_id', auth()->user()->id);
+                            })->count() : 0;
+
+
                     @endphp
 
                     <div class="bg-white rounded-lg overflow-hidden">
@@ -251,7 +259,7 @@
                                 class="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center">
                                     <span class="mr-1">➕</span> Register New Child
                                 
-
+ 
                             </a>
                         </div>
                         
@@ -261,7 +269,7 @@
                                 <span class="text-3xl">👶</span>
                             </div>
                             <p class="text-center font-medium text-gray-700">Your Children</p>
-                            <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $totalChildren }}</p>
+                            <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $parentChildrenCount }}</p>
                         </div>
 
                         <!-- Children Cards -->
