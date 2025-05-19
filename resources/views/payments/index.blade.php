@@ -1,336 +1,145 @@
+
 <x-app-layout>
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
-            {{-- Header Section --}}
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Header Section -->
+            <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-4xl font-bold flex items-center">
-                        <span class="text-3xl font-bold text-indigo-800">Payment Management</span>
-                        
-                    </h1>
-                    <!-- <div class="flex items-center space-x-4">
-                        @if(auth()->check())
-                            <div class="bg-blue-500 rounded-full p-2">
-                                <span class="material-icons text-white">notifications</span>
-                            </div>
-                            <div class="bg-blue-500 rounded-full p-2">
-                                <span class="material-icons text-white">account_circle</span>
-                            </div>
-                        @endif
-                    </div> -->
-                </div>
-                <!-- <h2 class="text-2xl mt-4 flex items-center">
-                    <span class="material-icons mr-3"></span>
-                    Payment Dashboard
-                </h2> -->
-            </div>
-
-            <div class="p-6">
-                <div class="mb-6 flex justify-between items-center">
-                    <div class="flex items-center space-x-4">
-                        <label for="month-filter" class="text-gray-700 font-semibold flex items-center">
-                            <span class="material-icons mr-2"></span>
-                            Filter by Month
-                        </label>
-                        <select 
-                            id="month-filter" 
-                            onchange="filterByMonth()" 
-                            class="bg-purple-50 border border-purple-200 text-gray-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-48 p-2.5"
-                        >
-                            <option value="">All Months</option>
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
+                    <div>
+                        <h2 class="text-2xl font-bold text-indigo-800">
+                            {{ __('Payments') }}
+                        </h2>
+                        <p class="text-gray-600 mt-1">Manage payment records for children</p>
                     </div>
-
-                    @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('payments.create') }}" class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                            </svg>
+                    <div>
+                        <a href="{{ route('payments.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-sm transition">
                             Create New Payment
                         </a>
-               
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message Alert -->
+            @if(session('message'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <p>{{ session('message') }}</p>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Payments Table Card -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    @if($payments->isEmpty())
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No payments found</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new payment.</p>
+                            <div class="mt-6">
+                                <a href="{{ route('payments.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    New Payment
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Child</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent(s)</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (RM)</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($payments as $payment)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $payment->child->child_name ?? 'N/A' }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    @php
+                                                        $parentRecord = $payment->parentRecord;
+                                                        $names = [];
+                                                        if ($parentRecord) {
+                                                            if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+                                                            if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+                                                            if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+                                                        }
+                                                        echo !empty($names) ? implode(' & ', $names) : 'N/A';
+                                                    @endphp
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    {{ number_format($payment->payment_amount, 2) }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    @if($payment->payment_status == 'complete') 
+                                                        bg-green-100 text-green-800
+                                                    @elseif($payment->payment_status == 'pending')
+                                                        bg-yellow-100 text-yellow-800
+                                                    @else
+                                                        bg-red-100 text-red-800
+                                                    @endif">
+                                                    {{ ucfirst($payment->payment_status) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    {{ $payment->paymentByParents_date ? \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') : 'Not paid yet' }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div class="flex space-x-2">
+                                                    @if($payment->payment_status !== 'complete')
+                                                        <form action="#" method="POST" class="inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="text-green-600 hover:text-green-900">
+                                                                Mark as Paid
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                    <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                    <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     @endif
                 </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full bg-white shadow-md rounded-lg overflow-hidden">
-                        <thead class="bg-indigo-600  text-white">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Parents</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Children</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Payment (RM)</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Due Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Status</th>
-                                @if(auth()->user()->role === 'admin')
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-white-700 uppercase tracking-wider">Actions</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody id="payment-list">
-                            @foreach($payments as $payment)
-                                <tr 
-                                    data-month="{{ date('m', strtotime($payment->due_date)) }}" 
-                                    class="border-b hover:bg-blue-50 transition-colors"
-                                >
-                                    <td class="px-6 py-4 text-sm text-gray-700">
-                                        <div class="flex items-center">
-                                            <span class="material-icons mr-2 text-blue-500">family_restroom</span>
-                                            {{ $payment->parent_names }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">
-                                        <div class="flex items-center">
-                                            <span class="material-icons mr-2 text-green-500">child_care</span>
-                                            {{ $payment->child_name }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">
-                                        {{ number_format($payment->amount, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">
-                                        {{ date('d/m/Y', strtotime($payment->due_date)) }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @switch($payment->status)
-                                            @case('paid')
-                                                <span class="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 flex items-center">
-                                                    <span class="material-icons mr-1 text-sm">check_circle</span>
-                                                    Paid
-                                                </span>
-                                                @break
-                                            @case('pending')
-                                                <span class="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800 flex items-center">
-                                                    <span class="material-icons mr-1 text-sm">pending</span>
-                                                    Pending
-                                                </span>
-                                                @break
-                                            @case('overdue')
-                                                <span class="px-3 py-1 rounded-full text-sm bg-red-100 text-red-800 flex items-center">
-                                                    <span class="material-icons mr-1 text-sm">warning</span>
-                                                    Overdue
-                                                </span>
-                                                @break
-                                        @endswitch
-                                    </td>
-                                    @if(auth()->user()->role === 'admin')
-                                        <td class="px-6 py-4">
-                                            <div class="flex space-x-2">
-                                                <button 
-                                                    onclick="sendReminderEmail({{ $payment->id }})"
-                                                    class="text-blue-500 hover:text-blue-700 transition-colors"
-                                                >
-                                                    <span class="material-icons">email</span>
-                                                </button>
-                                                <button 
-                                                    onclick="editPayment({{ $payment->id }})"
-                                                    class="text-green-500 hover:text-green-700 transition-colors"
-                                                >
-                                                    <span class="material-icons">edit</span>
-                                                </button>
-                                                <button 
-                                                    onclick="deletePayment({{ $payment->id }})"
-                                                    class="text-red-500 hover:text-red-700 transition-colors"
-                                                >
-                                                    <span class="material-icons">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    @endif
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- Add Payment Modal -->
-    <div 
-        id="add-payment-modal" 
-        class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
-    >
-        <div class="bg-white rounded-2xl shadow-xl p-8 w-96">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-blue-700">Add New Payment</h3>
-                <button onclick="closeAddPaymentModal()" class="text-gray-500 hover:text-gray-700">
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-            <form id="add-payment-form" class="space-y-4">
-                @csrf
-                <div>
-                    <label for="parent-names" class="block text-sm font-medium text-gray-700">Parent Names</label>
-                    <input 
-                        type="text" 
-                        id="parent-names" 
-                        name="parent_names" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" 
-                        required
-                    >
-                </div>
-                <div>
-                    <label for="child-name" class="block text-sm font-medium text-gray-700">Child Name</label>
-                    <input 
-                        type="text" 
-                        id="child-name" 
-                        name="child_name" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" 
-                        required
-                    >
-                </div>
-                <div>
-                    <label for="payment-amount" class="block text-sm font-medium text-gray-700">Payment Amount (RM)</label>
-                    <input 
-                        type="number" 
-                        id="payment-amount" 
-                        name="amount" 
-                        step="0.01" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" 
-                        required
-                    >
-                </div>
-                <div>
-                    <label for="due-date" class="block text-sm font-medium text-gray-700">Due Date</label>
-                    <input 
-                        type="date" 
-                        id="due-date" 
-                        name="due_date" 
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200" 
-                        required
-                    >
-                </div>
-                <div class="flex justify-end space-x-4 pt-4">
-                    <button 
-                        type="button" 
-                        onclick="closeAddPaymentModal()" 
-                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
-                    >
-                        Cancel
-                    </button>
-                    <button 
-                        type="submit" 
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                        Add Payment
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    @push('scripts')
-    <script>
-        function filterByMonth() {
-            const selectedMonth = document.getElementById('month-filter').value;
-            const payments = document.querySelectorAll('[data-month]');
-
-            payments.forEach(payment => {
-                if (!selectedMonth || payment.getAttribute('data-month') === selectedMonth) {
-                    payment.style.display = '';
-                } else {
-                    payment.style.display = 'none';
-                }
-            });
-        }
-
-        function openAddPaymentModal() {
-            document.getElementById('add-payment-modal').classList.remove('hidden');
-            document.getElementById('add-payment-modal').classList.add('flex');
-        }
-
-        function closeAddPaymentModal() {
-            document.getElementById('add-payment-modal').classList.remove('flex');
-            document.getElementById('add-payment-modal').classList.add('hidden');
-        }
-
-        function sendReminderEmail(paymentId) {
-            // AJAX call to send reminder email
-            fetch(`/payments/${paymentId}/remind`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Reminder email sent successfully!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to send reminder email.');
-            });
-        }
-
-        function editPayment(paymentId) {
-            // Redirect to edit payment page or open edit modal
-            window.location.href = `/payments/${paymentId}/edit`;
-        }
-
-        function deletePayment(paymentId) {
-            if (confirm('Are you sure you want to delete this payment?')) {
-                fetch(`/payments/${paymentId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Remove the payment row from the table
-                    document.querySelector(`tr[data-payment-id="${paymentId}"]`).remove();
-                    alert('Payment deleted successfully!');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete payment.');
-                });
-            }
-        }
-
-        // Handle form submission
-        document.getElementById('add-payment-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-
-            fetch('/payments', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Close modal
-                closeAddPaymentModal();
-                
-                // Optionally refresh the payments table or add the new payment row
-                alert('Payment added successfully!');
-                
-                // Optionally reload the page or update the table dynamically
-                location.reload();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to add payment.');
-            });
-        });
-    </script>
-    @endpush
 </x-app-layout>

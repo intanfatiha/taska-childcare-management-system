@@ -8,6 +8,7 @@ use App\Models\Child;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -17,16 +18,15 @@ class PaymentController extends Controller
     public function index()
     {
        
-          // Fetch payments with optional filtering
-        $query = Payment::query();
+          // Fetch payments with relationships for display
+        $payments = Payment::with(['child', 'parentRecord'])
+                    ->orderBy('payment_duedate', 'desc')
+                    ->get();
 
-        // Filter by month if requested
-        // if (request()->has('month')) {
-        //     $query->whereMonth('due_date', request('month'));
-        // }
-
-        // // Sort payments
-        $payments = Payment::orderBy('payment_duedate', 'desc')->get();
+        // Update payment statuses before displaying
+        foreach ($payments as $payment) {
+            $this->updatePaymentStatus($payment);
+        }
 
         return view('payments.index',compact('payments'));
 
@@ -38,11 +38,12 @@ class PaymentController extends Controller
      */
     public function create()
     { 
-        // Get all children with their parent record and related parent models
+     // Get all children with their parent record and related parent models
     $children = \App\Models\Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
 
     $formattedChildren = [];
     $parentsByChild = [];
+    $parentRecordIdByChild = [];
 
     foreach ($children as $child) {
         $formattedChildren[] = [
@@ -52,18 +53,19 @@ class PaymentController extends Controller
 
         $parentRecord = $child->parentRecord;
         $parentName = 'No Data';
+        $parentRecordId = null;
+
         if ($parentRecord) {
-            if ($parentRecord->father && $parentRecord->mother) {
-                $parentName = $parentRecord->father->father_name . ' & ' . $parentRecord->mother->mother_name;
-            } elseif ($parentRecord->guardian) {
-                $parentName = $parentRecord->guardian->guardian_name;
-            } elseif ($parentRecord->father) {
-                $parentName = $parentRecord->father->father_name;
-            } elseif ($parentRecord->mother) {
-                $parentName = $parentRecord->mother->mother_name;
-            }
+            $names = [];
+            if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+            if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+            if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+            $parentName = implode(' & ', $names);
+            $parentRecordId = $parentRecord->id;
         }
+
         $parentsByChild[$child->id] = $parentName;
+        $parentRecordIdByChild[$child->id] = $parentRecordId;
     }
 
     // Optionally sort children alphabetically
@@ -71,7 +73,7 @@ class PaymentController extends Controller
         return strcmp($a['name'], $b['name']);
     });
 
-    return view('payments.create', compact('formattedChildren', 'parentsByChild'));
+    return view('payments.create', compact('formattedChildren', 'parentsByChild', 'parentRecordIdByChild'));
 
 }
 
@@ -80,35 +82,27 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-          // Validate the request
+         // Validate the request
         $validatedData = $request->validate([
-            'parent_names' => 'required|string|max:255',
-            'child_name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'due_date' => 'required|date|after:today',
+            'child_id' => 'required|exists:childrens,id',
+            'parent_id' => 'required|exists:parent_records,id',
+            'payment_amount' => 'required|numeric|min:0',
+            'due_date' => 'required|date',
         ]);
 
-        // Determine payment status
-        $status = $this->determinePaymentStatus($validatedData['due_date']);
-
-        // Create the payment
+        // Create the payment with initial pending status
         $payment = Payment::create([
-            'parent_names' => $validatedData['parent_names'],
-            'child_name' => $validatedData['child_name'],
-            'amount' => $validatedData['amount'],
-            'due_date' => $validatedData['due_date'],
-            'status' => $status,
-            'created_by' => Auth::id()
+            'user_id' => null, // As per requirement
+            'child_id' => $validatedData['child_id'],
+            'parent_id' => $validatedData['parent_id'],
+            'payment_amount' => $validatedData['payment_amount'],
+            'payment_duedate' => $validatedData['due_date'],
+            'payment_status' => 'pending',
+            'bill_date' => Carbon::now()->toDateString(),
         ]);
 
-        // Optionally send confirmation email
-        $this->sendPaymentConfirmationEmail($payment);
-
-        // Return response
-        return response()->json([
-            'message' => 'Payment added successfully',
-            'payment' => $payment
-        ], 201);
+        return redirect()->route('payments.index')
+                         ->with('message', 'Payment created successfully');
     }
 
     /**
@@ -116,7 +110,8 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment)
     {
-        //
+         $this->updatePaymentStatus($payment);
+        return view('payments.show', compact('payment'));
     }
 
     /**
@@ -124,7 +119,37 @@ class PaymentController extends Controller
      */
     public function edit(Payment $payment)
     {
-        //
+         $children = Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
+
+            $formattedChildren = [];
+            $parentsByChild = [];
+            $parentRecordIdByChild = [];
+
+            foreach ($children as $child) {
+                $formattedChildren[] = [
+                    'id' => $child->id,
+                    'name' => $child->child_name,
+                ];
+
+                $parentRecord = $child->parentRecord;
+                $parentName = 'No Data';
+                $parentRecordId = null;
+
+                if ($parentRecord) {
+                    $names = [];
+                    if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+                    if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+                    if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+                    $parentName = implode(' & ', $names);
+                    $parentRecordId = $parentRecord->id;
+                }
+
+                $parentsByChild[$child->id] = $parentName;
+                $parentRecordIdByChild[$child->id] = $parentRecordId;
+            }
+
+            return view('payments.edit', compact('payment', 'formattedChildren', 'parentsByChild', 'parentRecordIdByChild'));
+        
     }
 
     /**
@@ -140,6 +165,8 @@ class PaymentController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        //
+          $payment->delete();
+        return redirect()->route('payments.index')
+                         ->with('message', 'Payment deleted successfully');
     }
 }

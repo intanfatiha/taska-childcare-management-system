@@ -43,9 +43,12 @@
 
                     <!-- Parent Dropdown (auto-filled, read-only) -->
                     <div class="mb-5">
-                        <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-1">Parent(s)</label>
+                        <label for="parent_display" class="block text-sm font-medium text-gray-700 mb-1">Parent(s)</label>
                         <input type="text" id="parent_display" class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100" readonly>
                         <input type="hidden" id="parent_id" name="parent_id">
+                        @error('parent_id')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Payment Amount -->
@@ -81,13 +84,20 @@
     </div>
  
 <script>
+    // Store both the parent names and their IDs
     const parentsByChild = @json($parentsByChild);
+    const parentRecordIdByChild = @json($parentRecordIdByChild);
 
     document.getElementById('child_id').addEventListener('change', function() {
         const childId = this.value;
         const parentDisplay = document.getElementById('parent_display');
+        const parentIdField = document.getElementById('parent_id');
+        
+        // Update the display field with parent names
         parentDisplay.value = parentsByChild[childId] || '';
-        // If you need to set a hidden parent_id for form submission, you can add logic here
+        
+        // Update the hidden field with the parent record ID
+        parentIdField.value = parentRecordIdByChild[childId] || '';
     });
 </script>
 </x-app-layout>

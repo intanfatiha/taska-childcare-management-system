@@ -46,6 +46,6 @@ class Payment extends Model
      */
     public function child()
     {
-        return $this->belongsTo(ParentRecord::class, 'child_id');
+        return $this->belongsTo(Child::class, 'child_id');
     }
 }
