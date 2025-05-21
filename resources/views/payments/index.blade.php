@@ -119,9 +119,8 @@
                                                         <form action="#" method="POST" class="inline">
                                                             @csrf
                                                             @method('PATCH')
-                                                            <button type="submit" class="text-green-600 hover:text-green-900">
-                                                                Mark as Paid
-                                                            </button>
+                                                                            <a href="{{ route('payments.stripe.form', $payment->id) }}" class="btn btn-primary">Pay with Card</a>
+
                                                         </form>
                                                     @endif
                                                     <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>

@@ -108,6 +108,17 @@ Route::resource('attendances', AttendanceController::class);
 Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
 
 Route::resource('payments', PaymentController::class);
+Route::get('/payments/{payment}/stripe', [PaymentController::class, 'showStripeForm'])->name('payments.stripe.form');
+Route::post('/payments/stripe/charge', [PaymentController::class, 'stripeCharge'])->name('payments.stripe.charge');
+Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');
+    Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::get('/success', function () {
+        return "Payment Successful!";
+    })->name('payment.success');
+    Route::get('/cancel', function () {
+        return "Payment Canceled!";
+    })->name('payment.cancel');
+
 
 Route::resource('generateReports', GenerateReportController::class);
 Route::get('/attendance-report', [GenerateReportController::class, 'index'])->name('attendance.report');

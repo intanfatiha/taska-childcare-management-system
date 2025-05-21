@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
 
 class PaymentController extends Controller
 {
@@ -24,9 +26,9 @@ class PaymentController extends Controller
                     ->get();
 
         // Update payment statuses before displaying
-        foreach ($payments as $payment) {
-            $this->updatePaymentStatus($payment);
-        }
+        // foreach ($payments as $payment) {
+        //     $this->updatePaymentStatus($payment);
+        // }
 
         return view('payments.index',compact('payments'));
 
@@ -110,7 +112,7 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment)
     {
-         $this->updatePaymentStatus($payment);
+        //  $this->updatePaymentStatus($payment);
         return view('payments.show', compact('payment'));
     }
 
@@ -169,4 +171,44 @@ class PaymentController extends Controller
         return redirect()->route('payments.index')
                          ->with('message', 'Payment deleted successfully');
     }
+
+
+
+    
+    public function showStripeForm(Payment $payment)
+    {
+        return view('payments.stripe', compact('payment'));
+    }
+
+    public function checkout(Request $request)
+    {
+       Stripe::setApiKey(env('STRIPE_SECRET'));
+    
+            try {
+                $session = Session::create([
+                    'payment_method_types' => ['card'],
+                    'line_items' => [[
+                        'price_data' => [
+                            'currency' => 'usd',
+                            'product_data' => [
+                                'name' => 'Laravel Stripe Payment',
+                            ],
+                            'unit_amount' => 1000, // $10.00 in cents
+                        ],
+                        'quantity' => 1,
+                    ]],
+                    'mode' => 'payment',
+                    'success_url' => route('payment.success'),
+                    'cancel_url' => route('payment.cancel'),
+                ]);
+    
+                return redirect($session->url, 303);
+            } catch (\Exception $e) {
+                return back()->withErrors(['error' => 'Unable to create payment session: ' . $e->getMessage()]);
+            }
+
+
+    }
+
+
 }
