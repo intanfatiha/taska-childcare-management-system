@@ -116,12 +116,11 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex space-x-2">
                                                     @if($payment->payment_status !== 'complete')
-                                                        <form action="#" method="POST" class="inline">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                                            <a href="{{ route('payments.stripe.form', $payment->id) }}" class="btn btn-primary">Pay with Card</a>
-
-                                                        </form>
+                                                        <form action="{{ route('payment.checkout') }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                                        <button type="submit" class="btn btn-primary">Pay with Card</button>
+                                                    </form>
                                                     @endif
                                                     <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                                     <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?');">

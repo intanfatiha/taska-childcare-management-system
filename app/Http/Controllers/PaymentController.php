@@ -103,6 +103,42 @@ class PaymentController extends Controller
             'bill_date' => Carbon::now()->toDateString(),
         ]);
 
+        $parentRecord = \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
+        ->find($validatedData['parent_id']);
+
+        $emails = [];
+
+        if ($parentRecord) {
+            if ($parentRecord->father && $parentRecord->father->father_email) {
+                $emails[$parentRecord->father->father_email] = $parentRecord->father->father_name;
+            }
+            if ($parentRecord->mother && $parentRecord->mother->mother_email) {
+                $emails[$parentRecord->mother->mother_email] = $parentRecord->mother->mother_name;
+            }
+            if ($parentRecord->guardian && $parentRecord->guardian->guardian_email) {
+                $emails[$parentRecord->guardian->guardian_email] = $parentRecord->guardian->guardian_name;
+            }
+        }
+
+        foreach ($emails as $email => $name) {
+        try {
+            Mail::html("
+                <h2>Dear $name,</h2>
+                <p>A new payment has been created for your child. Please log in to your account to view and make payment.</p>
+                <p>Thank you.</p>
+            ", function ($message) use ($email) {
+                $message->to($email)
+                    ->subject('New Payment Notification');
+            });
+
+            // Log successful email
+            \Log::info("Payment email sent successfully to: $email");
+        } catch (\Exception $e) {
+            // Log email sending failures
+            \Log::error("Failed to send payment email to $email. Error: " . $e->getMessage());
+        }
+    }
+
         return redirect()->route('payments.index')
                          ->with('message', 'Payment created successfully');
     }
@@ -180,35 +216,36 @@ class PaymentController extends Controller
         return view('payments.stripe', compact('payment'));
     }
 
-    public function checkout(Request $request)
-    {
-       Stripe::setApiKey(env('STRIPE_SECRET'));
     
-            try {
-                $session = Session::create([
-                    'payment_method_types' => ['card'],
-                    'line_items' => [[
-                        'price_data' => [
-                            'currency' => 'usd',
-                            'product_data' => [
-                                'name' => 'Laravel Stripe Payment',
-                            ],
-                            'unit_amount' => 1000, // $10.00 in cents
-                        ],
-                        'quantity' => 1,
-                    ]],
-                    'mode' => 'payment',
-                    'success_url' => route('payment.success'),
-                    'cancel_url' => route('payment.cancel'),
-                ]);
-    
-                return redirect($session->url, 303);
-            } catch (\Exception $e) {
-                return back()->withErrors(['error' => 'Unable to create payment session: ' . $e->getMessage()]);
-            }
+public function checkout(Request $request)
+{
+    Stripe::setApiKey(env('STRIPE_SECRET'));
 
+    $payment = Payment::findOrFail($request->payment_id);
 
+    try {
+        $session = Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'myr', // or 'myr' if you want MYR
+                    'product_data' => [
+                        'name' => 'Your Fees',
+                    ],
+                    'unit_amount' => intval($payment->payment_amount * 100), // amount in cents
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => route('payment.success'),
+            'cancel_url' => route('payment.cancel'),
+        ]);
+
+        return redirect($session->url, 303);
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Unable to create payment session: ' . $e->getMessage()]);
     }
+}
 
 
 }

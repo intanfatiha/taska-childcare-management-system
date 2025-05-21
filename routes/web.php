@@ -115,9 +115,11 @@ Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form'
     Route::get('/success', function () {
         return "Payment Successful!";
     })->name('payment.success');
-    Route::get('/cancel', function () {
-        return "Payment Canceled!";
-    })->name('payment.cancel');
+    Route::get('/payment/cancel', function () {
+    return redirect()->route('payments.index');
+})->name('payment.cancel');
+
+Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
 
 
 Route::resource('generateReports', GenerateReportController::class);
