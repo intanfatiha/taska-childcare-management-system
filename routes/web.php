@@ -108,19 +108,21 @@ Route::resource('attendances', AttendanceController::class);
 Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
 
 Route::resource('payments', PaymentController::class);
-Route::get('/payments/{payment}/stripe', [PaymentController::class, 'showStripeForm'])->name('payments.stripe.form');
-Route::post('/payments/stripe/charge', [PaymentController::class, 'stripeCharge'])->name('payments.stripe.charge');
+// Route::get('/payments/{payment}/stripe', [PaymentController::class, 'showStripeForm'])->name('payments.stripe.form');
+// Route::post('/payments/stripe/charge', [PaymentController::class, 'stripeCharge'])->name('payments.stripe.charge');
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');
-    Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
-    Route::get('/success', function () {
-        return "Payment Successful!";
-    })->name('payment.success');
-    Route::get('/payment/cancel', function () {
-    return redirect()->route('payments.index');
-})->name('payment.cancel');
-
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
-
+Route::get('/success', function () { return "Payment Successful!";})->name('payment.success');
+Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+Route::get('/payment/cancel', function () {return redirect()->route('payments.index');})->name('payment.cancel');
+Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+  
+    // Invoice routes
+    Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payments.invoice');
+    
+    // Optional: Preview invoice in browser (for testing)
+// Preview invoice in browser with app layout
+Route::get('/payments/{payment}/invoice/preview', [PaymentController::class, 'previewInvoice'])->name('payments.invoice.preview');
 
 Route::resource('generateReports', GenerateReportController::class);
 Route::get('/attendance-report', [GenerateReportController::class, 'index'])->name('attendance.report');

@@ -5,39 +5,83 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\ParentRecord;
 use App\Models\Child;
+use App\Models\Father;
+use App\Models\Mother;
+use App\Models\Guardian;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PaymentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+     public function index()
     {
-       
-          // Fetch payments with relationships for display
-        $payments = Payment::with(['child', 'parentRecord'])
+        $today = Carbon::now();
+
+        // Automatically update overdue payments
+        Payment::where('payment_status', 'pending')
+            ->whereDate('payment_duedate', '<', $today)
+            ->update(['payment_status' => 'overdue']);
+
+        $payments = [];
+
+        if (auth()->user()->role === 'parents') {
+            $parentRecord = $this->getParentRecordForLoggedInUser();
+
+            if ($parentRecord) {
+                $payments = Payment::with(['child', 'parentRecord'])
+                    ->where('parent_id', $parentRecord->id)
                     ->orderBy('payment_duedate', 'desc')
                     ->get();
+            }
+        } else {
+            $payments = Payment::with(['child', 'parentRecord'])
+                ->orderBy('payment_duedate', 'desc')
+                ->get();
+        }
 
-        // Update payment statuses before displaying
-        // foreach ($payments as $payment) {
-        //     $this->updatePaymentStatus($payment);
-        // }
+        return view('payments.index', compact('payments'));
+    }
 
-        return view('payments.index',compact('payments'));
+    //function to get the parent record for the logged-in user
+    protected function getParentRecordForLoggedInUser()
+    {
+        $userId = auth()->id();
 
+        // 1. Check if user is a father
+        $father = Father::where('user_id', $userId)->first();
+        if ($father) {
+            $record = ParentRecord::where('father_id', $father->id)->first();
+            if ($record) return $record;
+        }
+
+        // 2. Check if user is a mother
+        $mother = Mother::where('user_id', $userId)->first();
+        if ($mother) {
+            $record = ParentRecord::where('mother_id', $mother->id)->first();
+            if ($record) return $record;
+        }
+
+        // 3. Check if user is a guardian
+        $guardian = Guardian::where('user_id', $userId)->first();
+        if ($guardian) {
+            $record = ParentRecord::where('guardian_id', $guardian->id)->first();
+            if ($record) return $record;
+        }
+
+        // No matching parent record
+        return null;
     }
     
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     { 
      // Get all children with their parent record and related parent models
@@ -143,9 +187,7 @@ class PaymentController extends Controller
                          ->with('message', 'Payment created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Payment $payment)
     {
         //  $this->updatePaymentStatus($payment);
@@ -209,13 +251,6 @@ class PaymentController extends Controller
     }
 
 
-
-    
-    public function showStripeForm(Payment $payment)
-    {
-        return view('payments.stripe', compact('payment'));
-    }
-
     
 public function checkout(Request $request)
 {
@@ -237,7 +272,7 @@ public function checkout(Request $request)
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            'success_url' => route('payment.success'),
+            'success_url' => route('payment.success', ['payment_id' => $payment->id]),
             'cancel_url' => route('payment.cancel'),
         ]);
 
@@ -246,6 +281,102 @@ public function checkout(Request $request)
         return back()->withErrors(['error' => 'Unable to create payment session: ' . $e->getMessage()]);
     }
 }
+
+public function paymentSuccess(Request $request)
+{
+    $paymentId = $request->query('payment_id');
+    $payment = Payment::findOrFail($paymentId);
+
+    // Only update if not already complete
+    if ($payment->payment_status !== 'Complete') {
+        $payment->user_id = auth()->id(); // or set to the parent user id if needed
+        $payment->paymentByParents_date = Carbon::now();
+        $payment->payment_status = 'Complete';
+        $payment->save();
+    }
+
+    return redirect()->route('payments.index')->with('message', 'Payment successful and updated!');
+}
+
+public function invoice(Payment $payment)
+    {
+        // Check if payment is complete
+        if ($payment->payment_status !== 'Complete') {
+            return redirect()->back()
+                           ->with('error', 'Invoice can only be generated for completed payments.');
+        }
+
+        // Check authorization - only admin or the payment owner can download invoice
+        $user = auth()->user();
+        if ($user->role !== 'admin') {
+            $parentRecord = $this->getParentRecordForLoggedInUser();
+            if (!$parentRecord || $payment->parent_id !== $parentRecord->id) {
+                abort(403, 'Unauthorized access to invoice.');
+            }
+        }
+
+        // Load relationships
+        $payment->load([
+            'child', 
+            'parentRecord.father', 
+            'parentRecord.mother', 
+            'parentRecord.guardian'
+        ]);
+
+        // Generate PDF
+        $pdf = Pdf::loadView('payments.invoice', compact('payment'))
+                  ->setPaper('a4', 'portrait')
+                  ->setOptions([
+                      'dpi' => 150,
+                      'defaultFont' => 'sans-serif',
+                      'isHtml5ParserEnabled' => true,
+                      'isRemoteEnabled' => true
+                  ]);
+
+        // Generate filename
+        $childName = $payment->child->child_name ?? 'Child';
+        $invoiceDate = $payment->paymentByParents_date ? 
+                      \Carbon\Carbon::parse($payment->paymentByParents_date)->format('Y-m-d') : 
+                      \Carbon\Carbon::now()->format('Y-m-d');
+        
+        $filename = 'Invoice-' . $payment->id . '-' . str_replace(' ', '_', $childName) . '-' . $invoiceDate . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Preview invoice in browser (optional method for testing).
+     */
+    public function previewInvoice(Payment $payment)
+    {
+        // Check if payment is complete
+        if ($payment->payment_status !== 'Complete') {
+            return redirect()->back()
+                           ->with('error', 'Invoice can only be generated for completed payments.');
+        }
+
+        // Check authorization
+        $user = auth()->user();
+        if ($user->role !== 'admin') {
+            $parentRecord = $this->getParentRecordForLoggedInUser();
+            if (!$parentRecord || $payment->parent_id !== $parentRecord->id) {
+                abort(403, 'Unauthorized access to invoice.');
+            }
+        }
+
+        // Load relationships
+        $payment->load([
+            'child', 
+            'parentRecord.father', 
+            'parentRecord.mother', 
+            'parentRecord.guardian'
+        ]);
+
+        return view('payments.invoice', compact('payment'));
+    }
+
+
+
 
 
 }

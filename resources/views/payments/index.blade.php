@@ -1,5 +1,5 @@
-
 <x-app-layout>
+   
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Header Section -->
@@ -11,11 +11,14 @@
                         </h2>
                         <p class="text-gray-600 mt-1">Manage payment records for children</p>
                     </div>
+                    
+                    @if(auth()->user()->role === 'admin')
                     <div>
                         <a href="{{ route('payments.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-sm transition">
                             Create New Payment
                         </a>
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -31,6 +34,7 @@
                 </div>
             @endif
 
+             @if(auth()->user()->role === 'admin')
             <!-- Payments Table Card -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -97,15 +101,21 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    @if($payment->payment_status == 'complete') 
+                                                @php
+                                                    $isOverdue = $payment->payment_status == 'pending' && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
+                                                    $status = $isOverdue ? 'overdue' : $payment->payment_status;
+                                                @endphp
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                    @if($status == 'Complete')
                                                         bg-green-100 text-green-800
-                                                    @elseif($payment->payment_status == 'pending')
+                                                    @elseif($status == 'Pending')
                                                         bg-yellow-100 text-yellow-800
-                                                    @else
+                                                    @elseif($status == 'Overdue')
                                                         bg-red-100 text-red-800
+                                                    @else
+                                                        bg-gray-100 text-gray-800
                                                     @endif">
-                                                    {{ ucfirst($payment->payment_status) }}
+                                                    {{ ucfirst($status) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -115,12 +125,22 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div class="flex space-x-2">
-                                                    @if($payment->payment_status !== 'complete')
+                                                    @if($payment->payment_status !== 'Complete')
                                                         <form action="{{ route('payment.checkout') }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <input type="hidden" name="payment_id" value="{{ $payment->id }}">
-                                                        <button type="submit" class="btn btn-primary">Pay with Card</button>
-                                                    </form>
+                                                            @csrf
+                                                            <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                                            <button type="submit" class="btn btn-primary">Pay with Card</button>
+                                                        </form>
+                                                    @else
+                                                        <button type="button" disabled class="px-3 py-1 bg-gray-300 text-gray-500 rounded cursor-not-allowed text-sm">
+                                                            Paid
+                                                        </button>
+                                                        <a href="{{ route('payments.invoice', $payment) }}" class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition">
+                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                            Invoice
+                                                        </a>
                                                     @endif
                                                     <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                                     <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?');">
@@ -140,4 +160,98 @@
             </div>
         </div>
     </div>
+    @endif
+
+    @if(auth()->user()->role === 'parents')
+    <div class="mt-10">
+        <h2 class="text-2xl font-bold text-indigo-800 mb-6">My Payment Records</h2>
+        <div class="space-y-6">
+            @forelse($payments as $payment)
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+                    <div class="flex flex-col md:flex-row justify-between">
+                        <div class="flex-1">
+                            <!-- Child Name -->
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">
+                                {{ $payment->child->child_name ?? 'N/A' }}
+                            </h3>
+                            <!-- Payment Info Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <span class="font-semibold text-gray-700">Amount:</span>
+                                    <span class="text-indigo-700 font-bold">RM {{ number_format($payment->payment_amount, 2) }}</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Due Date:</span>
+                                    <span>{{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-gray-700">Status:</span>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        @if($payment->payment_status == 'Complete')
+                                            bg-green-100 text-green-800
+                                        @elseif($payment->payment_status == 'Pending')
+                                            bg-yellow-100 text-yellow-800
+                                        @else
+                                            bg-red-100 text-red-800
+                                        @endif">
+                                        {{ ucfirst($payment->payment_status) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Payment Date -->
+                            <div class="text-sm text-gray-600 mb-2">
+                                <span class="font-semibold">Payment Date:</span>
+                                {{ $payment->paymentByParents_date ? \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') : 'Not paid yet' }}
+                            </div>
+                            <!-- Parent(s) Name
+                            <div class="text-sm text-gray-600">
+                                <span class="font-semibold">Parent(s):</span>
+                                @php
+                                    $parentRecord = $payment->parentRecord;
+                                    $names = [];
+                                    if ($parentRecord) {
+                                        if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+                                        if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+                                        if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+                                    }
+                                    echo !empty($names) ? implode(' & ', $names) : 'N/A';
+                                @endphp
+                            </div> -->
+                        </div>
+                        <!-- Action Button -->
+                        <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-6 space-y-2">
+                            @if($payment->payment_status !== 'Complete')
+                                <form action="{{ route('payment.checkout') }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-full">
+                                        Pay with Card
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" disabled class="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed w-full">
+                                    Payment Complete
+                                </button>
+                                <a href="{{ route('payments.invoice', $payment) }}" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition w-full">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Download Invoice
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white rounded-lg p-8 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012 2h2a2 2 0 012 2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p class="mt-4 text-xl text-gray-500">No payment records available</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+@endif
+
 </x-app-layout>
