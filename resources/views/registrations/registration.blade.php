@@ -1,9 +1,6 @@
 
 <x-guest-layout>
-
-<!-- <div class="bg-gradient-to-r from-orange-300 via-blue-300 to-purple-300 p-4 rounded-t-lgmin-h-screen bg-cover bg-center flex items-center justify-center">  -->
-
-
+    
     <div class="mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
 
         <div class="py-19">
@@ -658,7 +655,7 @@
                                 </div>
                             </div>
                                 <div class="flex justify-end mt-6">
-                                    <button type="submit" class="bg-blue-500 text-black px-6 py-2 rounded hover:bg-blue-600"> Next </button>
+                                    <button type="submit" class="bg-blue-500 text-black px-6 py-2 rounded hover:bg-blue-600"> Submit </button>
                                 </div>
                         </form>
                     </div>
