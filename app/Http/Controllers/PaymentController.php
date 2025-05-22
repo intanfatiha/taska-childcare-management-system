@@ -237,7 +237,23 @@ class PaymentController extends Controller
      */
     public function update(Request $request, Payment $payment)
     {
-        //
+         // Validate the request
+        $validatedData = $request->validate([
+            'child_id' => 'required|exists:childrens,id',
+            'parent_id' => 'required|exists:parent_records,id',
+            'payment_amount' => 'required|numeric|min:0',
+            'due_date' => 'required|date',
+        ]);
+
+        // Update the payment record
+        $payment->child_id = $validatedData['child_id'];
+        $payment->parent_id = $validatedData['parent_id'];
+        $payment->payment_amount = $validatedData['payment_amount'];
+        $payment->payment_duedate = $validatedData['due_date'];
+        $payment->save();
+
+        return redirect()->route('payments.index')->with('message', 'Payment updated successfully!');
+
     }
 
     /**
