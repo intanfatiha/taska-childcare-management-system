@@ -203,7 +203,7 @@ class AttendanceController extends Controller
         $child = Child::findOrFail($childId);
         
         // Get existing attendance record for this child and date
-        $attendance = Attendance::where('child_id', $childId)
+        $attendance = Attendance::where('children_id', $childId)
                             ->where('attendance_date', $date)
                             ->first();
         
@@ -213,9 +213,10 @@ class AttendanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $childId, $date = null)
-    {
-    $date = $date ?? $request->input('date', now()->format('Y-m-d'));
+    
+public function update(Request $request, $childId, $date = null)
+{
+    $date = $date ?? $request->input('attendance_date', now()->format('Y-m-d'));
     
     // Validation rules
     $validatedData = $request->validate([
@@ -239,21 +240,19 @@ class AttendanceController extends Controller
     // Find or create attendance record
     $attendance = Attendance::updateOrCreate(
         [
-            'child_id' => $childId,
-            'attendance_date' => $validatedData['date']
+            'children_id' => $childId,
+            'attendance_date' => $validatedData['attendance_date'] // <-- FIXED HERE
         ],
         [
             'attendance_status' => $validatedData['attendance_status'],
             'time_in' => $validatedData['time_in'],
             'time_out' => $validatedData['time_out'],
-            'notes' => $validatedData['notes'] ?? null,
         ]
     );
 
-    return redirect()->route('attendances.index', ['date' => $validatedData['date']])
+    return redirect()->route('attendances.index', ['date' => $validatedData['attendance_date']])
                    ->with('success', 'Attendance updated successfully for ' . $attendance->child->child_name);
-    }
-
+}
 
 
     /**
@@ -294,7 +293,7 @@ public function createTimeOut()
     }])
     ->get();
     
-    return view('attendances.createTimeOut', compact('presentChildren'));
+    return view('attendances.index', compact('presentChildren'));
 }
 
 /**
@@ -312,7 +311,7 @@ public function updateTimeOut(Request $request)
 
     foreach ($request->time_out as $childId => $timeOut) {
         if (!empty($timeOut)) {
-            $updated = Attendance::where('child_id', $childId)
+            $updated = Attendance::where('children_id', $childId)
                                 ->where('attendance_date', $today)
                                 ->where('attendance_status', 'attend')
                                 ->update(['time_out' => $timeOut]);

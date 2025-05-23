@@ -127,15 +127,7 @@
                                    required>
                         </div>
 
-                        <!-- Notes (Optional) -->
-                        <div class="mb-6">
-                            <label for="notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
-                            <textarea id="notes" 
-                                      name="notes" 
-                                      rows="3"
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                      placeholder="Any additional notes about the attendance...">{{ optional($attendance)->notes }}</textarea>
-                        </div>
+                        
 
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between">
