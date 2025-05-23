@@ -56,21 +56,18 @@ Route::resource('adminActivity', AdminController::class);
 
 Route::get('/children-Register-Request', [AdminController::class, 'childrenRegisterRequest'])->name('childrenRegisterRequest');
 Route::get('/children-Register-Request-reject', [AdminController::class, 'rejection'])->name('adminActivity.rejection');
-Route::post('/admin/reject-registration/{enrollmentId}', [AdminController::class, 'rejectRegistration'])
-    ->name('adminActivity.rejectRegistration');
+Route::post('/admin/reject-registration/{enrollmentId}', [AdminController::class, 'rejectRegistration'])->name('adminActivity.rejectRegistration');
 
 // Route::post('/register-parents-success', [AdminController::class, 'registerParents'])->name('adminActivity.success');
 // Route::post('/register-parents-success', [ParentRegistrationController::class, 'registerParents'])->name('adminActivity.success');
 // Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
 //     ->name('adminActivity.approveRegistration');
 
-Route::post('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
-    ->name('adminActivity.approveRegistration');
+Route::post('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])->name('adminActivity.approveRegistration');
 
-Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])
-    ->name('adminActivity.approveForm');
-    Route::get('/children-enrollment', [AdminController::class, 'listEnrollments'])->name('listChildEnrollment');
-    Route::get('/enrollment-detail/{id}', [AdminController::class, 'enrollmentDetail'])->name('enrollmentDetail');
+Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])->name('adminActivity.approveForm');
+Route::get('/children-enrollment', [AdminController::class, 'listEnrollments'])->name('listChildEnrollment');
+Route::get('/enrollment-detail/{id}', [AdminController::class, 'enrollmentDetail'])->name('enrollmentDetail');
 
 
 Route::resource('rooms',RoomController::class);
@@ -86,7 +83,6 @@ Route::post('/staff-assignments/update', [StaffController::class, 'updateAssignm
 Route::resource('childrens', ChildrenController::class);
 
 Route::resource('announcements',AnnouncementsController::class);
-
 
 Route::resource('daily_activities', DailyActivitiesController::class);
 
@@ -105,11 +101,22 @@ Route::resource('camera-footages', CameraFootageController::class);
 // Route::delete('/camera-footages/{id}', [CameraFootageController::class, 'destroy'])->name('cameraFootages.destroy');
 
 Route::resource('attendances', AttendanceController::class);
-Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
+// Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
+Route::get('/time-out', [AttendanceController::class, 'createTimeOut'])->name('attendances.createTimeOut');
+Route::post('/time-out', [AttendanceController::class, 'updateTimeOut'])->name('attendances.updateTimeOut');
+Route::get('attendances/edit/{childId}/{date?}', [AttendanceController::class, 'edit'])->name('attendances.edit');
+// In your web.php routes file
+
+
+Route::put('attendances/update/{childId}/{date?}', [AttendanceController::class, 'update'])
+     ->name('attendances.update');
+
+Route::post('attendances/update-time-out', [AttendanceController::class, 'updateTimeOut'])
+     ->name('attendances.updateTimeOut');
+
+
 
 Route::resource('payments', PaymentController::class);
-// Route::get('/payments/{payment}/stripe', [PaymentController::class, 'showStripeForm'])->name('payments.stripe.form');
-// Route::post('/payments/stripe/charge', [PaymentController::class, 'stripeCharge'])->name('payments.stripe.charge');
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
 Route::get('/success', function () { return "Payment Successful!";})->name('payment.success');
@@ -117,10 +124,8 @@ Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->na
 Route::get('/payment/cancel', function () {return redirect()->route('payments.index');})->name('payment.cancel');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
   
-    // Invoice routes
-    Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payments.invoice');
-    
-    // Optional: Preview invoice in browser (for testing)
+// Invoice routes
+Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payments.invoice');
 // Preview invoice in browser with app layout
 Route::get('/payments/{payment}/invoice/preview', [PaymentController::class, 'previewInvoice'])->name('payments.invoice.preview');
 

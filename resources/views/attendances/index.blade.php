@@ -122,7 +122,11 @@
                         <!-- Buttons -->
                         <div class="flex gap-4">
                             <a href="{{ route('attendances.create') }}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">
-                                Add Attendance
+                                Time In Attendance
+                            </a>
+
+                             <a href="{{ route('attendances.createTimeOut') }}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded">
+                                Time Out Attendance
                             </a>
                         </div>
                     </form>
@@ -149,6 +153,9 @@
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Date
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Overtime
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Action
@@ -189,6 +196,16 @@
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') : '-' }}</td>                   
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') : '-' }}</td>                    
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->attendance_date ?? $date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"></td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ route('attendances.edit', ['childId' => $child->id, 'date' => $date]) }}" 
+                           class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Edit
+                        </a>
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -202,4 +219,3 @@
 
     
 </x-app-layout>
-
