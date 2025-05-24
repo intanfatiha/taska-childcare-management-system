@@ -196,8 +196,26 @@
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') : '-' }}</td>                   
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') : '-' }}</td>                    
                     <td class="px-6 py-4 whitespace-nowrap">{{ $attendance->attendance_date ?? $date }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap"></td>
                     <td class="px-6 py-4 whitespace-nowrap">
+                        @php
+                            $overtimeMinutes = null;
+                            if ($attendance && $attendance->time_out) {
+                                $attendanceDate = \Carbon\Carbon::parse($attendance->attendance_date);
+                                $dayOfWeek = $attendanceDate->format('l'); // e.g. 'Monday'
+                                $closeTime = $dayOfWeek === 'Thursday' ? '16:00' : '17:30';
+                                $close = \Carbon\Carbon::parse($attendance->attendance_date . ' ' . $closeTime);
+                                $out = \Carbon\Carbon::parse($attendance->attendance_date . ' ' . $attendance->time_out);
+                                if ($out->gt($close)) {
+                                    $overtimeMinutes = $out->diffInMinutes($close);
+                                }
+                            }
+                        @endphp
+                        @if($overtimeMinutes)
+                            <span class="text-red-600 font-bold">{{ $overtimeMinutes }} min</span>
+                        @else
+                            <span class="text-gray-500">-</span>
+                        @endif
+                    </td>                    <td class="px-6 py-4 whitespace-nowrap">
                         <a href="{{ route('attendances.edit', ['childId' => $child->id, 'date' => $date]) }}" 
                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm inline-flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -8,6 +8,9 @@ use App\Models\Child;
 use App\Models\Father;
 use App\Models\Mother;
 use App\Models\Guardian;
+use App\Models\Enrollment;
+use App\Models\Attendance;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -82,14 +85,15 @@ class PaymentController extends Controller
     }
     
 
-    public function create()
-    { 
-     // Get all children with their parent record and related parent models
-    $children = \App\Models\Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
+
+public function create()
+{
+    $children = Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
 
     $formattedChildren = [];
     $parentsByChild = [];
     $parentRecordIdByChild = [];
+    $enrollmentStartDates = [];
 
     foreach ($children as $child) {
         $formattedChildren[] = [
@@ -112,16 +116,31 @@ class PaymentController extends Controller
 
         $parentsByChild[$child->id] = $parentName;
         $parentRecordIdByChild[$child->id] = $parentRecordId;
+        $enrollmentStartDates[$child->id] = $child->parentRecord?->enrollment?->created_at?->format('Y-m-d');
     }
 
-    // Optionally sort children alphabetically
-    usort($formattedChildren, function($a, $b) {
-        return strcmp($a['name'], $b['name']);
-    });
+    // Sort children alphabetically
+    usort($formattedChildren, fn($a, $b) => strcmp($a['name'], $b['name']));
 
-    return view('payments.create', compact('formattedChildren', 'parentsByChild', 'parentRecordIdByChild'));
+    // Optimized overtime query
+    $attendanceSums = Attendance::select('children_id', \DB::raw('SUM(attendance_overtime) as total'))
+        ->whereMonth('attendance_date', now()->month)
+        ->whereYear('attendance_date', now()->year)
+        ->groupBy('children_id')
+        ->pluck('total', 'children_id')
+        ->toArray();
 
+    $totalOvertimeMinutesByChild = [];
+    foreach ($children as $child) {
+        $totalOvertimeMinutesByChild[$child->id] = $attendanceSums[$child->id] ?? 0;
+    }
+
+    return view('payments.create', compact(
+        'formattedChildren', 'parentsByChild', 'parentRecordIdByChild',
+        'enrollmentStartDates', 'totalOvertimeMinutesByChild'
+    ));
 }
+
 
     /**
      * Store a newly created resource in storage.

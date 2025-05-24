@@ -1,5 +1,22 @@
 <x-app-layout>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Success/Error Messages -->
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <h1 class="text-3xl font-bold mb-6 text-center text-purple-600">
             <i class="fas fa-sign-out-alt mr-2"></i>Children's Time Out
         </h1>
@@ -31,28 +48,25 @@
                 </div>
             </div>
 
-        
-
-             <!-- Summary Card -->
-        <div class="mt-2 bg-white p-4 rounded-lg shadow-md border-2 border-gray-200">
-            <h3 class="text-lg font-bold text-gray-700 mb-2">Today's Summary</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="bg-green-100 p-3 rounded-lg">
-                    <div class="text-2xl font-bold text-green-600">{{ $presentChildren->count() }}</div>
-                    <div class="text-sm text-green-700">Present Today</div>
-                </div>
-                <div class="bg-purple-100 p-3 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-600">{{ $presentChildren->where('attendances.0.time_out', '!=', null)->count() }}</div>
-                    <div class="text-sm text-purple-700">Timed Out</div>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600">{{ $presentChildren->where('attendances.0.time_out', null)->count() }}</div>
-                    <div class="text-sm text-blue-700">Still Here</div>
+            <!-- Summary Card -->
+            <div class="mt-2 bg-white p-4 rounded-lg shadow-md border-2 border-gray-200 mb-6">
+                <h3 class="text-lg font-bold text-gray-700 mb-2">Today's Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600">{{ $presentChildren->count() }}</div>
+                        <div class="text-sm text-green-700">Present Today</div>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <div class="text-2xl font-bold text-purple-600">{{ $presentChildren->filter(function($child) { return $child->attendances->first() && $child->attendances->first()->time_out; })->count() }}</div>
+                        <div class="text-sm text-purple-700">Timed Out</div>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-600">{{ $presentChildren->filter(function($child) { return $child->attendances->first() && !$child->attendances->first()->time_out; })->count() }}</div>
+                        <div class="text-sm text-blue-700">Still Here</div>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-    <br>
+
             <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
                 <thead>
                     <tr class="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
@@ -132,24 +146,7 @@
                 <span>Time Out</span>
             </div>
         </div>
-
-       
-
-    @if (session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    </div>
 
     <!-- Add Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
@@ -173,14 +170,14 @@
                     
                     // Visual feedback
                     this.innerHTML = '<i class="fas fa-check mr-1"></i>Set';
-                    this.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                    this.classList.remove('bg-purple-500', 'hover:bg-purple-600');
                     this.classList.add('bg-green-500', 'hover:bg-green-600');
                     
                     // Reset button after 2 seconds
                     setTimeout(() => {
                         this.innerHTML = '<i class="fas fa-clock mr-1"></i>Now';
                         this.classList.remove('bg-green-500', 'hover:bg-green-600');
-                        this.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                        this.classList.add('bg-purple-500', 'hover:bg-purple-600');
                     }, 2000);
                 });
             });

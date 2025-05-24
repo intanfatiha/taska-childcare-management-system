@@ -15,7 +15,8 @@ class Attendance extends Model
         'attendance_date',
         'time_in',
         'time_out',
-        'attendance_status'
+        'attendance_status',
+        'attendance_overtime',
     ];
     
       // Relationship with Child model

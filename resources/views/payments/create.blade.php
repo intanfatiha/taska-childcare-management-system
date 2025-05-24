@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <div class="py-6">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
@@ -27,7 +26,7 @@
                 <form action="{{ route('payments.store') }}" method="POST">
                     @csrf
 
-                   <!-- Child Dropdown -->
+                    <!-- Child Dropdown -->
                     <div class="mb-5">
                         <label for="child_id" class="block text-sm font-medium text-gray-700 mb-1">Child Name</label>
                         <select id="child_id" name="child_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
@@ -60,6 +59,18 @@
                         @enderror
                     </div>
 
+                    <!-- Overtime Amount and Minutes -->
+                    <div class="mb-5 flex items-center space-x-4">
+                        <div class="flex-1">
+                            <label for="overtime_amount" class="block text-sm font-medium text-gray-700 mb-1">Overtime Charges (RM)</label>
+                            <input type="number" id="overtime_amount" name="overtime_amount" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Overtime Charges" step="0.01" required readonly>
+                        </div>
+                        <div>
+                            <label for="total_overtime_minutes" class="block text-sm font-medium text-gray-700 mb-1">Total Overtime (min)</label>
+                            <input type="number" id="total_overtime_minutes" name="total_overtime_minutes" class="w-24 rounded-md border-gray-300 shadow-sm bg-gray-100" readonly>
+                        </div>
+                    </div>
+
                     <!-- Due Date -->
                     <div class="mb-5">
                         <label for="due_date" class="block text-sm font-medium text-gray-700 mb-1">Due Date (Pay By or Before)</label>
@@ -82,22 +93,56 @@
             </div>
         </div>
     </div>
- 
+
 <script>
-    // Store both the parent names and their IDs
     const parentsByChild = @json($parentsByChild);
     const parentRecordIdByChild = @json($parentRecordIdByChild);
+    const enrollmentDatesByChild = @json($enrollmentStartDates);
+    const overtimeMinutesByChild = @json($totalOvertimeMinutesByChild);
 
-    document.getElementById('child_id').addEventListener('change', function() {
+    const today = "{{ \Carbon\Carbon::now()->format('Y-m-d') }}";
+    const ratePerDay = 25.81;
+    const ratePerMinute = 0.50;
+
+    function calculateDaysEnrolled(startDate, endDateStr) {
+        if (!startDate) return 0;
+        const start = new Date(startDate);
+        const end = new Date(endDateStr);
+        end.setDate(new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate());
+        const diffTime = Math.abs(end - start);
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    function updatePaymentFields(startDate, overtimeMinutes) {
+        const days = calculateDaysEnrolled(startDate, today);
+        const overtimeAmount = overtimeMinutes * ratePerMinute;
+        const paymentAmount = (days * ratePerDay) + overtimeAmount;
+
+        document.getElementById('total_overtime_minutes').value = overtimeMinutes;
+        document.getElementById('overtime_amount').value = overtimeAmount.toFixed(2);
+        document.getElementById('payment_amount').value = paymentAmount.toFixed(2);
+    }
+
+    document.getElementById('child_id').addEventListener('change', function () {
         const childId = this.value;
-        const parentDisplay = document.getElementById('parent_display');
-        const parentIdField = document.getElementById('parent_id');
-        
-        // Update the display field with parent names
-        parentDisplay.value = parentsByChild[childId] || '';
-        
-        // Update the hidden field with the parent record ID
-        parentIdField.value = parentRecordIdByChild[childId] || '';
+
+        // Update parent fields
+        document.getElementById('parent_display').value = parentsByChild[childId] || '';
+        document.getElementById('parent_id').value = parentRecordIdByChild[childId] || '';
+
+        // Update payment fields
+        const startDate = enrollmentDatesByChild[childId] || null;
+        const overtime = overtimeMinutesByChild[childId] || 0;
+
+        updatePaymentFields(startDate, overtime);
+    });
+
+    // Auto-trigger for first child (if any preselected)
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialChildId = document.getElementById('child_id').value;
+        if (initialChildId) {
+            document.getElementById('child_id').dispatchEvent(new Event('change'));
+        }
     });
 </script>
 </x-app-layout>

@@ -1,76 +1,306 @@
-
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <!-- Header Section -->
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Children Attendance</h2>
 
-                    <!-- Buttons -->
-                    <div class="space-x-2">
-                        <a href="{{ route('attendance.report.pdf', ['selected_date' => $selectedDate]) }}" class="btn btn-primary btn-sm">PDF/Print</a>
-                        <a href="" class="btn btn-primary btn-sm">Excel</a>
-                    </div>
+<script>
+    const overtimeData = {
+        daily: @json($overtimeDaily),
+        weekly: @json($overtimeWeekly),
+        monthly: @json($overtimeMonthly)
+    };
+    const attendanceData = {
+        daily: @json($attendanceDaily),
+        weekly: @json($attendanceWeekly),
+        monthly: @json($attendanceMonthly)
+    };
+</script>
+
+<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Header Section with Gradient -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+                <div>
+                    <h2 class="text-3xl font-bold text-indigo-800">
+                        {{ __('Attendance Report') }}
+                    </h2>
+                    <!-- <p class="text-gray-600 mt-1">Stay updated with the latest information and events</p> -->
                 </div>
+            </div>
 
-                <!-- Date Selector and Apply Button -->
-                <form method="GET" action="{{ route('attendance.report') }}" class="flex justify-between items-center mb-6">
-                    <div class="flex space-x-4 items-center">
-                        <label for="select-date" class="text-sm font-semibold">Select Date:</label>
-                        <input type="date" id="select-date" name="selected_date" class="form-input border-gray-300 rounded-lg"
-                            value="{{ $selectedDate }}">
-                    </div>
-                    <button type="submit" class="btn btn-success btn-sm">Apply Filter</button>
-                </form>
+<x-slot name="header">
+    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+        {{ __('Children Attendance Dashboard') }}
+    </h2>
+</x-slot>
 
-                <!-- Error or Success Messages -->
-                @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
-                </div>
-                @endif
+<div class="max-w-7xl mx-auto py-8 px-4">
+    <!-- Date Filter and PDF Export -->
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+        <form method="GET" action="{{ route('attendance.report') }}" class="flex items-center gap-4">
+            <div>
+                <label for="selected_date" class="block text-sm font-medium text-gray-700 mb-1">Select Date:</label>
+                <input type="date" id="selected_date" name="selected_date" value="{{ $selectedDate }}"
+                    class="border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <button type="submit"
+                class="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                <i class="fas fa-filter mr-2"></i>Filter
+            </button>
+        </form>
 
-                @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-                @endif
+        <!-- PDF Export Button -->
+        <div class="flex gap-2">
+            <a href=""
+                class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center">
+                <i class="fas fa-file-pdf mr-2"></i>Export PDF
+            </a>
+            <button onclick="printDashboard()"
+                class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center">
+                <i class="fas fa-print mr-2"></i>Print
+            </button>
+        </div>
+    </div>
 
-                <!-- Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="border px-4 py-2 text-left">Name</th>
-                                <th class="border px-4 py-2 text-left">Time In</th>
-                                <th class="border px-4 py-2 text-left">Time Out</th>
-                                <th class="border px-4 py-2 text-left">Date</th>
-                                <th class="border px-4 py-2 text-left">Attend/Absent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($attendances as $attendance)
-                                <tr>
-                                    <td class="border px-4 py-2">{{ $attendance->child->child_name }}</td>
-                                    <td class="border px-4 py-2">{{ $attendance->time_in ?? 'N/A' }}</td>
-                                    <td class="border px-4 py-2">{{ $attendance->time_out ?? 'N/A' }}</td>
-                                    <td class="border px-4 py-2">{{ $attendance->attendance_date }}</td>
-                                    <td class="border px-4 py-2">
-                                        <span class="px-2 py-1 rounded-full text-white {{ $attendance->attendance_status === 'attend' ? 'bg-green-500' : 'bg-red-500' }}">
-                                            {{ ucfirst($attendance->attendance_status) }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="border px-4 py-2 text-center">No attendance records found for the selected date.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+    <!-- Attendance Stats Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-blue-100 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold text-blue-700">Total Children</h3>
+        <p class="text-2xl font-bold text-blue-900 mt-2">{{ $totalChildren }}</p>
+    </div>
+    <div class="bg-green-100 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold text-green-700">Present</h3>
+        <p class="text-2xl font-bold text-green-900 mt-2">{{ $presentCount }}</p>
+    </div>
+    <div class="bg-red-100 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold text-red-700">Absent</h3>
+        <p class="text-2xl font-bold text-red-900 mt-2">{{ $absentCount }}</p>
+    </div>
+    <div class="bg-yellow-50 p-4 rounded-xl shadow">
+        <h3 class="text-lg font-semibold text-yellow-700">Attendance Rate</h3>
+        <p class="text-2xl font-bold text-yellow-900 mt-2">{{ $attendanceRate }}%</p>
+    </div>
+</div>
+
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-2xl shadow-xl p-6 print:shadow-none print:border print:border-gray-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Attendance Summary</h2>
+                <select id="filterTypePie"
+                    class="bg-white border border-gray-300 px-3 py-1.5 rounded-xl text-sm shadow-sm text-gray-600">
+                    <option value="daily">Daily</option>
+                    <option value="weekly" selected>Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="relative h-80 flex items-center justify-center">
+                <canvas id="attendancePieChart" class="max-w-full max-h-[320px]"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl p-6 print:shadow-none print:border print:border-gray-300">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Overtime Summary</h2>
+                <select id="filterTypeOvertime"
+                    class="bg-white border border-gray-300 px-3 py-1.5 rounded-xl text-sm shadow-sm text-gray-600">
+                    <option value="daily">Daily</option>
+                    <option value="weekly" selected>Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="relative h-80">
+                <canvas id="overtimeChart" class="w-full h-full max-h-[320px]"></canvas>
             </div>
         </div>
     </div>
+
+    <!-- Attendance Table -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 print:shadow-none print:border print:border-gray-300" id="attendanceTable">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-700">Attendance Table ({{ $selectedDate }})</h2>
+            <div class="text-sm text-gray-500">Total Records: {{ count($attendances) }}</div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto text-sm">
+                <thead class="bg-gray-100 text-gray-600 uppercase text-left">
+                    <tr>
+                        <th class="px-4 py-3">#</th>
+                        <th class="px-4 py-3">Child Name</th>
+                        <th class="px-4 py-3">Date</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Time In</th>
+                        <th class="px-4 py-3">Time Out</th>
+                        <th class="px-4 py-3">Overtime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($attendances as $index => $attendance)
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-3">{{ $index + 1 }}</td>
+                        <td class="px-4 py-3 font-medium">{{ $attendance->child->child_name }}</td>
+                        <td class="px-4 py-3">{{ \Carbon\Carbon::parse($attendance->attendance_date)->format('M d, Y') }}</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                                {{ $attendance->attendance_status === 'attend' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ ucfirst($attendance->attendance_status) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($attendance->time_in)
+                                <span class="text-green-600 font-medium">
+                                    {{ \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($attendance->time_out)
+                                <span class="text-blue-600 font-medium">
+                                    {{ \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($attendance->attendance_overtime && $attendance->attendance_overtime > 0)
+                                <span class="text-red-600 font-bold">{{ $attendance->attendance_overtime }} min</span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                    @if($attendances->isEmpty())
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-gray-500">
+                            <i class="fas fa-calendar-times text-4xl mb-2 block text-gray-300"></i>
+                            No attendance data available for this date.
+                        </td>
+                    </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js and Font Awesome -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+
+<!-- Chart Script -->
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Overtime Chart
+    const overtimeCtx = document.getElementById('overtimeChart').getContext('2d');
+    let overtimeChart;
+
+    function renderOvertimeChart(type) {
+        const data = overtimeData[type];
+        const labels = data.map(d => d.label);
+        const totals = data.map(d => Math.abs(d.total)); // Always positive
+
+        if (overtimeChart) overtimeChart.destroy();
+        overtimeChart = new Chart(overtimeCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Overtime (min)',
+                    data: totals,
+                    backgroundColor: '#3498db',
+                    borderRadius: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { ticks: { autoSkip: true, maxTicksLimit: 12 } }
+                }
+            }
+        });
+    }
+
+    // Attendance Pie Chart
+    const pieCtx = document.getElementById('attendancePieChart').getContext('2d');
+    let pieChart;
+
+    function renderPieChart(type) {
+        let present = 0, absent = 0;
+        if (type === 'daily') {
+            const today = "{{ $selectedDate }}";
+            attendanceData.daily.forEach(d => {
+                if (d.attendance_date === today) {
+                    if (d.attendance_status === 'attend') present += d.total;
+                    if (d.attendance_status === 'absent') absent += d.total;
+                }
+            });
+        } else if (type === 'weekly') {
+            // Get current week
+            const now = new Date("{{ $selectedDate }}");
+            const year = now.getFullYear();
+            const week = getWeekNumber(now);
+            attendanceData.weekly.forEach(d => {
+                if (d.year == year && d.week == week) {
+                    if (d.attendance_status === 'attend') present += d.total;
+                    if (d.attendance_status === 'absent') absent += d.total;
+                }
+            });
+        } else if (type === 'monthly') {
+            const month = "{{ \Carbon\Carbon::parse($selectedDate)->format('Y-m') }}";
+            attendanceData.monthly.forEach(d => {
+                if (d.month === month) {
+                    if (d.attendance_status === 'attend') present += d.total;
+                    if (d.attendance_status === 'absent') absent += d.total;
+                }
+            });
+        }
+
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [present, absent],
+                    backgroundColor: ['#2ecc71', '#e74c3c'],
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    // Helper to get ISO week number
+    function getWeekNumber(date) {
+        date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = date.getUTCDay() || 7;
+        date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+        return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+    }
+
+    // Event listeners
+    document.getElementById('filterTypeOvertime').addEventListener('change', function () {
+        renderOvertimeChart(this.value);
+    });
+
+    document.getElementById('filterTypePie').addEventListener('change', function () {
+        renderPieChart(this.value);
+    });
+
+    // Initial render
+    renderOvertimeChart('weekly');
+    renderPieChart('weekly');
+});
+</script>
+
 </x-app-layout>

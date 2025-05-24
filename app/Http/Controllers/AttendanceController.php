@@ -213,46 +213,58 @@ class AttendanceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    
-public function update(Request $request, $childId, $date = null)
-{
-    $date = $date ?? $request->input('attendance_date', now()->format('Y-m-d'));
-    
-    // Validation rules
-    $validatedData = $request->validate([
-        'attendance_status' => 'required|in:attend,absent',
-        'time_in' => 'nullable|date_format:H:i',
-        'time_out' => 'nullable|date_format:H:i|after:time_in',
-        'attendance_date' => 'required|date',
-    ]);
+    public function update(Request $request, $childId, $date = null)
+    {
+        $date = $date ?? $request->input('attendance_date', now()->format('Y-m-d'));
 
-    // Additional validation: if status is 'attend', time_in should be provided
-    if ($validatedData['attendance_status'] === 'attend' && empty($validatedData['time_in'])) {
-        return back()->withErrors(['time_in' => 'Time In is required when marking attendance as Present.']);
+        $validatedData = $request->validate([
+            'attendance_status' => 'required|in:attend,absent',
+            'time_in' => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i|after:time_in',
+            'attendance_date' => 'required|date',
+        ]);
+
+        if ($validatedData['attendance_status'] === 'attend' && empty($validatedData['time_in'])) {
+            return back()->withErrors(['time_in' => 'Time In is required when marking attendance as Present.']);
+        }
+
+        if ($validatedData['attendance_status'] === 'absent') {
+            $validatedData['time_in'] = null;
+            $validatedData['time_out'] = null;
+        }
+
+        $attendance = Attendance::updateOrCreate(
+            [
+                'children_id' => $childId,
+                'attendance_date' => $validatedData['attendance_date']
+            ],
+            [
+                'attendance_status' => $validatedData['attendance_status'],
+                'time_in' => $validatedData['time_in'],
+                'time_out' => $validatedData['time_out'],
+            ]
+        );
+
+        if (!empty($validatedData['time_out'])) {
+            $attendanceDate = \Carbon\Carbon::parse($validatedData['attendance_date']);
+            $dayOfWeek = $attendanceDate->format('l');
+            $threshold = ($dayOfWeek === 'Thursday') ? '16:00' : '17:30';
+
+            $closeTime = \Carbon\Carbon::parse($validatedData['attendance_date'] . ' ' . $threshold);
+            $outTime = \Carbon\Carbon::parse($validatedData['attendance_date'] . ' ' . $validatedData['time_out']);
+
+            $overtimeMinutes = 0;
+            if ($outTime->gt($closeTime)) {
+                $overtimeMinutes = $outTime->diffInMinutes($closeTime);
+            }
+
+            $attendance->attendance_overtime = $overtimeMinutes;
+            $attendance->save();
+        }
+
+        return redirect()->route('attendances.index', ['date' => $validatedData['attendance_date']])
+            ->with('success', 'Attendance updated successfully for ' . $attendance->child->child_name);
     }
-
-    // If status is 'absent', clear time fields
-    if ($validatedData['attendance_status'] === 'absent') {
-        $validatedData['time_in'] = null;
-        $validatedData['time_out'] = null;
-    }
-
-    // Find or create attendance record
-    $attendance = Attendance::updateOrCreate(
-        [
-            'children_id' => $childId,
-            'attendance_date' => $validatedData['attendance_date'] // <-- FIXED HERE
-        ],
-        [
-            'attendance_status' => $validatedData['attendance_status'],
-            'time_in' => $validatedData['time_in'],
-            'time_out' => $validatedData['time_out'],
-        ]
-    );
-
-    return redirect()->route('attendances.index', ['date' => $validatedData['attendance_date']])
-                   ->with('success', 'Attendance updated successfully for ' . $attendance->child->child_name);
-}
 
 
     /**
@@ -279,26 +291,38 @@ public function update(Request $request, $childId, $date = null)
 /**
  * Show the time out form (only children who are present today)
  */
-public function createTimeOut()
+public function createTimeOut() 
 {
     $today = now()->format('Y-m-d');
     
-    // Get only children who are present today
+    // Get present children with today's attendance
     $presentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($today) {
         $query->where('attendance_date', $today)
               ->where('attendance_status', 'attend');
     })
     ->with(['attendances' => function ($query) use ($today) {
         $query->where('attendance_date', $today);
+    }])->get();
+
+    // Get absent children (if needed for other views)
+    $absentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($today) {
+        $query->where('attendance_date', $today)
+              ->where('attendance_status', 'absent');
+    })
+    ->with(['attendances' => function ($query) use ($today) {
+        $query->where('attendance_date', $today);
     }])
     ->get();
-    
-    return view('attendances.index', compact('presentChildren'));
+
+    $totalChildren = \App\Models\Child::count(); 
+    $totalAttend = $presentChildren->count();
+    $totalAbsent = $absentChildren->count();
+
+    // Use correct view name for time out page
+    return view('attendances.createTimeOut', compact('presentChildren', 'totalChildren', 'totalAttend', 'totalAbsent'));
 }
 
-/**
- * Update time out for children
- */
+
 public function updateTimeOut(Request $request)
 {
     $request->validate([
@@ -311,18 +335,34 @@ public function updateTimeOut(Request $request)
 
     foreach ($request->time_out as $childId => $timeOut) {
         if (!empty($timeOut)) {
-            $updated = Attendance::where('children_id', $childId)
-                                ->where('attendance_date', $today)
-                                ->where('attendance_status', 'attend')
-                                ->update(['time_out' => $timeOut]);
-            
-            if ($updated) {
+            $attendance = Attendance::where('children_id', $childId)
+                ->where('attendance_date', $today)
+                ->where('attendance_status', 'attend')
+                ->first();
+
+            if ($attendance) {
+                $attendanceDate = \Carbon\Carbon::parse($attendance->attendance_date);
+                $dayOfWeek = $attendanceDate->format('l'); // e.g. 'Monday'
+                $threshold = ($dayOfWeek === 'Thursday') ? '16:00' : '17:30';
+
+                // Calculate overtime minutes
+                $closeTime = \Carbon\Carbon::parse($attendance->attendance_date . ' ' . $threshold);
+                $outTime = \Carbon\Carbon::parse($attendance->attendance_date . ' ' . $timeOut);
+                $overtimeMinutes = 0;
+                if ($outTime->gt($closeTime)) {
+                    $overtimeMinutes = $outTime->diffInMinutes($closeTime);
+                }
+
+                $attendance->time_out = $timeOut;
+                $attendance->attendance_overtime = $overtimeMinutes;
+                $attendance->save();
+
                 $updatedCount++;
             }
         }
     }
 
-    return redirect()->back()->with('success', "Time out updated for {$updatedCount} children.");
+    return redirect()->route('attendances.index')->with('success', "Time out updated for {$updatedCount} children.");
 }
 
 /**
