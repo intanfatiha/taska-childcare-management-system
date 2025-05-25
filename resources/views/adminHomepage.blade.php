@@ -263,7 +263,7 @@
                                 <h2 class="text-2xl font-bold text-black-700">My Children</h2>
                             </div>
                            
-                            <a href="#" 
+                            <a href="{{ route('enrollment.createNewChild') }}"
                                 class="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center">
                                     <span class="mr-1">➕</span> Register New Child
                                 
@@ -328,36 +328,205 @@
                     </div>
                     </div>
 
+                   <!-- Announcements & Daily Board Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <!-- Announcements Section -->
                     <!-- Announcements Section -->
-                    <div class="mt-10">
-                        <h3 class="text-xl font-bold mb-4 text-indigo-700">Latest Announcements</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                            @forelse($latestAnnouncements as $announcement)
-                                <div class="border-2 border-indigo-200 rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition">
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <span class="text-sm px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">
-                                            {{ ucfirst($announcement->announcement_type) }}
-                                        </span>
-                                        <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($announcement->announcement_date)->format('d M Y') }}</span>
-                                    </div>
-                                    <h4 class="font-bold text-lg text-indigo-800 mb-1">{{ $announcement->announcement_title }}</h4>
-                                    <p class="text-gray-700 mb-2">{{ $announcement->activity_description }}</p>
-                                    @if($announcement->announcement_location)
-                                        <p class="text-sm text-gray-500 mb-1"><span class="font-semibold">Location:</span> {{ $announcement->announcement_location }}</p>
-                                    @endif
-                                    @if($announcement->announcement_time)
-                                        <p class="text-sm text-gray-500"><span class="font-semibold">Time:</span> {{ $announcement->announcement_time }}</p>
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg shadow-md p-6 mt-6">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
+                            <span class="mr-2">🔔</span> Latest Announcement
+                        </h3>
+
+                        @php
+                            $latestAnnouncement = \App\Models\Announcements::orderBy('announcement_date', 'desc')->first();
+                        @endphp
+
+                        @if($latestAnnouncement)
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($latestAnnouncement->announcement_date)->format('d M Y') }}</span>
+                                    @if($latestAnnouncement->announcement_time)
+                                        <span class="text-xs text-gray-500">{{ $latestAnnouncement->announcement_time }}</span>
                                     @endif
                                 </div>
-                            @empty
-                                <div class="col-span-full text-center text-gray-500 py-8">
-                                    <span class="text-2xl mb-2">🔔</span>
-                                    <p>No announcements found.</p>
-                                </div>
-                            @endforelse
-                        </div>
+                                <h4 class="font-bold text-lg text-indigo-800 mb-1">{{ $latestAnnouncement->announcement_title }}</h4>
+                                <p class="text-gray-700 mb-2">{{ $latestAnnouncement->activity_description }}</p>
+
+                                @if($latestAnnouncement->announcement_location)
+                                    <p class="text-sm text-gray-500 mb-1"><span class="font-semibold">Location:</span> {{ $latestAnnouncement->announcement_location }}</p>
+                                @endif
+                                <p class="text-sm text-indigo-600 mt-1 font-semibold italic">
+                                    Type: {{ ucfirst($latestAnnouncement->announcement_type) }}
+                                </p>
+                            </div>
+
+                            <a href="{{ route('announcements.index') }}"
+                            class="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                                View All Announcements
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-8">
+                                <span class="text-2xl mb-2">🔔</span>
+                                <p>No announcements found.</p>
+                            </div>
+                        @endif
                     </div>
 
+
+                    <!-- Daily Board Section -->
+                    <div class="bg-white border-2 border-indigo-200 rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
+                            <span class="mr-2">📅</span> Daily Board
+                        </h3>
+                        @php
+                            $latestDaily = \App\Models\daily_activities::orderBy('post_date', 'desc')->first();
+                        @endphp
+                        @if($latestDaily)
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($latestDaily->post_date)->format('d M Y') }}</span>
+                                    <span class="text-xs text-gray-500">{{ $latestDaily->post_time }}</span>
+                                </div>
+                                <h4 class="font-bold text-lg text-indigo-800 mb-1">Daily Activity</h4>
+                                <p class="text-gray-700 mb-2">{{ $latestDaily->post_desc }}</p>
+                            </div>
+                            <a href="{{ route('daily_activities.index') }}"
+                            class="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                                View All Daily Board
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-8">
+                                <span class="text-2xl mb-2">📅</span>
+                                <p>No daily board posts found.</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Attendance Section -->
+                    <div class="bg-white border-2 border-green-200 rounded-lg shadow-md p-6 mb-8">
+                        <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center">
+                            <span class="mr-2">🗓️</span> Attendance Summary
+                        </h3>
+                        @php
+                            // Get all children for this parent
+                            $parentChildIds = $childrenRecords->pluck('child.id')->filter()->all();
+                            $attendanceSummary = [];
+                            $today = now()->format('Y-m-d');
+                            foreach ($parentChildIds as $childId) {
+                                $attendance = \App\Models\Attendance::where('children_id', $childId)
+                                    ->where('attendance_date', $today)
+                                    ->first();
+                                $attendanceSummary[] = [
+                                    'name' => \App\Models\Child::find($childId)?->child_name ?? '-',
+                                    'status' => $attendance?->attendance_status ?? 'Not Marked',
+                                    'time_in' => $attendance?->time_in,
+                                    'time_out' => $attendance?->time_out,
+                                    'overtime' => $attendance?->attendance_overtime,
+                                ];
+                            }
+                        @endphp
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full table-auto border-collapse border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="border px-4 py-2 text-left">Child Name</th>
+                                        <th class="border px-4 py-2 text-left">Status</th>
+                                        <th class="border px-4 py-2 text-left">Time In</th>
+                                        <th class="border px-4 py-2 text-left">Time Out</th>
+                                        <th class="border px-4 py-2 text-left">Overtime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($attendanceSummary as $row)
+                                        <tr>
+                                            <td class="border px-4 py-2">{{ $row['name'] }}</td>
+                                            <td class="border px-4 py-2">
+                                                @if($row['status'] === 'attend')
+                                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Present</span>
+                                                @elseif($row['status'] === 'absent')
+                                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded">Absent</span>
+                                                @else
+                                                    <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded">{{ $row['status'] }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="border px-4 py-2">
+                                                {{ $row['time_in'] ? \Carbon\Carbon::parse($row['time_in'])->format('g:i A') : '-' }}
+                                            </td>
+                                            <td class="border px-4 py-2">
+                                                {{ $row['time_out'] ? \Carbon\Carbon::parse($row['time_out'])->format('g:i A') : '-' }}
+                                            </td>
+                                            <td class="border px-4 py-2">
+                                                {{ $row['overtime'] && $row['overtime'] > 0 ? $row['overtime'].' min' : '-' }}
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-gray-500">No attendance data for today.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="{{ route('attendances.index') }}"
+                        class="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                            View Full Attendance
+                        </a>
+                    </div>
+
+                    <!-- Payment Section -->
+                    <div class="bg-white border-2 border-yellow-200 rounded-lg shadow-md p-6 mb-8">
+                        <h3 class="text-xl font-bold text-yellow-700 mb-4 flex items-center">
+                            <span class="mr-2">💳</span> Payment Summary
+                        </h3>
+                        @php
+                            $parentRecord = null;
+                            if ($father) $parentRecord = \App\Models\ParentRecord::where('father_id', $father->id)->first();
+                            if (!$parentRecord && $mother) $parentRecord = \App\Models\ParentRecord::where('mother_id', $mother->id)->first();
+                            if (!$parentRecord && $guardian) $parentRecord = \App\Models\ParentRecord::where('guardian_id', $guardian->id)->first();
+                            $payments = $parentRecord
+                                ? \App\Models\Payment::with('child')->where('parent_id', $parentRecord->id)->orderBy('payment_duedate', 'desc')->take(5)->get()
+                                : collect();
+                        @endphp
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full table-auto border-collapse border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="border px-4 py-2 text-left">Child Name</th>
+                                        <th class="border px-4 py-2 text-left">Amount</th>
+                                        <th class="border px-4 py-2 text-left">Due Date</th>
+                                        <th class="border px-4 py-2 text-left">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($payments as $payment)
+                                        <tr>
+                                            <td class="border px-4 py-2">{{ $payment->child->child_name ?? '-' }}</td>
+                                            <td class="border px-4 py-2">RM {{ number_format($payment->payment_amount, 2) }}</td>
+                                            <td class="border px-4 py-2">{{ $payment->payment_duedate ? \Carbon\Carbon::parse($payment->payment_duedate)->format('Y-m-d') : '-' }}</td>
+                                            <td class="border px-4 py-2">
+                                                @if($payment->payment_status === 'Complete' || $payment->payment_status === 'Paid')
+                                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Paid</span>
+                                                @elseif($payment->payment_status === 'overdue' || $payment->payment_status === 'Overdue')
+                                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded">Overdue</span>
+                                                @else
+                                                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Unpaid</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-gray-500">No payment records found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="{{ route('payments.index') }}"
+                        class="inline-block mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
+                            View All Payments
+                        </a>
+                    </div>
+                </div>
 
                 @endif
             </div>

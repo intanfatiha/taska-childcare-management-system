@@ -139,8 +139,7 @@ class EnrollmentController extends Controller
 
         try{
 
-            // dd('Made it to this point');
-               // 1. First create the registration record
+            // 1. First create the registration record
                 $registration = Enrollment::create([
                     'status' => 'pending',
                     'registration_type' => $request->registration_type,
@@ -342,5 +341,24 @@ class EnrollmentController extends Controller
     public function destroy(Enrollment $enrollment)
     {
         //
+    }
+
+     
+    public function createNewChild()
+    {
+        $userId = auth()->id();
+        $father = \App\Models\Father::where('user_id', $userId)->first();
+        $mother = \App\Models\Mother::where('user_id', $userId)->first();
+        $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
+
+        if ($guardian) {
+            $registration_type = 'guardian';
+        } elseif ($father || $mother) {
+            $registration_type = 'parents';
+        } else {
+            $registration_type = null; // or handle as needed
+        }
+
+        return view('registrations.newChildRegister', compact('father', 'mother', 'guardian', 'registration_type'));
     }
 }

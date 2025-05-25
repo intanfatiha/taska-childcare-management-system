@@ -34,6 +34,7 @@ Route::get('/', function () {
 
 //Handle form submission
 Route::get('/registration', [EnrollmentController::class, 'create'])->name('enrollment.create');
+Route::get('/registration/new-child', [\App\Http\Controllers\EnrollmentController::class, 'createNewChild'])->name('enrollment.createNewChild');
 Route::post('/registration', [EnrollmentController::class, 'store'])->name('enrollment.store');
 Route::get('/registration/confirmation', function (){ return view('registrations.confirmation');})->name('enrollments.confirmation');
 
