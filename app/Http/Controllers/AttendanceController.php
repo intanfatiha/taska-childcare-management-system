@@ -44,42 +44,53 @@ class AttendanceController extends Controller
     }
 
    
-    public function parentsIndex(Request $request)
-    {
-        $userId = auth()->id();
 
-        // Find all ParentRecords where the logged-in user is a father, mother, or guardian
-        $parentRecords = \App\Models\ParentRecord::where(function ($query) use ($userId) {
-            $query->where('father_id', $userId)
-                ->orWhere('mother_id', $userId)
-                ->orWhere('guardian_id', $userId);
-        })->with('child')->get();
+public function parentsIndex(Request $request)
+{
+    $date = $request->get('date', now()->format('Y-m-d'));
+    $userId = auth()->id();
 
-        // Get all children associated with the parent
-        $myChildren = $parentRecords->pluck('child');
+    // Find parent/guardian records for this user
+    $father = \App\Models\Father::where('user_id', $userId)->first();
+    $mother = \App\Models\Mother::where('user_id', $userId)->first();
+    $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
 
-        // Get the selected date or default to today
-        $filterDate = $request->get('date', now()->format('Y-m-d'));
+    // Collect all possible parent/guardian IDs
+    $fatherId = $father?->id;
+    $motherId = $mother?->id;
+    $guardianId = $guardian?->id;
 
-        // Calculate attendance summary
-        $totalChildren = $myChildren->count();
-        $presentToday = 0;
-        $absentToday = 0;
+    // Find ParentRecords where this user is a father, mother, or guardian
+    $parentRecords = \App\Models\ParentRecord::query()
+        ->when($fatherId, fn($q) => $q->orWhere('father_id', $fatherId))
+        ->when($motherId, fn($q) => $q->orWhere('mother_id', $motherId))
+        ->when($guardianId, fn($q) => $q->orWhere('guardian_id', $guardianId))
+        ->with('child')
+        ->get();
 
-        foreach ($myChildren as $child) {
-            $attendance = \App\Models\Attendance::where('children_id', $child->id)
-                ->where('attendance_date', $filterDate)
-                ->first();
+    // Get all children associated with the parent, filter out nulls, and unique by id
+    $myChildren = $parentRecords->pluck('child')->filter()->unique('id')->values();
 
-            if ($attendance && $attendance->attendance_status === 'attend') {
-                $presentToday++;
-            } elseif ($attendance && $attendance->attendance_status === 'absent') {
-                $absentToday++;
-            }
+    $filterDate = $request->get('date', now()->format('Y-m-d'));
+
+    $totalChildren = $myChildren->count();
+    $presentToday = 0;
+    $absentToday = 0;
+
+    foreach ($myChildren as $child) {
+        $attendance = \App\Models\Attendance::where('children_id', $child->id)
+            ->where('attendance_date', $filterDate)
+            ->first();
+
+        if ($attendance && $attendance->attendance_status === 'attend') {
+            $presentToday++;
+        } elseif ($attendance && $attendance->attendance_status === 'absent') {
+            $absentToday++;
         }
-
-        return view('attendances.parentsIndex', compact('myChildren', 'filterDate', 'totalChildren', 'presentToday', 'absentToday'));
     }
+
+    return view('attendances.parentsIndex', compact('myChildren', 'filterDate', 'totalChildren', 'presentToday', 'absentToday'));
+}
     /**
      * Show the form for creating a new resource.
      */

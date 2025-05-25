@@ -2,7 +2,7 @@
     <div class="flex justify-between items-center">
         <h2 class="text-4xl font-bold mb-6">
             {{ __('My Children\'s Attendance') }}
-        </h2>
+        </h2> 
     </div>
 
     <!-- Attendance Summary Cards -->
@@ -58,40 +58,86 @@
         </div>
     </div>
 
+     <form method="GET" action="{{ route('attendances.parentsIndex') }}" class="mb-6 flex items-center justify-between">
+                        <!-- Date Filter -->
+                        <div class="flex flex-col">
+                            <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                            <input type="date" name="date" id="date"
+                                value="{{ request('date', now()->format('Y-m-d')) }}"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                        </div>
+
+                        
+                    </form>
+
+
     <!-- Attendance Table -->
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Picture</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time In</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Out</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Overtime</th>
+
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @foreach ($myChildren as $child)
-                    @php
-                        $attendance = \App\Models\Attendance::where('children_id', $child->id)
-                            ->where('attendance_date', $filterDate)
-                            ->first();
-                    @endphp
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $child->child_name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if ($attendance && $attendance->attendance_status === 'attend')
-                                <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold">Present</span>
-                            @elseif ($attendance && $attendance->attendance_status === 'absent')
-                                <span class="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold">Absent</span>
-                            @else
-                                <span class="bg-gray-300 text-gray-700 px-4 py-1 rounded-full text-sm font-bold">No Record</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') : '-' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ $attendance?->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') : '-' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
+           <tbody class="bg-white divide-y divide-gray-200">
+            @foreach ($myChildren as $child)
+                @php
+                    $attendance = \App\Models\Attendance::where('children_id', $child->id)
+                        ->where('attendance_date', $filterDate)
+                        ->first();
+                @endphp
+                <tr>
+                    <!-- Picture -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if($child->child_photo)
+                            <img src="{{ asset('storage/' . $child->child_photo) }}" alt="Child Photo" class="h-12 w-12 rounded-full object-cover">
+                        @else
+                            <span class="inline-block h-12 w-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </span>
+                        @endif
+                    </td>
+                    <!-- Name -->
+                    <td class="px-6 py-4 whitespace-nowrap">{{ $child->child_name }}</td>
+                    <!-- Status -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if ($attendance && $attendance->attendance_status === 'attend')
+                            <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold">Present</span>
+                        @elseif ($attendance && $attendance->attendance_status === 'absent')
+                            <span class="bg-red-500 text-white px-4 py-1 rounded-full text-sm font-bold">Absent</span>
+                        @else
+                            <span class="bg-gray-300 text-gray-700 px-4 py-1 rounded-full text-sm font-bold">No Record</span>
+                        @endif
+                    </td>
+                    <!-- Date -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ $attendance ? \Carbon\Carbon::parse($attendance->attendance_date)->format('d M Y') : '-' }}
+                    </td>
+                    <!-- Time In -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ $attendance?->time_in ? \Carbon\Carbon::parse($attendance->time_in)->format('g:i A') : '-' }}
+                    </td>
+                    <!-- Time Out -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ $attendance?->time_out ? \Carbon\Carbon::parse($attendance->time_out)->format('g:i A') : '-' }}
+                    </td>
+                    <!-- Overtime -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ ($attendance && $attendance->attendance_overtime > 0) ? $attendance->attendance_overtime . ' min' : '-' }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
         </table>
     </div>
 </x-app-layout>

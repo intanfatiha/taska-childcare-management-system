@@ -467,7 +467,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <a href="{{ route('attendances.index') }}"
+                        <a href="{{ route('attendances.parentsIndex') }}"
                         class="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                             View Full Attendance
                         </a>

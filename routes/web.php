@@ -102,7 +102,7 @@ Route::resource('camera-footages', CameraFootageController::class);
 // Route::delete('/camera-footages/{id}', [CameraFootageController::class, 'destroy'])->name('cameraFootages.destroy');
 
 Route::resource('attendances', AttendanceController::class);
-// Route::get('/attendances-parentsChildAttendance', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
+Route::get('/attendances-parents', [AttendanceController::class, 'parentsIndex'])->name('attendances.parentsIndex');
 Route::get('/time-out', [AttendanceController::class, 'createTimeOut'])->name('attendances.createTimeOut');
 Route::post('/time-out', [AttendanceController::class, 'updateTimeOut'])->name('attendances.updateTimeOut');
 Route::get('attendances/edit/{childId}/{date?}', [AttendanceController::class, 'edit'])->name('attendances.edit');
