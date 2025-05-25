@@ -64,7 +64,7 @@ Route::post('/admin/reject-registration/{enrollmentId}', [AdminController::class
 // Route::put('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])
 //     ->name('adminActivity.approveRegistration');
 
-Route::post('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistration'])->name('adminActivity.approveRegistration');
+Route::post('/admin/approve-registration/{parentRecord}', [AdminController::class, 'approveRegistration'])->name('adminActivity.approveRegistration');
 
 Route::get('/admin/approve-registration/{enrollmentId}', [AdminController::class, 'approveRegistrationForm'])->name('adminActivity.approveForm');
 Route::get('/children-enrollment', [AdminController::class, 'listEnrollments'])->name('listChildEnrollment');

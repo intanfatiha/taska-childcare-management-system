@@ -38,4 +38,9 @@ class Enrollment extends Model
         return $this->hasOne(Guardian::class);
     }
 
+    public function parentRecord()
+    {
+        
+    }
+
 }
