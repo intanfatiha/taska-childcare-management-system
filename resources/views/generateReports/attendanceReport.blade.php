@@ -47,8 +47,8 @@
 
         <!-- PDF Export Button -->
         <div class="flex gap-2">
-            <a href=""
-                class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center">
+            <a href="{{ route('attendance.report.pdf', ['selected_date' => $selectedDate]) }}"
+            class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center">
                 <i class="fas fa-file-pdf mr-2"></i>Export PDF
             </a>
             <button onclick="printDashboard()"
