@@ -42,7 +42,7 @@
                         <input type="text" name="staff_phoneno" id="staff_phoneno" value="{{ old('staff_phoneno') }}" 
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                             required>
-                    </div>
+                    </div> 
 
                     <div>
                         <label for="staff_address" class="block text-sm font-medium text-gray-700">Address</label>
@@ -51,12 +51,12 @@
                             required>{{ old('staff_address') }}</textarea>
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                         <input type="password" name="password" id="password" value="{{ old('password') }}" 
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
                             required>
-                    </div>
+                    </div> -->
 
                 
 

@@ -198,6 +198,24 @@
                                                                 </svg>
                                                             
                                                             </a>
+                                                         @elseif($payment->payment_status == 'Overdue')
+                                                         @php
+                                                            $parentRecord = $payment->parentRecord;
+                                                            // Try to get the first available parent/guardian email
+                                                            $email = $parentRecord?->father?->father_email
+                                                                ?? $parentRecord?->mother?->mother_email
+                                                                ?? $parentRecord?->guardian?->guardian_email
+                                                                ?? null;
+                                                            $mailto = $email ? 'mailto:' . $email . '?subject=Overdue Payment Reminder&body=Dear Parent,%0D%0A%0D%0AThis is a reminder that your payment for ' . ($payment->child->child_name ?? 'your child') . ' is overdue. Please make the payment as soon as possible.%0D%0A%0D%0AThank you.' : '#';
+                                                        @endphp 
+
+                                                        <a href="{{ $mailto }}" title="Send Overdue Email" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 rounded transition">
+                                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-8 0v4a4 4 0 008 0v-4"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-5 9 5"></path>
+                                                            </svg>
+                                                        </a>
                                                         @else
                                                             <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg">
                                                                 <svg class="w-4 h-4 " fill="currentColor" viewBox="0 0 20 20">
@@ -208,10 +226,7 @@
                                                         @endif
 
 
-                                                    </div>
-                                                    
-                                               
-                                                    
+                                                    </div> 
                                                 </div>
                                             </td>
                                         </tr>
@@ -223,6 +238,192 @@
                 </div>
             </div>
             @endif
+
+            @if(auth()->user()->role === 'staff')
+
+            <h3 class="text-lg font-semibold text-gray-800">All Payment Records</h3>
+                    <p class="text-sm text-gray-600 mt-1">Overview of all childcare payments</p>
+            <!-- Admin Payments Table -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                
+                
+                <div class="p-6">
+                    @if($payments->isEmpty())
+                        <div class="text-center py-12">
+                            <div class="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">No payments found</h3>
+                            <p class="text-gray-500 mb-6">Get started by creating your first payment record.</p>
+                            <a href="{{ route('payments.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Create First Payment
+                            </a>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Child Information</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent(s)</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment Details</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-100">
+                                    @foreach($payments as $payment)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <!-- Child Information -->
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-semibold text-gray-900">
+                                                            {{ $payment->child->child_name ?? 'N/A' }}
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <!-- Parent(s) -->
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900 font-medium">
+                                                    @php
+                                                        $parentRecord = $payment->parentRecord;
+                                                        $names = [];
+                                                        if ($parentRecord) {
+                                                            if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+                                                            if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+                                                            if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+                                                        }
+                                                        echo !empty($names) ? implode(' & ', $names) : 'N/A';
+                                                    @endphp
+                                                </div>
+                                            </td>
+
+                                            <!-- Payment Details -->
+                                            <td class="px-6 py-4">
+                                                <div class="space-y-1">
+                                                    <div class="text-lg font-bold text-blue-600">
+                                                        RM {{ number_format($payment->payment_amount, 2) }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">
+                                                        Due: {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}
+                                                    </div>
+                                                    @if($payment->paymentByParents_date)
+                                                    <div class="text-xs text-green-600">
+                                                        Paid: {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') }}
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                            <!-- Status -->
+                                            <td class="px-6 py-4">
+                                                @php
+                                                    $isOverdue = $payment->payment_status == 'pending' && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
+                                                    $status = $isOverdue ? 'overdue' : $payment->payment_status;
+                                                @endphp
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                                    @if($status == 'Complete')
+                                                        bg-green-100 text-green-800
+                                                    @elseif($status == 'Pending')
+                                                        bg-yellow-100 text-yellow-800
+                                                    @elseif($status == 'Overdue')
+                                                        bg-red-100 text-red-800
+                                                    @else
+                                                        bg-gray-100 text-gray-800
+                                                    @endif">
+                                                    @if($status == 'Complete')
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    @elseif($status == 'Overdue')
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    @else
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    @endif
+                                                    {{ ucfirst($status) }}
+                                                </span>
+                                            </td>
+
+                                            <!-- Actions -->
+                                            <td class="px-6 py-4">
+                                                <div class="flex flex-col space-y-2 items-center">
+                                                    <!-- Management Actions (Edit/Delete) -->
+                                                    <div class="flex space-x-2">
+                                                        
+                                                        
+
+                                                        @if($payment->payment_status == 'Complete')
+                                                           
+                                                            <a href="{{ route('payments.invoice', $payment) }}" class="inline-flex items-center px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 text-xs font-medium rounded-lg transition-colors">
+                                                                <svg class="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                </svg>
+                                                            
+                                                            </a>
+                                                        @elseif($payment->payment_status == 'Overdue')
+                                                         @php
+                                                            $parentRecord = $payment->parentRecord;
+                                                            // Try to get the first available parent/guardian email
+                                                            $email = $parentRecord?->father?->father_email
+                                                                ?? $parentRecord?->mother?->mother_email
+                                                                ?? $parentRecord?->guardian?->guardian_email
+                                                                ?? null;
+                                                            $mailto = $email ? 'mailto:' . $email . '?subject=Overdue Payment Reminder&body=Dear Parent,%0D%0A%0D%0AThis is a reminder that your payment for ' . ($payment->child->child_name ?? 'your child') . ' is overdue. Please make the payment as soon as possible.%0D%0A%0D%0AThank you.' : '#';
+                                                        @endphp 
+
+                                                        <a href="{{ $mailto }}" title="Send Overdue Email" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 rounded transition">
+                                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-8 0v4a4 4 0 008 0v-4"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-5 9 5"></path>
+                                                            </svg>
+                                                        </a>
+                                                            <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg">
+                                                                <svg class="w-4 h-4 " fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                                </svg>
+                                                                
+                                                            </span>
+                                                        @else
+                                                         <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg">
+                                                                <svg class="w-4 h-4 " fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                                                </svg>
+                                                                
+                                                            </span>
+
+
+                                                        @endif
+
+
+                                                    </div> 
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            @endif
+
 
             @if(auth()->user()->role === 'parents')
             <!-- Parent View -->

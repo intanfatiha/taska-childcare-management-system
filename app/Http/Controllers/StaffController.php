@@ -50,7 +50,6 @@ class StaffController extends Controller
             'staff_email' => 'required|email|unique:staff|unique:users,email',
             'staff_phoneno' => 'required|string',
             'staff_address' => 'nullable|string',
-            'password' => 'required|min:8'
         ]);
     
         try {
@@ -58,7 +57,7 @@ class StaffController extends Controller
                 $user = User::create([
                     'name' => $validatedData['staff_name'],
                     'email' => $validatedData['staff_email'],
-                    'password' => Hash::make($validatedData['password']),
+                    'password' => Hash::make($validatedData['staff_ic']),
                     'role' => 'staff'
                 ]);
 
@@ -111,7 +110,6 @@ class StaffController extends Controller
             'staff_email' => 'required|email|unique:staff,staff_email,' . $staff->id . '|unique:users,email,' . $staff->user_id,
             'staff_phoneno' => 'required|string',
             'staff_address' => 'nullable|string',
-            'password' => 'nullable|min:8'
         ]);
     
         try {
@@ -125,7 +123,7 @@ class StaffController extends Controller
                 ];
 
                 if (!empty($validatedData['password'])) {
-                    $userData['password'] = Hash::make($validatedData['password']);
+                    $userData['password'] = Hash::make($validatedData['staff_ic']);
                 }
                 
                 $user->update($userData);

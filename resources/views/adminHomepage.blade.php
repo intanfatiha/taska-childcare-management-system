@@ -171,50 +171,72 @@
                                     <tr>
                                         <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Picture</th>
                                         <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Name</th>
+                                        <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Parents Name</th>
                                         <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Age</th>
                                         <th class="py-3 px-6 text-left font-semibold text-gray-700 border-b">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($assignedChildren as $assignment)
-                                        @php $child = $assignment->child; @endphp
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 border-b">
-                                                @if($assignment->child->child_photo)
-                                                    <div class="flex justify-center">
-                                                        <img src="{{ asset('storage/' . $assignment->child->child_photo) }}" 
-                                                            alt="Child Photo" 
-                                                            class="w-16 h-16 object-cover rounded-full border-2 border-indigo-200"
-                                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                                                    </div>
-                                                @else
-                                                    <div class="flex justify-center">
-                                                        <img src="{{ asset('images/no-image.png') }}" 
-                                                            alt="No Image" 
-                                                            class="w-16 h-16 object-cover rounded-full border-2 border-gray-200">
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 border-b font-medium">{{ $assignment->child->child_name }}</td>
-                                            <td class="px-6 py-4 border-b">{{ $assignment->child->child_age }} y/o</td>
-                                            <td class="px-6 py-4 border-b">
-                                                <span class="inline-block px-3 py-1 text-sm rounded-full 
-                                                    {{ $assignment->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                    {{ $assignment->status}}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="py-6 px-6 text-center text-gray-500">
-                                                <div class="flex flex-col items-center">
-                                                    <span class="text-2xl mb-2">🔍</span>
-                                                    <p>No children assigned yet.</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
+                               <tbody>
+    @forelse($assignedChildren as $assignment)
+        @php
+            $child = $assignment->child;
+            // Find ParentRecord for this child
+            $parentRecord = $child
+                ? \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
+                    ->where('child_id', $child->id)
+                    ->first()
+                : null;
+            $parentsName = '';
+            if ($parentRecord) {
+                if ($parentRecord->father && $parentRecord->mother) {
+                    $parentsName = $parentRecord->father->father_name . ' & ' . $parentRecord->mother->mother_name;
+                } elseif ($parentRecord->father) {
+                    $parentsName = $parentRecord->father->father_name;
+                } elseif ($parentRecord->mother) {
+                    $parentsName = $parentRecord->mother->mother_name;
+                } elseif ($parentRecord->guardian) {
+                    $parentsName = $parentRecord->guardian->guardian_name;
+                }
+            }
+        @endphp
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 border-b">
+                @if($child && $child->child_photo)
+                    <div class="flex justify-center">
+                        <img src="{{ asset('storage/' . $child->child_photo) }}" 
+                            alt="Child Photo" 
+                            class="w-16 h-16 object-cover rounded-full border-2 border-indigo-200"
+                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                    </div>
+                @else
+                    <div class="flex justify-center">
+                        <img src="{{ asset('images/no-image.png') }}" 
+                            alt="No Image" 
+                            class="w-16 h-16 object-cover rounded-full border-2 border-gray-200">
+                    </div>
+                @endif
+            </td>
+            <td class="px-6 py-4 border-b font-medium">{{ $child->child_name ?? '-' }}</td>
+            <td class="px-6 py-4 border-b">{{ $parentsName ?: '-' }}</td>
+            <td class="px-6 py-4 border-b">{{ $child->child_age ?? '-' }} y/o</td>
+            <td class="px-6 py-4 border-b">
+                <span class="inline-block px-3 py-1 text-sm rounded-full 
+                    {{ $assignment->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                    {{ $assignment->status}}
+                </span>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5" class="py-6 px-6 text-center text-gray-500">
+                <div class="flex flex-col items-center">
+                    <span class="text-2xl mb-2">🔍</span>
+                    <p>No children assigned yet.</p>
+                </div>
+            </td>
+        </tr>
+    @endforelse
+</tbody>
                             </table>
                         </div>
                     </div>
