@@ -302,8 +302,10 @@ public function parentsIndex(Request $request)
 /**
  * Show the time out form (only children who are present today)
  */
-public function createTimeOut() 
+public function createTimeOut(Request $request) 
 {
+    $date = $request->get('date', now()->format('Y-m-d'));
+
     $today = now()->format('Y-m-d');
     
     // Get present children with today's attendance
@@ -330,7 +332,7 @@ public function createTimeOut()
     $totalAbsent = $absentChildren->count();
 
     // Use correct view name for time out page
-    return view('attendances.createTimeOut', compact('presentChildren', 'totalChildren', 'totalAttend', 'totalAbsent'));
+    return view('attendances.createTimeOut', compact('presentChildren', 'date','totalChildren', 'totalAttend', 'totalAbsent'));
 }
 
 

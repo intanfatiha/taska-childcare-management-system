@@ -293,6 +293,7 @@ public function checkout(Request $request)
 
     $payment = Payment::findOrFail($request->payment_id);
 
+   
     try {
         $session = Session::create([
             'payment_method_types' => ['card'],

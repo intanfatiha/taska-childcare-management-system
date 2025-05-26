@@ -1,4 +1,5 @@
 <x-app-layout>
+    
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
@@ -7,15 +8,25 @@
 
         <!-- Filter & Buttons Section -->
         <div class="flex flex-wrap justify-between items-end mb-6 gap-4">
-            <!-- Filter Form -->
-            <form method="GET" action="{{ route('attendance.report') }}" class="flex items-center gap-4">
+            <!-- Filter Form --> 
+            <form method="GET" action="{{ route('payment.report') }}" class="flex items-center gap-4">
                 <div>
                     <label for="selected_date" class="block text-sm font-medium text-gray-700 mb-1">Select Date:</label>
                     <input type="date" id="selected_date" name="selected_date" value="{{ $selectedDate }}"
                         class="border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 </div>
+                
+                <!-- View Type Toggle -->
+                <div>
+                    <label for="view_type" class="block text-sm font-medium text-gray-700 mb-1">View:</label>
+                    <select name="view_type" id="view_type" class="border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="month" {{ request('view_type', 'month') === 'month' ? 'selected' : '' }}>Monthly View</option>
+                        <option value="day" {{ request('view_type') === 'day' ? 'selected' : '' }}>Daily View</option>
+                    </select>
+                </div>
+                
                 <button type="submit"
-                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mt-1">
+                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mt-1 ">
                     <i class="fas fa-filter mr-2"></i>Filter
                 </button>
             </form>
@@ -27,6 +38,7 @@
                     @csrf
                     <input type="hidden" name="chartImage" id="chartImageInput">
                     <input type="hidden" name="selected_date" value="{{ $selectedDate }}">
+                    <input type="hidden" name="view_type" value="{{ request('view_type', 'month') }}">
                     <input type="hidden" name="chart_filter" id="chartFilterInput" value="monthly">
                     <button type="submit"
                         class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center">
@@ -34,29 +46,56 @@
                     </button>
                 </form>
 
-                <button onclick="printDashboard()"
+                <!-- <button onclick="printDashboard()"
                     class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center">
                     <i class="fas fa-print mr-2"></i>Print
-                </button>
+                </button> -->
             </div>
         </div>
-
-        <!-- Summary Cards -->
+<!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-green-100 p-4 rounded-xl shadow">
-                <h3 class="text-lg font-semibold text-green-700">Total Collected</h3>
+                <h3 class="text-lg font-semibold text-green-700">
+                    Total Collected
+                    @if(request('view_type') === 'day')
+                        <small class="block text-xs text-green-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('M j, Y') }}</small>
+                    @else
+                        <small class="block text-xs text-green-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('F Y') }}</small>
+                    @endif
+                </h3>
                 <p class="text-2xl font-bold text-green-900 mt-2">RM {{ number_format($totalCollected, 2) }}</p>
             </div>
             <div class="bg-blue-100 p-4 rounded-xl shadow">
-                <h3 class="text-lg font-semibold text-blue-700">Paid</h3>
+                <h3 class="text-lg font-semibold text-blue-700">
+                    Paid
+                    @if(request('view_type') === 'day')
+                        <small class="block text-xs text-blue-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('M j, Y') }}</small>
+                    @else
+                        <small class="block text-xs text-blue-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('F Y') }}</small>
+                    @endif
+                </h3>
                 <p class="text-2xl font-bold text-blue-900 mt-2">{{ $paidCount }}</p>
             </div>
             <div class="bg-yellow-100 p-4 rounded-xl shadow">
-                <h3 class="text-lg font-semibold text-yellow-700">Unpaid</h3>
+                <h3 class="text-lg font-semibold text-yellow-700">
+                    Unpaid
+                    @if(request('view_type') === 'day')
+                        <small class="block text-xs text-yellow-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('M j, Y') }}</small>
+                    @else
+                        <small class="block text-xs text-yellow-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('F Y') }}</small>
+                    @endif
+                </h3>
                 <p class="text-2xl font-bold text-yellow-900 mt-2">{{ $unpaidCount }}</p>
             </div>
             <div class="bg-red-100 p-4 rounded-xl shadow">
-                <h3 class="text-lg font-semibold text-red-700">Overdue</h3>
+                <h3 class="text-lg font-semibold text-red-700">
+                    Overdue
+                    @if(request('view_type') === 'day')
+                        <small class="block text-xs text-red-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('M j, Y') }}</small>
+                    @else
+                        <small class="block text-xs text-red-600 mt-1">{{ \Carbon\Carbon::parse($selectedDate)->format('F Y') }}</small>
+                    @endif
+                </h3>
                 <p class="text-2xl font-bold text-red-900 mt-2">{{ $overdueCount }}</p>
             </div>
         </div>
@@ -87,7 +126,14 @@
         <!-- Payment Table -->
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-700">Payment Table</h2>
+                <h2 class="text-xl font-semibold text-gray-700">
+                    Payment Table - 
+                    @if(request('view_type') === 'day')
+                        {{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($selectedDate)->format('F Y') }}
+                    @endif
+                </h2>
                 <div class="text-sm text-gray-500">Total Records: {{ $payments->count() }}</div>
             </div>
             <div class="overflow-x-auto">
@@ -97,6 +143,8 @@
                             <th class="border px-4 py-2 text-left">Children Name</th>
                             <th class="border px-4 py-2 text-left">Parent Name</th>
                             <th class="border px-4 py-2 text-left">Payment Amount</th>
+                            <th class="border px-4 py-2 text-left">Created At</th>
+                            <th class="border px-4 py-2 text-left">Due Date</th>
                             <th class="border px-4 py-2 text-left">Payment Date</th>
                             <th class="border px-4 py-2 text-left">Status</th>
                         </tr>
@@ -118,9 +166,15 @@
                                     @endphp
                                 </td>
                                 <td class="border px-4 py-2">RM {{ number_format($payment->payment_amount, 2) }}</td>
+                               <td class="border px-4 py-2">{{ $payment->created_at->format('d/m/Y') }}</td>
+
+
+                                <td class="border px-4 py-2">
+                                    {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d/m/Y') }}
+                                </td>
                                 <td class="border px-4 py-2">
                                     @if ($payment->paymentByParents_date)
-                                        {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('Y-m-d') }}
+                                        {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d/m/Y') }}
                                     @else
                                         <span class="text-red-500 font-semibold">Not paid yet</span>
                                     @endif
@@ -137,9 +191,9 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-8 text-gray-500">
+                                <td colspan="6" class="text-center py-8 text-gray-500">
                                     <i class="fas fa-money-bill-wave text-4xl mb-2 block text-gray-300"></i>
-                                    No payment data available.
+                                    No payment data available for the selected period.
                                 </td>
                             </tr>
                         @endforelse

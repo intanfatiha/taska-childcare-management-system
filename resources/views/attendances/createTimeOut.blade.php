@@ -26,10 +26,15 @@
             <!-- Date selector and controls -->
             <div class="mb-6 bg-yellow-100 p-4 rounded-lg shadow-md border-2 border-yellow-300">
                 <div class="flex flex-wrap justify-between items-center">
-                    <div class="flex items-center mb-2 md:mb-0">
-                        <span class="mr-2 text-gray-700">Today's Date:</span>
-                        <input type="date" class="border-2 border-blue-300 rounded-md p-1" value="{{ date('Y-m-d') }}" readonly>
-                    </div>
+
+                    <div class="flex flex-col">
+        <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+        <input type="date" name="date" id="date"
+            value="{{ request('date', now()->format('Y-m-d')) }}"
+            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            onchange="this.form.submit()">
+    </div>
+
                     <div>
                         <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition mr-2">
                             <i class="fas fa-clock mr-1"></i> Save Time Out

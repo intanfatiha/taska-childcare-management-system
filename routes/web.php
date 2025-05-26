@@ -119,11 +119,12 @@ Route::post('attendances/update-time-out', [AttendanceController::class, 'update
 
 Route::resource('payments', PaymentController::class);
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.form');
-Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+// Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
 Route::get('/success', function () { return "Payment Successful!";})->name('payment.success');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('/payment/cancel', function () {return redirect()->route('payments.index');})->name('payment.cancel');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+
   
 // Invoice routes
 Route::get('/payments/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payments.invoice');
@@ -137,9 +138,15 @@ Route::get('/attendance-report', [GenerateReportController::class, 'index'])->na
 Route::get('/generate-reports/payment', [GenerateReportController::class, 'showPayment'])->name('generateReports.payment');
 Route::get('/attendance-report/pdf', [GenerateReportController::class, 'exportPdf'])->name('attendance.report.pdf');
 Route::get('/attendance/download-pdf', [GenerateReportController::class, 'downloadPDF'])->name('attendance.downloadPDF');
+Route::post('/attendance/report/pdf', [GenerateReportController::class, 'exportPdfAttendance'])->name('attendance.report.pdf.post');
+
 Route::get('/generate-reports/payment/export-pdf', [GenerateReportController::class, 'exportPDF'])->name('generateReports.export.pdf');
+Route::get('/attendance/report/pdf', [GenerateReportController::class, 'exportPdfAttendance'])
+    ->name('attendance.report.pdf');
+
 // web.php
 Route::post('/generate-report-pdf', [GenerateReportController::class, 'exportPDF'])->name('generateReports.export.pdf');
+Route::get('/reports/payment', [GenerateReportController::class, 'showPayment'])->name('payment.report');
 
 
 

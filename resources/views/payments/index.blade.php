@@ -123,6 +123,8 @@
                                                 <div class="space-y-1">
                                                     <div class="text-lg font-bold text-blue-600">
                                                         RM {{ number_format($payment->payment_amount, 2) }}
+
+                                                        
                                                     </div>
                                                     <div class="text-xs text-gray-500">
                                                         Due: {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}
@@ -163,6 +165,7 @@
                                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                                                         </svg>
+
                                                     @endif
                                                     {{ ucfirst($status) }}
                                                 </span>
@@ -320,6 +323,9 @@
                                                     @if($payment->paymentByParents_date)
                                                     <div class="text-xs text-green-600">
                                                         Paid: {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') }}
+
+                                                         <form action="{{ route('payment.checkout') }}" method="POST" class="w-full">
+                                            
                                                     </div>
                                                     @endif
                                                 </div>
@@ -331,6 +337,7 @@
                                                     $isOverdue = $payment->payment_status == 'pending' && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
                                                     $status = $isOverdue ? 'overdue' : $payment->payment_status;
                                                 @endphp
+                                              
                                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
                                                     @if($status == 'Complete')
                                                         bg-green-100 text-green-800

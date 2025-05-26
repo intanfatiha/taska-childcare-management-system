@@ -63,6 +63,7 @@
     </div>
 
     @push('scripts')
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const video = document.querySelector("#videoElement");
