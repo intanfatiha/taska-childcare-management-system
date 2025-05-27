@@ -28,14 +28,16 @@ class AdminController extends Controller
         return view('adminHomepage');
     }
 
-    public function listEnrollments() //total registered children 
-    {
-        $children = \App\Models\Child::whereHas('enrollment', function($query) {
-                $query->where('status', 'approved');
-            })->with('enrollment')->paginate(15);
+    public function listEnrollments()
+{
+    $children = Child::whereHas('enrollment', function($query) {
+            $query->where('status', 'approved');
+        })
+        ->with(['enrollment', 'parentRecords.father', 'parentRecords.mother', 'parentRecords.guardian'])
+        ->paginate(15);
 
-        return view('adminActivity.listChildEnrollment', compact('children'));
-    }
+    return view('adminActivity.listChildEnrollment', compact('children'));
+}
 
 
     /**
@@ -72,12 +74,13 @@ class AdminController extends Controller
     // }
 
     public function show(Enrollment $adminActivity)
-    {
-        $user = auth()->user();
-        $enrollment = $adminActivity->load(['father', 'mother', 'guardian', 'child']);
-        
-        return view('adminActivity.enrollmentDetail', compact('enrollment', 'user'));
-    }
+{
+    $user = auth()->user();
+    $enrollment = $adminActivity->load([
+        'father', 'mother', 'guardian', 'child.parentRecords.father', 'child.parentRecords.mother', 'child.parentRecords.guardian'
+    ]);
+    return view('adminActivity.enrollmentDetail', compact('enrollment', 'user'));
+}
  
 
     /**
