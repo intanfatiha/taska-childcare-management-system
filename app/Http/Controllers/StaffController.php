@@ -13,6 +13,9 @@ use App\Models\Guardian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 
 class StaffController extends Controller
@@ -20,13 +23,67 @@ class StaffController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+     public function index(Request $request)
     {
-        //
-        //$staffList = Staff::all();
-        $staffList = Staff::with('user')->latest()->get();
-       
-        return view('staffs.index', compact('staffList'));
+        $query = Staff::with('user');
+
+        // Apply search filter if provided
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('staff_name', 'LIKE', "%{$search}%")
+                  ->orWhere('staff_ic', 'LIKE', "%{$search}%")
+                  ->orWhere('staff_email', 'LIKE', "%{$search}%")
+                  ->orWhere('staff_phoneno', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply status filter if provided
+        if ($request->has('status') && !empty($request->status)) {
+            if ($request->status === 'active') {
+                $query->whereHas('user', function($q) {
+                    $q->whereNotNull('email_verified_at');
+                });
+            } elseif ($request->status === 'inactive') {
+                $query->whereHas('user', function($q) {
+                    $q->whereNull('email_verified_at');
+                });
+            }
+        }
+
+        $staffList = $query->latest()->paginate(15);
+
+        // For AJAX requests, return JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'data' => $staffList,
+                'statistics' => $this->getStaffStatistics()
+            ]);
+        }
+
+        return view('staffs.index', [
+            'staffList' => $staffList,
+            'search' => $request->search,
+            'status' => $request->status,
+            'statistics' => $this->getStaffStatistics()
+        ]);
+    }
+
+    /**
+     * Get staff statistics for dashboard
+     */
+    private function getStaffStatistics()
+    {
+        return [
+            'total' => Staff::count(),
+            'active' => Staff::whereHas('user', function($q) {
+                $q->whereNotNull('email_verified_at');
+            })->count(),
+            'inactive' => Staff::whereHas('user', function($q) {
+                $q->whereNull('email_verified_at');
+            })->count(),
+            'assigned' => StaffAssignment::distinct('primary_staff_id')->count(),
+        ];
     }
 
     /**
@@ -38,46 +95,89 @@ class StaffController extends Controller
         return view('staffs.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-        $validatedData = $request->validate([
-            'staff_name' => 'required|string|max:255',
-            'staff_ic' => 'required|string',
-            'staff_email' => 'required|email|unique:staff|unique:users,email',
-            'staff_phoneno' => 'required|string',
-            'staff_address' => 'nullable|string',
-        ]);
-    
-        try {
-            DB::transaction(function () use ($validatedData) {
-                $user = User::create([
-                    'name' => $validatedData['staff_name'],
-                    'email' => $validatedData['staff_email'],
-                    'password' => Hash::make($validatedData['staff_ic']),
-                    'role' => 'staff'
-                ]);
+   public function store(Request $request)
+{
+    // Validate the input
+    $validatedData = $request->validate([
+        'staff_name' => 'required|string|max:255',
+        'staff_ic' => 'required|string',
+        'staff_email' => 'required|email|unique:staff,staff_email|unique:users,email',
+        'staff_phoneno' => 'required|string',
+        'staff_address' => 'nullable|string',
+    ]);
 
-                
+    try {
+        DB::transaction(function () use ($validatedData) {
+            // Create user account
+            $user = User::create([
+                'name' => $validatedData['staff_name'],
+                'email' => $validatedData['staff_email'],
+                'password' => Hash::make($validatedData['staff_ic']), // Default password = IC
+                'role' => 'staff',
+            ]);
 
-                Staff::create([
-                    'user_id' => $user->id,
-                    'staff_name' => $validatedData['staff_name'],
-                    'staff_ic' => $validatedData['staff_ic'],
-                    'staff_email' => $validatedData['staff_email'],
-                    'staff_phoneno' => $validatedData['staff_phoneno'],
-                    'staff_address' => $validatedData['staff_address'] ?? null,
-                ]);
-            });
-    
-            return redirect()->route('staffs.index')->with('success', 'Staff registered successfully');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error registering staff: ' . $e->getMessage())->withInput();
-        }
+            // Create staff profile
+            Staff::create([
+                'user_id' => $user->id,
+                'staff_name' => $validatedData['staff_name'],
+                'staff_ic' => $validatedData['staff_ic'],
+                'staff_email' => $validatedData['staff_email'],
+                'staff_phoneno' => $validatedData['staff_phoneno'],
+                'staff_address' => $validatedData['staff_address'] ?? null,
+            ]);
+
+            // Send email notification
+            try {
+                $loginUrl = route('login');
+                Mail::html("
+                    <div style='font-family: Arial, sans-serif; background: #f9fafb; padding: 24px;'>
+                        <div style='max-width: 520px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #e5e7eb; padding: 32px;'>
+                            <h2 style='color: #2563eb; margin-bottom: 16px;'>👋 Welcome to Taska Hikmah!</h2>
+                            <p style='color: #374151; font-size: 16px; margin-bottom: 16px;'>
+                                Hello {$validatedData['staff_name']},
+                            </p>
+                            <p style='color: #374151; margin-bottom: 16px;'>
+                                Your staff account has been successfully created. Here are your login credentials:
+                            </p>
+                            <div style='background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;'>
+                                <p style='margin: 4px 0; color: #374151;'><strong>Email:</strong> {$validatedData['staff_email']}</p>
+                                <p style='margin: 4px 0; color: #374151;'><strong>Password:</strong> Identity Card Number</p>
+                            </div>
+                            <p style='color: #374151; margin-bottom: 24px;'>
+                                You can now log in to the system using the button below:
+                            </p>
+                            <div style='text-align: center; margin-bottom: 24px;'>
+                                <a href='{$loginUrl}' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                    🔑 Login to System
+                                </a>
+                            </div>
+                            <p style='color: #dc2626; font-size: 14px; margin-bottom: 24px;'>
+                                ⚠️ Please change your password after logging in to ensure your account's security.
+                            </p>
+                            <p style='color: #9ca3af; font-size: 13px; margin-top: 32px;'>
+                                This is an automated email from Taska Childcare Management System.
+                            </p>
+                        </div>
+                    </div>
+                ", function ($message) use ($validatedData) {
+                    $message->to($validatedData['staff_email'])
+                            ->subject('Your Taska Hikmah Staff Account is Ready!');
+                });
+
+                Log::info("Staff registration email sent to: {$validatedData['staff_email']}");
+            } catch (\Exception $e) {
+                Log::error("Failed to send staff email. Error: " . $e->getMessage());
+            }
+        });
+
+        return redirect()->route('staffs.index')->with('success', 'Staff registered and email sent successfully.');
+
+    } catch (\Exception $e) {
+        Log::error("Staff registration failed. Error: " . $e->getMessage());
+        return back()->with('error', 'Error registering staff: ' . $e->getMessage())->withInput();
     }
+}
+
 
 
     /**
