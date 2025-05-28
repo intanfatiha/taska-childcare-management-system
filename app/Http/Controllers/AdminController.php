@@ -74,13 +74,13 @@ class AdminController extends Controller
     // }
 
     public function show(Enrollment $adminActivity)
-{
-    $user = auth()->user();
-    $enrollment = $adminActivity->load([
-        'father', 'mother', 'guardian', 'child.parentRecords.father', 'child.parentRecords.mother', 'child.parentRecords.guardian'
-    ]);
-    return view('adminActivity.enrollmentDetail', compact('enrollment', 'user'));
-}
+    {
+        $user = auth()->user();
+        $enrollment = $adminActivity->load([
+            'father', 'mother', 'guardian', 'child.parentRecords.father', 'child.parentRecords.mother', 'child.parentRecords.guardian'
+        ]);
+        return view('adminActivity.enrollmentDetail', compact('enrollment', 'user'));
+    }
  
 
     /**
@@ -104,12 +104,14 @@ class AdminController extends Controller
      */
     public function destroy(string $id)
     {
-        $enrollment = Enrollment::findOrFail($id);
+        $parentRecord = ParentRecord::findOrFail($id);
 
-        // Optionally delete related children or other data
-        $enrollment->child()->delete(); // If there is a relationship defined in the Enrollment model
-    
-        $enrollment->delete();
+        $enrollment = Enrollment::where("id", $parentRecord->enrollment_id)->delete();
+        $father = Father::where("id", $parentRecord->father_id)->delete();
+        $mother = Mother::where("id", $parentRecord->mother_id)->delete();
+        $guardian = Guardian::where("id", $parentRecord->guardian_id)->delete();
+        $child = Child::where("id", $parentRecord->child_id)->delete();
+        $parentRecord->delete();
     
         return redirect()->route('childrenRegisterRequest')->with('message', 'Enrollment deleted successfully.');
     
@@ -127,6 +129,7 @@ class AdminController extends Controller
             $query->where('status', $status);
         })
         ->paginate(10);
+    
 
     return view('adminActivity.childRegisterRequest', [
         'parentRecords' => $parentRecords,

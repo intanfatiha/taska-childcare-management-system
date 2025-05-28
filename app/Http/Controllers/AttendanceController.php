@@ -133,11 +133,11 @@ public function parentsIndex(Request $request)
                 ]
             );
 
-        // $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
-        // ->where('child_id', $childId)->first();
+        $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
+        ->where('child_id', $childId)->first();
 
-         $parentRecord = \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
-        ->find($validatedData['parent_id']);
+        //  $parentRecord = \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
+        // ->find($validatedData['parent_id']);
 
             $parentEmails = [];
             if ($parentRecord) {
@@ -152,7 +152,7 @@ public function parentsIndex(Request $request)
                 }
             }
 
-            dd($parentEmails);
+            // dd($parentEmails);
 
             // Send email notification for attendance (both present and absent)
             if (!empty($parentEmails)) {

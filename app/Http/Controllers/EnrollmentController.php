@@ -497,14 +497,31 @@ class EnrollmentController extends Controller
     }
 
     // // Upload files
-    $childPhotoPath = $request->file('child_photo')->store('public/child_photos');
-    $birthCertPath = $request->file('birth_cert')->store('public/birth_certs');
-    $immunizationPath = $request->file('immunization_record')->store('public/immunization_records');
+    // $childPhotoPath = $request->file('child_photo')->store('public/children_photos');
+    // $birthCertPath = $request->file('birth_cert')->store('public/birth_certs');
+    // $immunizationPath = $request->file('immunization_record')->store('public/immunization_records');
 
     // $childPhotoPath = $request->file('child_photo')->store('child_photos', 'public');
     // $birthCertPath = $request->file('birth_cert')->store('birth_certs', 'public');
     // $immunizationPath = $request->file('immunization_record')->store('immunization_records', 'public');
 
+    if ($request->hasFile('child_photo') && $request->file('child_photo')->isValid()) {
+        $childPhotoPath = $request->file('child_photo')->store('children_photos', 'public');
+    }else {
+        $childPhotoPath = null; // Handle missing file
+    } 
+
+    if ($request->hasFile('birth_cert') && $request->file('birth_cert')->isValid()) {
+        $birthCertPath = $request->file('birth_cert')->store('birth_certs', 'public');
+    } else {
+        $birthCertPath = null; // Handle missing file
+    }
+
+    if ($request->hasFile('immunization_record') && $request->file('immunization_record')->isValid()) {
+        $immunizationPath = $request->file('immunization_record')->store('immunization_records', 'public');
+    } else {
+        $immunizationPath = null; // Handle missing file
+    }
    
 
     // Create Child
