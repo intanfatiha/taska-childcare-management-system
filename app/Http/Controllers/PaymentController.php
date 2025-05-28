@@ -412,6 +412,46 @@ public function invoice(Payment $payment)
     }
 
 
+    public function sendOverdueEmail(Request $request)
+    {
+        $payment = Payment::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian', 'child'])
+            ->findOrFail($request->payment_id);
+
+        $parentRecord = $payment->parentRecord;
+        $childName = $payment->child->child_name ?? 'your child';
+
+        $emails = [];
+        if ($parentRecord) {
+            if ($parentRecord->father && $parentRecord->father->father_email) {
+                $emails[$parentRecord->father->father_email] = $parentRecord->father->father_name;
+            }
+            if ($parentRecord->mother && $parentRecord->mother->mother_email) {
+                $emails[$parentRecord->mother->mother_email] = $parentRecord->mother->mother_name;
+            }
+            if ($parentRecord->guardian && $parentRecord->guardian->guardian_email) {
+                $emails[$parentRecord->guardian->guardian_email] = $parentRecord->guardian->guardian_name;
+            }
+        }
+
+
+        foreach ($emails as $email => $name) {
+            try {
+                Mail::html("
+                    <h2>Dear $name,</h2>
+                    <p>This is a reminder that your payment for <strong>$childName</strong> is overdue. Please make the payment as soon as possible.</p>
+                    <p>Thank you.</p>
+                ", function ($message) use ($email) {
+                    $message->to($email)
+                        ->subject('Overdue Payment Reminder');
+                });
+                \Log::info("Overdue payment email sent successfully to: $email");
+            } catch (\Exception $e) {
+                \Log::error("Failed to send overdue payment email to $email. Error: " . $e->getMessage());
+            }
+        }
+
+        return back()->with('message', 'Overdue email sent to parent/guardian.');
+    }
 
 
 

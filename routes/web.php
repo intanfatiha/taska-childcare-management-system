@@ -124,6 +124,7 @@ Route::get('/success', function () { return "Payment Successful!";})->name('paym
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('/payment/cancel', function () {return redirect()->route('payments.index');})->name('payment.cancel');
 Route::post('/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+Route::post('/payments/send-overdue-email', [PaymentController::class, 'sendOverdueEmail'])->name('payments.sendOverdueEmail');
 
   
 // Invoice routes

@@ -16,7 +16,7 @@
                                 <h1 class="text-3xl font-bold text-gray-800">Payment Management</h1>
                                 <p class="text-gray-600 mt-1">Manage and track childcare payment records</p>
                             </div>
-                        </div>
+                        </div> 
                         
                         @if(auth()->user()->role === 'admin')
                         <div class="flex space-x-3">
@@ -202,7 +202,7 @@
                                                             
                                                             </a>
                                                          @elseif($payment->payment_status == 'Overdue')
-                                                         @php
+                                                         <!-- @php
                                                             $parentRecord = $payment->parentRecord;
                                                             // Try to get the first available parent/guardian email
                                                             $email = $parentRecord?->father?->father_email
@@ -210,15 +210,21 @@
                                                                 ?? $parentRecord?->guardian?->guardian_email
                                                                 ?? null;
                                                             $mailto = $email ? 'mailto:' . $email . '?subject=Overdue Payment Reminder&body=Dear Parent,%0D%0A%0D%0AThis is a reminder that your payment for ' . ($payment->child->child_name ?? 'your child') . ' is overdue. Please make the payment as soon as possible.%0D%0A%0D%0AThank you.' : '#';
-                                                        @endphp 
+                                                        @endphp  -->
 
-                                                        <a href="{{ $mailto }}" title="Send Overdue Email" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 rounded transition">
-                                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-8 0v4a4 4 0 008 0v-4"></path>
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path>
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-5 9 5"></path>
-                                                            </svg>
-                                                        </a>
+                                                         <form action="{{ route('payments.sendOverdueEmail') }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="payment_id" value="{{ $payment->id }}">
+                                                            <button type="submit" title="Send Overdue Email"
+                                                                class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 rounded transition"
+                                                               >
+                                                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm-8 0v4a4 4 0 008 0v-4"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9-5 9 5"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
                                                         @else
                                                             <span class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-lg">
                                                                 <svg class="w-4 h-4 " fill="currentColor" viewBox="0 0 20 20">
