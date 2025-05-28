@@ -228,7 +228,7 @@ class AdminController extends Controller
         ]);
 
         $validated['role'] = $validated['role'] ?? 'parents';
-
+ 
         // Find ParentRecord and related models
         $parentRecord = \App\Models\ParentRecord::with(['enrollment', 'father', 'mother', 'guardian', 'child'])->findOrFail($parentRecordId);
 

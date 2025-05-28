@@ -112,7 +112,7 @@
                     @else
                         <p class="text-gray-600">No parent/guardian record found for this child.</p>
                     @endif
-
+ 
                     <!-- Child Documents -->
                     <p class="text-gray-600"><strong>Birth Certification:</strong></p>
                     @if ($child->child_birth_cert)

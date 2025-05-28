@@ -8,9 +8,8 @@ use App\Models\Father;
 use App\Models\Mother;
 use App\Models\Guardian;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Models\ParentRecord;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -134,8 +133,11 @@ public function parentsIndex(Request $request)
                 ]
             );
 
-        $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
-        ->where('child_id', $childId)->first();
+        // $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
+        // ->where('child_id', $childId)->first();
+
+         $parentRecord = \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
+        ->find($validatedData['parent_id']);
 
             $parentEmails = [];
             if ($parentRecord) {
@@ -149,6 +151,8 @@ public function parentsIndex(Request $request)
                     $parentEmails[] = $parentRecord->guardian->email;
                 }
             }
+
+            dd($parentEmails);
 
             // Send email notification for attendance (both present and absent)
             if (!empty($parentEmails)) {

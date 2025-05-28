@@ -370,6 +370,8 @@
 
             <!-- Children Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                @php 
+                @endphp
                 @forelse($childrenRecords as $record)
                     @php $child = $record->child; @endphp
                     @if($child)
@@ -381,7 +383,7 @@
                                     <img src="{{ asset('storage/' . $child->child_photo) }}"
                                          alt="Child Photo"
                                          class="w-full h-full object-cover"
-                                         onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
+                                         >
                                 @else
                                     <img src="{{ asset('images/no-image.png') }}"
                                          alt="No Image"

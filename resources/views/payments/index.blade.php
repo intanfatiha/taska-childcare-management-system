@@ -1,24 +1,15 @@
 <x-app-layout>
     <div class="min-h-screen ">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Header Section -->
-            <div class="mb-8">
-                <div class="bg-white rounded-2xl shadow-lg p-8 border border-blue-100">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-3 rounded-xl">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 class="text-3xl font-bold text-gray-800">Payment Management</h1>
-                                <p class="text-gray-600 mt-1">Manage and track childcare payment records</p>
-                            </div>
-                        </div> 
-                        
-                        @if(auth()->user()->role === 'admin')
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> 
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+                <div>
+                    <h2 class="text-3xl font-bold text-indigo-800">
+                        {{ __('Payment Management') }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">Manage and track childcare payment records</p>
+                </div>
+
+                @if(auth()->user()->role === 'admin')
                         <div class="flex space-x-3">
                             <a href="{{ route('payments.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,9 +19,8 @@
                             </a>
                         </div>
                         @endif
-                    </div>
-                </div>
             </div>
+            
 
             <!-- Success Message Alert -->
             @if(session('message'))
@@ -53,6 +43,7 @@
             @if(auth()->user()->role === 'admin')
              <h3 class="text-lg font-semibold text-gray-800">All Payment Records</h3>
                     <p class="text-sm text-gray-600 mt-1">Overview of all childcare payments</p>
+                    <br>
             <!-- Admin Payments Table -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 

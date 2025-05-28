@@ -405,9 +405,9 @@ class EnrollmentController extends Controller
             'guardian_occupation' => 'required|string',
             'guardian_monthly_income' => 'required|string',
             'guardian_relation' => 'required|string',
-             'guardian_staff_number' => 'nullable|string',
-                'guardian_ptj' => 'nullable|string',
-                'guardian_office_number' => 'nullable|string',
+            'guardian_staff_number' => 'nullable|string',
+            'guardian_ptj' => 'nullable|string',
+            'guardian_office_number' => 'nullable|string',
         ];
 
         if (!$guardianExists) {
@@ -496,10 +496,14 @@ class EnrollmentController extends Controller
         }
     }
 
-    // Upload files
+    // // Upload files
     $childPhotoPath = $request->file('child_photo')->store('public/child_photos');
     $birthCertPath = $request->file('birth_cert')->store('public/birth_certs');
     $immunizationPath = $request->file('immunization_record')->store('public/immunization_records');
+
+    // $childPhotoPath = $request->file('child_photo')->store('child_photos', 'public');
+    // $birthCertPath = $request->file('birth_cert')->store('birth_certs', 'public');
+    // $immunizationPath = $request->file('immunization_record')->store('immunization_records', 'public');
 
    
 
