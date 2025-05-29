@@ -2,18 +2,18 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\http\Controllers\RoomController; //panggil sebab kat bawah kita ada panggil resorce ctrller
-use App\http\Controllers\RoomReservationController;
-use App\http\Controllers\StaffController;
-use App\http\Controllers\ChildrenController;
-use App\http\Controllers\AnnouncementsController;
-use App\http\Controllers\DailyActivitiesController;
-use App\http\Controllers\AdminController;
-use App\http\Controllers\CameraFootageController;
-use App\http\Controllers\EnrollmentController;
-use App\http\Controllers\AttendanceController;
-use App\http\Controllers\PaymentController;
-use App\http\Controllers\GenerateReportController;
+use App\Http\Controllers\RoomController; //panggil sebab kat bawah kita ada panggil resorce ctrller
+use App\Http\Controllers\RoomReservationController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ChildrenController;
+use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\DailyActivitiesController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CameraFootageController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\GenerateReportController;
 
 //GET	Fetch data (View)
 //POST	Create new data
