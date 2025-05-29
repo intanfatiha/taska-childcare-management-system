@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RoomController; //panggil sebab kat bawah kita ada panggil resorce ctrller
+use App\Http\Controllers\RoomController; 
 use App\Http\Controllers\RoomReservationController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\ChildrenController;
