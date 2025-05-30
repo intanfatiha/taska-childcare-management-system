@@ -144,7 +144,7 @@ class AdminController extends Controller
         return view('adminActivity.approve', compact('enrollment'));
     }
 
-
+ 
 
     public function rejection()
     {
@@ -152,7 +152,7 @@ class AdminController extends Controller
         //return 'Test: Route and Controller are working.';
     }
 
-    public function rejectRegistration(Request $request, $enrollmentId)
+    public function rejectRegistration(Request $request, $parentRecordId)
     {   
         $validated = $request->validate([
             'father_email' => 'nullable|email',
@@ -165,11 +165,30 @@ class AdminController extends Controller
             'rejectReason' => 'required|string|max:255',
         ]);
 
-        $enrollment = Enrollment::findOrFail($enrollmentId);
+        // $enrollment = Enrollment::findOrFail($enrollmentId);
 
-        // Update the enrollment status to "rejected"
-        $enrollment->status = 'rejected';
-        $enrollment->save();
+         $validated['registration_type'] = $validated['registration_type'] ?? 'parents';
+ 
+        // Find ParentRecord and related models
+        $parentRecord = \App\Models\ParentRecord::with(['enrollment', 'father', 'mother', 'guardian', 'child'])->findOrFail($parentRecordId);
+
+        $enrollment = $parentRecord->enrollment;
+        $father = $parentRecord->father;
+        $mother = $parentRecord->mother;
+        $guardian = $parentRecord->guardian;
+        $child = $parentRecord->child;
+
+        // Update the enrollment status to "approved"
+        if ($enrollment) {
+            $enrollment->status = 'rejected';
+            $enrollment->save();
+        }
+
+        
+
+        // // Update the enrollment status to "rejected"
+        // $enrollment->status = 'rejected';
+        // $enrollment->save();
 
         // Collect emails to send the rejection message
         $emails = [];
@@ -204,6 +223,15 @@ class AdminController extends Controller
                 Log::error("Failed to send rejection email to $email. Error: " . $e->getMessage());
             }
         }
+
+        // $parentRecord = ParentRecord::findOrFail($id);
+
+        Enrollment::where("id", $parentRecord->enrollment_id)->delete();
+Father::where("id", $parentRecord->father_id)->delete();
+Mother::where("id", $parentRecord->mother_id)->delete();
+Guardian::where("id", $parentRecord->guardian_id)->delete();
+Child::where("id", $parentRecord->child_id)->delete();
+$parentRecord->delete();
 
         // Redirect back with a success message
         return redirect()->route('childrenRegisterRequest')->with('message', 'Application rejected successfully.');

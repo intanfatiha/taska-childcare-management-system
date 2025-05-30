@@ -11,11 +11,12 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-<div class="min-h-screen bg-purple-100">
+        <div class="min-h-screen bg-gray-100">
             <!-- Top Navigation -->
             @include('layouts.navigation')
 
@@ -31,15 +32,15 @@
             <!-- Main Layout Container -->
             <div class="flex">
                 <!-- Sidebar -->
-                <div class="w-72 flex-shrink-0">
+                <div class="w-64 flex-shrink-0">
                     <x-sidebar />
                 </div>
 
                 <!-- Main Content Area -->
                 <div class="flex-1 overflow-x-hidden">
-                    <div class="container mx-auto px-6 py-8">
-                        <div class="bg-white overflow-hidden shadow-xl rounded-3xl border border-gray-100">
-                            <main class="p-8">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <main class="p-6">
                                 {{ $slot }}
                             </main>
                         </div>
@@ -47,8 +48,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- This is the fix: Load scripts pushed from other views -->
-        @stack('scripts')
+           <!-- This is the fix: Load scripts pushed from other views -->
+           @stack('scripts') 
     </body>
 </html>

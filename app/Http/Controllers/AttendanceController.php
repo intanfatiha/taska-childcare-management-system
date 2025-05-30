@@ -133,22 +133,24 @@ public function parentsIndex(Request $request)
                 ]
             );
 
-        $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
-        ->where('child_id', $childId)->first();
 
-        //  $parentRecord = \App\Models\ParentRecord::with(['father', 'mother', 'guardian'])
-        // ->find($validatedData['parent_id']);
+        // Get child and parent data
+        $child = Child::find($childId);
+        $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
+            ->where('child_id', $childId)
+            ->first();
+    
 
             $parentEmails = [];
             if ($parentRecord) {
-                if ($parentRecord->father && $parentRecord->father->email) {
-                    $parentEmails[] = $parentRecord->father->email;
+                if ($parentRecord->father && $parentRecord->father->father_email) {
+                    $parentEmails[] = $parentRecord->father->father_email;
                 }
-                if ($parentRecord->mother && $parentRecord->mother->email) {
-                    $parentEmails[] = $parentRecord->mother->email;
+                if ($parentRecord->mother && $parentRecord->mother->mother_email) {
+                    $parentEmails[] = $parentRecord->mother->mother_email;
                 }
-                if ($parentRecord->guardian && $parentRecord->guardian->email) {
-                    $parentEmails[] = $parentRecord->guardian->email;
+                if ($parentRecord->guardian && $parentRecord->guardian->guardian_email) {
+                    $parentEmails[] = $parentRecord->guardian->guardian_email;
                 }
             }
 
@@ -308,35 +310,34 @@ public function parentsIndex(Request $request)
  */
 public function createTimeOut(Request $request) 
 {
+    // Use selected date from request, or default to today
     $date = $request->get('date', now()->format('Y-m-d'));
 
-    $today = now()->format('Y-m-d');
-    
-    // Get present children with today's attendance
-    $presentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($today) {
-        $query->where('attendance_date', $today)
+    // Get present children with attendance on the selected date
+    $presentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($date) {
+        $query->where('attendance_date', $date)
               ->where('attendance_status', 'attend');
     })
-    ->with(['attendances' => function ($query) use ($today) {
-        $query->where('attendance_date', $today);
+    ->with(['attendances' => function ($query) use ($date) {
+        $query->where('attendance_date', $date);
     }])->get();
 
-    // Get absent children (if needed for other views)
-    $absentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($today) {
-        $query->where('attendance_date', $today)
+    // Get absent children (if needed)
+    $absentChildren = \App\Models\Child::whereHas('attendances', function ($query) use ($date) {
+        $query->where('attendance_date', $date)
               ->where('attendance_status', 'absent');
     })
-    ->with(['attendances' => function ($query) use ($today) {
-        $query->where('attendance_date', $today);
-    }])
-    ->get();
+    ->with(['attendances' => function ($query) use ($date) {
+        $query->where('attendance_date', $date);
+    }])->get();
 
+    // Total stats (if needed)
     $totalChildren = \App\Models\Child::count(); 
     $totalAttend = $presentChildren->count();
     $totalAbsent = $absentChildren->count();
 
-    // Use correct view name for time out page
-    return view('attendances.createTimeOut', compact('presentChildren', 'date','totalChildren', 'totalAttend', 'totalAbsent'));
+    // Return the view with filtered data
+    return view('attendances.createTimeOut', compact('presentChildren', 'date', 'totalChildren', 'totalAttend', 'totalAbsent'));
 }
 
 
@@ -375,12 +376,70 @@ public function updateTimeOut(Request $request)
                 $attendance->save();
 
                 $updatedCount++;
+
+                // Get child and parent data
+                $child = Child::find($childId);
+                $parentRecord = ParentRecord::with(['father', 'mother', 'guardian'])
+                    ->where('child_id', $childId)
+                    ->first();
+
+                $parentEmails = [];
+                if ($parentRecord) {
+                    if ($parentRecord->father && $parentRecord->father->father_email) {
+                        $parentEmails[] = $parentRecord->father->father_email;
+                    }
+                    if ($parentRecord->mother && $parentRecord->mother->mother_email) {
+                        $parentEmails[] = $parentRecord->mother->mother_email;
+                    }
+                    if ($parentRecord->guardian && $parentRecord->guardian->guardian_email) {
+                        $parentEmails[] = $parentRecord->guardian->guardian_email;
+                    }
+                }
+
+                // Send email notification (check-out only)
+                if (!empty($parentEmails)) {
+                    $childName = $child->child_name ?? 'Your child';
+                    $outTimeFormatted = date('g:i A', strtotime($timeOut));
+                    $attendanceDateFormatted = $attendanceDate->format('F j, Y');
+
+                    $message = "$childName has <strong>checked out</strong> on <strong>$attendanceDateFormatted</strong> at <strong>$outTimeFormatted</strong>.";
+                    $subject = "Check-Out Notification: $childName Checked Out";
+
+                    foreach ($parentEmails as $email) {
+                        try {
+                            \Mail::html("
+                                <div style='font-family: Arial, sans-serif; background: #f9fafb; padding: 24px;'>
+                                    <div style='max-width: 520px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #e5e7eb; padding: 32px;'>
+                                        <h2 style='color: #2563eb; margin-bottom: 16px;'>Attendance Notification</h2>
+                                        <p style='color: #374151; font-size: 16px; margin-bottom: 16px;'>
+                                            $message
+                                        </p>
+                                        <p style='color: #374151; margin-bottom: 24px;'>
+                                            Please log in to your account for more details.
+                                        </p>
+                                        <a href='" . route('login') . "' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                            🔑 Login to Parent Portal
+                                        </a>
+                                        <p style='color: #9ca3af; font-size: 13px; margin-top: 32px;'>
+                                            This is an automated notification from Taska Childcare Management System.
+                                        </p>
+                                    </div>
+                                </div>
+                            ", function ($message) use ($email, $subject) {
+                                $message->to($email)->subject($subject);
+                            });
+                        } catch (\Exception $e) {
+                            \Log::error("Failed to send attendance email to $email. Error: " . $e->getMessage());
+                        }
+                    }
+                }
             }
         }
     }
 
     return redirect()->route('attendances.index')->with('success', "Time out updated for {$updatedCount} children.");
 }
+
 
 /**
  * Send time out notification to parents

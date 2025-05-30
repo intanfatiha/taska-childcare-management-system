@@ -21,37 +21,29 @@
             <i class="fas fa-sign-out-alt mr-2"></i>Children's Time Out
         </h1>
 
-        <form method="POST" action="{{ route('attendances.updateTimeOut') }}">
-            @csrf
-            <!-- Date selector and controls -->
+        <!-- Date Filter Form (GET) -->
+        <form method="GET" action="{{ route('attendances.createTimeOut') }}">
             <div class="mb-6 bg-yellow-100 p-4 rounded-lg shadow-md border-2 border-yellow-300">
                 <div class="flex flex-wrap justify-between items-center">
-
                     <div class="flex flex-col">
-        <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
-        <input type="date" name="date" id="date"
-            value="{{ request('date', now()->format('Y-m-d')) }}"
-            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            onchange="this.form.submit()">
-    </div>
-
+                        <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
+                        <input type="date" name="date" id="date"
+                            value="{{ request('date', now()->format('Y-m-d')) }}"
+                            class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
                     <div>
-                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition mr-2">
-                            <i class="fas fa-clock mr-1"></i> Save Time Out
+                        <button type="submit"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition">
+                            <i class="fas fa-search mr-1"></i> Filter Date
                         </button>
                     </div>
                 </div>
             </div>
+        </form>
 
-            <div class="bg-blue-50 p-4 rounded-lg shadow-md mb-6 border-2 border-blue-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-blue-700">Time Out Sheet</h2>
-                    <div class="text-sm text-blue-600">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Only children who are present today will be shown
-                    </div>
-                </div>
-            </div>
+        <!-- Time Out Submission Form -->
+        <form method="POST" action="{{ route('attendances.updateTimeOut') }}">
+            @csrf
 
             <!-- Summary Card -->
             <div class="mt-2 bg-white p-4 rounded-lg shadow-md border-2 border-gray-200 mb-6">
@@ -62,12 +54,26 @@
                         <div class="text-sm text-green-700">Present Today</div>
                     </div>
                     <div class="bg-purple-100 p-3 rounded-lg">
-                        <div class="text-2xl font-bold text-purple-600">{{ $presentChildren->filter(function($child) { return $child->attendances->first() && $child->attendances->first()->time_out; })->count() }}</div>
+                        <div class="text-2xl font-bold text-purple-600">
+                            {{ $presentChildren->filter(fn($child) => $child->attendances->first()?->time_out)->count() }}
+                        </div>
                         <div class="text-sm text-purple-700">Timed Out</div>
                     </div>
                     <div class="bg-blue-100 p-3 rounded-lg">
-                        <div class="text-2xl font-bold text-blue-600">{{ $presentChildren->filter(function($child) { return $child->attendances->first() && !$child->attendances->first()->time_out; })->count() }}</div>
+                        <div class="text-2xl font-bold text-blue-600">
+                            {{ $presentChildren->filter(fn($child) => $child->attendances->first() && !$child->attendances->first()->time_out)->count() }}
+                        </div>
                         <div class="text-sm text-blue-700">Still Here</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-blue-50 p-4 rounded-lg shadow-md mb-6 border-2 border-blue-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-blue-700">Time Out Sheet</h2>
+                    <div class="text-sm text-blue-600">
+                        <i class="fas fa-info-circle mr-1"></i>Only children who are present today will be shown
                     </div>
                 </div>
             </div>
@@ -85,22 +91,13 @@
                 </thead>
                 <tbody>
                     @forelse($presentChildren as $index => $child)
-                    @php
-                        $attendance = $child->attendances->first(); // Get today's attendance record
-                    @endphp
+                    @php $attendance = $child->attendances->first(); @endphp
                     <tr class="hover:bg-blue-50 border-b border-gray-200 transition-colors">
                         <td class="px-4 py-3 text-center">{{ $index + 1 }}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex justify-center">
-                                @if($child->child_photo)
-                                    <img src="{{ asset('storage/' . $child->child_photo) }}" alt="{{ $child->child_name }}" 
-                                        class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md" 
-                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
-                                @else
-                                    <img src="{{ asset('images/no-image.png') }}" alt="No Image" 
-                                        class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md">
-                                @endif
-                            </div>
+                        <td class="px-4 py-3 text-center">
+                            <img src="{{ $child->child_photo ? asset('storage/' . $child->child_photo) : asset('images/no-image.png') }}"
+                                alt="{{ $child->child_name }}" class="w-16 h-16 object-cover rounded-full border-4 border-blue-300 shadow-md"
+                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.png') }}';">
                         </td>
                         <td class="px-4 py-3 text-center font-medium text-blue-800">{{ $child->child_name }}</td>
                         <td class="px-4 py-3 text-center">
@@ -113,14 +110,14 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-center">
-                            <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50 time-out" 
-                                name="time_out[{{ $child->id }}]" 
+                            <input type="time" class="border-2 border-blue-300 rounded-md p-1 bg-blue-50 time-out"
+                                name="time_out[{{ $child->id }}]"
                                 value="{{ optional($attendance)->time_out ? date('H:i', strtotime($attendance->time_out)) : '' }}"
                                 data-child-id="{{ $child->id }}">
                         </td>
                         <td class="px-4 py-3 text-center">
                             <button type="button" class="set-current-time bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-md text-sm transition"
-                                    data-child-id="{{ $child->id }}">
+                                data-child-id="{{ $child->id }}">
                                 <i class="fas fa-clock mr-1"></i>Now
                             </button>
                         </td>
@@ -138,6 +135,12 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <div class="text-right mt-6">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition">
+                    <i class="fas fa-save mr-1"></i>Save All Time Out
+                </button>
+            </div>
         </form>
 
         <!-- Legend -->
@@ -153,11 +156,11 @@
         </div>
     </div>
 
-    <!-- Add Font Awesome for icons -->
+    <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Function to get current time in HH:MM format
             function getCurrentTime() {
                 const now = new Date();
                 const hours = now.getHours().toString().padStart(2, '0');
@@ -165,20 +168,16 @@
                 return `${hours}:${minutes}`;
             }
 
-            // Add event listeners to "Now" buttons
-            const nowButtons = document.querySelectorAll('.set-current-time');
-            nowButtons.forEach(button => {
+            document.querySelectorAll('.set-current-time').forEach(button => {
                 button.addEventListener('click', function () {
                     const childId = this.dataset.childId;
                     const timeOutField = document.querySelector(`.time-out[data-child-id="${childId}"]`);
                     timeOutField.value = getCurrentTime();
-                    
-                    // Visual feedback
+
                     this.innerHTML = '<i class="fas fa-check mr-1"></i>Set';
                     this.classList.remove('bg-purple-500', 'hover:bg-purple-600');
                     this.classList.add('bg-green-500', 'hover:bg-green-600');
-                    
-                    // Reset button after 2 seconds
+
                     setTimeout(() => {
                         this.innerHTML = '<i class="fas fa-clock mr-1"></i>Now';
                         this.classList.remove('bg-green-500', 'hover:bg-green-600');
