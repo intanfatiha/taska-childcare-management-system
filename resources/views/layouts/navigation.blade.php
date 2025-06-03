@@ -5,8 +5,8 @@
       <!-- Left Section: Logo and Title -->
       <div class="flex items-center space-x-4">
         <a href="" class="flex items-center space-x-3">
-          <div class="bg-orange-400 p-2 rounded-lg">
-            <img src="{{ asset('assets/ppuk_logo.png') }}" alt="Logo" class="h-6 w-6">
+          <div class="bg-white-400 p-2 rounded-lg">
+            <!-- <img src="{{ asset('assets/ppuk_logo.png') }}" alt="Logo" class="h-8 w-8"> -->
           </div>
           <div class="text-gray-900 leading-tight text-left"> <!-- text-left explicitly here -->
             <h1 class="text-lg font-bold">LITTLECARE: CHILDCARE MANAGEMENT SYSTEM</h1>

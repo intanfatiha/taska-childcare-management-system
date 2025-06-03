@@ -54,4 +54,10 @@ class Child extends Model
         return $this->hasOne(ParentRecord::class, 'child_id');
     }
 
+   
+public function parentRecord()
+{
+    return $this->hasOne(\App\Models\ParentRecord::class, 'child_id');
+}
+
 }

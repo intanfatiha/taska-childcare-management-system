@@ -29,7 +29,7 @@
 
 
     <!-- Navigation Header -->
-    <nav class="shadow-lg sticky top-0 z-50" style="background-image: url('{{ asset('assets/wave-border.png') }}'); background-size: cover; background-position: center;">
+<nav class="shadow-lg sticky top-0 z-50" style="background-color: white;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo Section -->
@@ -87,7 +87,7 @@
                 <!-- Hero Image -->
                 <div class="relative opacity-0 animate-fade-in">
                     <div class="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                        <img src="{{ asset('assets/Taska-Hikmah-login.jpg') }}" alt="Happy Children" class="w-full h-64 object-cover rounded-xl">
+                        <img src="{{ asset('assets/care.jpg') }}" alt="Happy Children" class="w-full h-64 object-cover rounded-xl">
                         <div class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-800 px-4 py-2 rounded-full font-bold transform -rotate-12">
                             Premium Care ⭐
                         </div>
@@ -267,9 +267,9 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 bg-white">
+    <section id="contact" class="py-20 bg-white" style="background-image: url('{{ asset('assets/grid1.png') }}'); background-size: cover; background-position: center;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" >
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">Get in Touch</h2>
                 <p class="text-xl text-gray-600">We'd love to hear from you and answer any questions</p>
             </div>

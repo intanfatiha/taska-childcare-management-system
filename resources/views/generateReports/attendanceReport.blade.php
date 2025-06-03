@@ -23,11 +23,7 @@
         </div>
     </div>
 
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Children Attendance Dashboard') }}
-        </h2>
-    </x-slot>
+
 
     <div class="max-w-7xl mx-auto py-8 px-4">
         <!-- Date Filter and PDF Export -->
