@@ -77,7 +77,7 @@
 
             // Check for webcam support and initialize
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true }) 
                     .then(function (stream) {
                         video.srcObject = stream;
                         mediaRecorder = new MediaRecorder(stream);

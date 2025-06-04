@@ -54,12 +54,20 @@
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }} transition-colors duration-200">
                     <span class="text-xl"></span>
 
-                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-purple-600 group-hover:text-purple-700' }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
                         <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                         <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                     </svg>
+
                 </div>
                 <span class="font-medium {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-gray-600 group-hover:text-gray-800' }}">Children Daily Board</span>
             </a>
@@ -203,12 +211,20 @@
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-yellow-100' }} transition-colors duration-200">
                     <span class="text-xl"></span>
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-purple-600 group-hover:text-purple-700' }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
                         <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                         <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                     </svg>
+
                 </div>
                 <span class="font-medium {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-gray-600 group-hover:text-gray-800' }}">Children Daily Board</span>
             </a>
@@ -309,13 +325,21 @@
                class="group flex items-center space-x-3 p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] {{ request()->routeIs('daily_activities.*') ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' : 'hover:bg-white hover:shadow-md' }}">
                 <div class="p-1.5 rounded-lg {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }} transition-colors duration-200">
                     <span class="text-xl"></span>
-
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-purple-600 group-hover:text-purple-700' }}"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
                         <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                         <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1" />
                         <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1" />
                     </svg>
+
                 </div>
                 <span class="font-medium {{ request()->routeIs('daily_activities.*') ? 'text-white' : 'text-gray-600 group-hover:text-gray-800' }}">Children Daily Board</span>
             </a>

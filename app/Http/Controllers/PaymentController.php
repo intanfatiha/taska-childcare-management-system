@@ -333,52 +333,56 @@ public function paymentSuccess(Request $request)
 
     return redirect()->route('payments.index')->with('message', 'Payment successful and updated!');
 }
-
 public function invoice(Payment $payment)
-    {
-        // Check if payment is complete
-        if ($payment->payment_status !== 'Complete') {
-            return redirect()->back()
-                           ->with('error', 'Invoice can only be generated for completed payments.');
-        }
+{
+    // Only allow invoice generation for completed payments
+    if ($payment->payment_status !== 'Complete') {
+        return redirect()->back()
+            ->with('error', 'Invoice can only be generated for completed payments.');
+    }
 
-        // Check authorization - only admin or the payment owner can download invoice
-        $user = auth()->user();
-        if ($user->role !== 'admin') {
-            $parentRecord = $this->getParentRecordForLoggedInUser();
-            if (!$parentRecord || $payment->parent_id !== $parentRecord->id) {
-                abort(403, 'Unauthorized access to invoice.');
-            }
-        }
+    $user = auth()->user();
 
-        // Load relationships
-        $payment->load([
-            'child', 
-            'parentRecord.father', 
-            'parentRecord.mother', 
-            'parentRecord.guardian'
+    // Authorization: admins can access all, parents only their own invoices
+    if ($user->role !== 'admin') {
+        $parentRecord = $this->getParentRecordForLoggedInUser();
+
+        if (!$parentRecord || $payment->parent_id !== $parentRecord->id) {
+            abort(403, 'Unauthorized access to invoice.');
+        }
+    }
+
+    // Load relationships for invoice details
+    $payment->load([
+        'child',
+        'parentRecord.father',
+        'parentRecord.mother',
+        'parentRecord.guardian'
+    ]);
+
+    // Generate PDF using the Blade view and set paper size to A4 portrait
+    $pdf = Pdf::loadView('payments.invoice', compact('payment'))
+        ->setPaper('a4', 'portrait')
+        ->setOptions([
+            'dpi' => 150,
+            'defaultFont' => 'Arial',
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
         ]);
 
-        // Generate PDF
-        $pdf = Pdf::loadView('payments.invoice', compact('payment'))
-                  ->setPaper('a4', 'portrait')
-                  ->setOptions([
-                      'dpi' => 150,
-                      'defaultFont' => 'sans-serif',
-                      'isHtml5ParserEnabled' => true,
-                      'isRemoteEnabled' => true
-                  ]);
+    // Prepare filename with child name and invoice date
+    $childName = $payment->child->child_name ?? 'Child';
+    $invoiceDate = $payment->paymentByParents_date
+        ? \Carbon\Carbon::parse($payment->paymentByParents_date)->format('Y-m-d')
+        : \Carbon\Carbon::now()->format('Y-m-d');
 
-        // Generate filename
-        $childName = $payment->child->child_name ?? 'Child';
-        $invoiceDate = $payment->paymentByParents_date ? 
-                      \Carbon\Carbon::parse($payment->paymentByParents_date)->format('Y-m-d') : 
-                      \Carbon\Carbon::now()->format('Y-m-d');
-        
-        $filename = 'Invoice-' . $payment->id . '-' . str_replace(' ', '_', $childName) . '-' . $invoiceDate . '.pdf';
+    $filename = 'Invoice-' . $payment->id . '-' . str_replace(' ', '_', $childName) . '-' . $invoiceDate . '.pdf';
 
-        return $pdf->download($filename);
-    }
+    // Download the generated PDF
+    return $pdf->download($filename);
+}
+
+
 
     /**
      * Preview invoice in browser (optional method for testing).

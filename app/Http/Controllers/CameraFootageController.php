@@ -83,6 +83,7 @@ class CameraFootageController extends Controller
                 'date' => $request->date,
                 'file_location' => 'uploads/cameraFootages/' . $filename,
             ]);
+\Log::info('DB Name: ' . \DB::connection()->getDatabaseName());
 
             return response()->json([
                 'success' => true,
