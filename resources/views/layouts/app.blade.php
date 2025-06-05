@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-<div class="min-h-screen bg-purple-100">
+<div class="min-h-screen bg-purple-300">
             <!-- Top Navigation -->
             @include('layouts.navigation')
 
@@ -31,7 +31,7 @@
             <!-- Main Layout Container -->
             <div class="flex">
                 <!-- Sidebar -->
-                <div class="w-72 flex-shrink-0">
+                <div class="w-72 flex-shrink-0 py-5 ">
                     <x-sidebar />
                 </div>
 
@@ -47,6 +47,17 @@
                 </div>
             </div>
         </div>
+         <!-- Footer -->
+        <footer class="bg-white  border-gray-200 mt-8">
+            <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center text-gray-500 text-sm">
+                <div>
+                    &copy; {{ date('Y') }} Taska Childcare Management System. All rights reserved.
+                </div>
+                <div>
+                    Made with <span class="text-red-500">&hearts;</span> by your team.
+                </div>
+            </div>
+        </footer>
         
         <!-- This is the fix: Load scripts pushed from other views -->
         @stack('scripts')

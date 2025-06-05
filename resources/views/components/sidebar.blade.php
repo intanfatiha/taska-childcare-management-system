@@ -1,7 +1,7 @@
 <!-- resources/views/components/sidebar.blade.php -->
-<div class="h-[86vh] w-64 bg-gradient-to-br from-purple-50 to-white shadow-2xl relative overflow-hidden text-gray-800 m-3 rounded-3xl">
+<div class="absolute left-4 top-0 h-[86vh] w-70 bg-gradient-to-br from-purple-50 to-white shadow-2xl relative overflow-hidden text-black-800 m-3 rounded-3xl">
     <!-- Logo Section -->
-    <div class="p-4 bg-gradient-to-r from-gray-100 to-gray-50 mx-3 mt-3 rounded-2xl">
+    <div class="p-4 bg-gradient-to-r from-gray-100 to-blue-50 mx-3 mt-3 rounded-2xl">
         <div class="flex items-center space-x-3">
             <!-- <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg transform transition-transform duration-200 hover:scale-105"> -->
                 <!-- <span class="text-xl">👶</span> -->

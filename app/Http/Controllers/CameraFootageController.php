@@ -67,7 +67,7 @@ class CameraFootageController extends Controller
             $directory = public_path('uploads/cameraFootages');
             $filename = time() . '_' . $file->getClientOriginalName();
 
-            // Ensure the directory exists
+            // Ensure the directory exists 
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
@@ -83,7 +83,7 @@ class CameraFootageController extends Controller
                 'date' => $request->date,
                 'file_location' => 'uploads/cameraFootages/' . $filename,
             ]);
-\Log::info('DB Name: ' . \DB::connection()->getDatabaseName());
+            \Log::info('DB Name: ' . \DB::connection()->getDatabaseName());
 
             return response()->json([
                 'success' => true,

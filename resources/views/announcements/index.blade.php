@@ -117,29 +117,34 @@
 
                                 <!-- Action Buttons -->
                                 
-                                <a href="{{ route('announcements.edit', $announcement->id) }}" class="flex items-center text-blue-600 hover:text-blue-800 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                        <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                                        <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-                                        <path d="M16 5l3 3" />
-                                    </svg>
-                                    Edit
-                                </a>
+                               <div class="flex space-x-4">
+    <!-- Edit Button -->
+    <a href="{{ route('announcements.edit', $announcement->id) }}" class="flex items-center text-blue-600 hover:text-blue-800 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+            <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+            <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+            <path d="M16 5l3 3" />
+        </svg>
+     
+    </a>
 
-                                <form method="POST" action="{{ route('announcements.destroy', $announcement->id) }}" onsubmit="return confirm('Are you sure you want to delete this announcement?');" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="flex items-center text-red-600 hover:text-red-800 transition">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
-                                            <path d="M4 7h16" />
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                            <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                                            <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                                        </svg>
-                                        Delete
-                                    </button>
-                                </form>
+    <!-- Delete Button -->
+    <form method="POST" action="{{ route('announcements.destroy', $announcement->id) }}" onsubmit="return confirm('Are you sure you want to delete this announcement?');" class="inline">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="flex items-center text-red-600 hover:text-red-800 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                <path d="M4 7h16" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+            </svg>
+         
+        </button>
+    </form>
+</div>
+
                             </div>
                             @endif
                         </div>

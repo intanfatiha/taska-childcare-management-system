@@ -60,8 +60,8 @@ class AnnouncementsController extends Controller
             'announcement_type'=>'required|string|max:50',
         ]);
 
-    // Create the announcement
-    $announcement = Announcements::create($validatedData);
+        // Create the announcement
+        $announcement = Announcements::create($validatedData);
 
     // Send email to all users with the 'parents' role
     $parents = User::where('role', 'parents')->get();
@@ -137,8 +137,8 @@ class AnnouncementsController extends Controller
             'announcement_type' => 'required|string|max:255',
         ]);
 
-             // Update the announcement
-    $announcement->update($validatedData);
+        // Update the announcement
+        $announcement->update($validatedData);
 
     // Send email to all users with the 'parents' role
     $parents = User::where('role', 'parents')->get();
@@ -186,7 +186,6 @@ class AnnouncementsController extends Controller
      */
     public function destroy($id)
     {
-        // Use the Query Builder to delete the announcement by its ID
         Announcements::where('id', $id)->delete();
 
         // Redirect with success message

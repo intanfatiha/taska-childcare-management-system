@@ -157,7 +157,7 @@ public function create()
 
         // Create the payment with initial pending status
         $payment = Payment::create([
-            'user_id' => null, // As per requirement
+            'user_id' => null, 
             'child_id' => $validatedData['child_id'],
             'parent_id' => $validatedData['parent_id'],
             'payment_amount' => $validatedData['payment_amount'],

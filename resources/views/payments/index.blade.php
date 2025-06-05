@@ -41,9 +41,101 @@
             @endif
 
             @if(auth()->user()->role === 'admin')
-             <h3 class="text-lg font-semibold text-gray-800">All Payment Records</h3>
-                    <p class="text-sm text-gray-600 mt-1">Overview of all childcare payments</p>
-                    <br>
+             <h3 class="text-lg font-semibold text-gray-800"></h3>
+                    
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Revenue Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-teal-400 to-teal-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.51-1.31c-.562-.649-1.413-1.076-2.353-1.253V5z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            RM {{ number_format($payments->where('payment_status', 'Complete')->sum('payment_amount'), 2) }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Total Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            {{ $payments->where('payment_status', 'Complete')->count() }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Completed Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-orange-400 to-orange-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                           
+
+                              {{ $payments->where('payment_status', 'Pending')->count() }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Pending Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-red-400 to-red-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            @php
+                                $overdueCount = $payments->filter(function($payment) {
+                                    return $payment->payment_status == 'Pending' && 
+                                           \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
+                                })->count();
+                            @endphp
+                            {{ $overdueCount }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Overdue Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
             <!-- Admin Payments Table -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 

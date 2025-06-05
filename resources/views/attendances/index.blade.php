@@ -1,12 +1,29 @@
 <x-app-layout>
-    <div class="flex justify-between items-center">
-        <h2 class="text-4xl font-bold mb-6">
-            {{ __('Attendance Management') }}
-        </h2>
-        <!-- <a href="{{ route('attendances.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
-            Add Attendance
-        </a> -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl p-4 mb-6 border border-gray-200 w-full">
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-5"></div>
+    <div class="relative flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4 sm:gap-6">
+        <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
+            <div class="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
+                {{ __('Attendance Management') }}
+            </h2>
+            <div class="flex items-center space-x-2 text-gray-600 text-sm sm:text-base">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Real-time attendance tracking system</span>
+            </div>
+        </div>
     </div>
+</div>
+
 
     <!-- Attendance Summary Cards -->
     <div class="grid grid-cols-3 gap-6 mb-6">
@@ -101,7 +118,70 @@
         </div>
     </div> 
 
-    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Revenue Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-teal-400 to-teal-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.51-1.31c-.562-.649-1.413-1.076-2.353-1.253V5z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Total Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                           
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Completed Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-orange-400 to-orange-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                           
+
+                             
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Pending Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>    
     
 
     <div class="py-1">
@@ -221,7 +301,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
-                            Edit
+                           
                         </a>
                     </td>
                 </tr>

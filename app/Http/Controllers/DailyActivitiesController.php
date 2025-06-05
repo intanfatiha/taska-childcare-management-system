@@ -66,7 +66,7 @@ class DailyActivitiesController extends Controller
         $validatedData = $request->validate
         (
         [ 
-            'activity_photo' => 'required|image|mimes:jpeg,jpg,png|max:2048', //rooms adalah nama yang uniq
+            'activity_photo' => 'required|image|mimes:jpeg,jpg,png|max:2048', 
             'post_date' => 'required|date|after_or_equal:today',
             'post_time' => 'required|date_format:H:i',
             'post_desc' => 'required|string|max:255'
@@ -79,7 +79,7 @@ class DailyActivitiesController extends Controller
          // Check if a photo was uploaded
          if ($request->hasFile('activity_photo')) {
             $image = $request->file('activity_photo');
-            $image_name = 'activityBoard_' . time() . '.' . $image->getClientOriginalExtension(); //utk rename gmbr tu. kebetulan nama sama boleh jadi error.thats why ada msa
+            $image_name = 'activityBoard_' . time() . '.' . $image->getClientOriginalExtension(); 
 
             // Set directory path and create directory if it doesn't exist
             $directory = public_path('uploads/dailyActivityBoards');
@@ -87,8 +87,7 @@ class DailyActivitiesController extends Controller
                 mkdir($directory, 0755, true);
             }
 
-            // Resize the image to 300x300 using GD
-            $resized_image = imagecreatetruecolor(500, 500); //utk muat dekat srver. 300,300
+            $resized_image = imagecreatetruecolor(500, 500); 
             $source_image = ($image->getClientOriginalExtension() == 'png') ? imagecreatefrompng($image->getRealPath()) : imagecreatefromjpeg($image->getRealPath());
             list($width, $height) = getimagesize($image->getRealPath());
             imagecopyresampled($resized_image, $source_image, 0, 0, 0, 0, 500, 500, $width, $height);
@@ -108,7 +107,7 @@ class DailyActivitiesController extends Controller
             $validatedData['activity_photo'] = $image_name;
         }
 
-        daily_activities::create($validatedData); // ORM = equivelent to insert into (SQL). Room to nama model and then function create 
+        daily_activities::create($validatedData); // ORM = equivelent to insert into (SQL). 
 
         //back() - back to page yang sama
         return redirect()->route('daily_activities.index')->with('message', 'Post created successfully');
