@@ -25,34 +25,66 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
-     public function index()
-    {
-        $today = Carbon::now();
+   
+public function index(Request $request)
+{
+    $month = $request->get('month', now()->format('Y-m'));
+    $status = $request->get('status', 'all');
 
-        // Automatically update overdue payments
-        Payment::where('payment_status', 'pending')
-            ->whereDate('payment_duedate', '<', $today)
-            ->update(['payment_status' => 'overdue']);
+    $today = Carbon::now();
 
-        $payments = [];
+    // Automatically update overdue payments
+    Payment::where('payment_status', 'pending')
+        ->whereDate('payment_duedate', '<', $today)
+        ->update(['payment_status' => 'overdue']);
 
-        if (auth()->user()->role === 'parents') {
-            $parentRecord = $this->getParentRecordForLoggedInUser();
+    $paymentsQuery = Payment::with(['child', 'parentRecord'])
+        ->orderBy('payment_duedate', 'desc');
 
-            if ($parentRecord) {
-                $payments = Payment::with(['child', 'parentRecord'])
-                    ->where('parent_id', $parentRecord->id)
-                    ->orderBy('payment_duedate', 'desc')
-                    ->get();
-            }
-        } else {
-            $payments = Payment::with(['child', 'parentRecord'])
-                ->orderBy('payment_duedate', 'desc')
-                ->get();
-        }
-
-        return view('payments.index', compact('payments'));
+    // Filter by month
+    if ($month) {
+        $paymentsQuery->whereMonth('payment_duedate', Carbon::parse($month)->month)
+                      ->whereYear('payment_duedate', Carbon::parse($month)->year);
     }
+
+    // Filter by status
+    if ($status && $status !== 'all') {
+        if ($status === 'overdue') {
+            $paymentsQuery->where('payment_status', 'overdue');
+        } else {
+            $paymentsQuery->where('payment_status', ucfirst($status));
+        }
+    }
+
+    // Filter for parents
+    if (auth()->user()->role === 'parents') {
+        $parentRecord = $this->getParentRecordForLoggedInUser();
+        if ($parentRecord) {
+            $paymentsQuery->where('parent_id', $parentRecord->id);
+        }
+    }
+
+    if (auth()->user()->role === 'parents') {
+    $children = \App\Models\Child::whereHas('parentRecord', function($q) use ($parentRecord) {
+    $q->where('father_id', $parentRecord->father_id)
+      ->orWhere('mother_id', $parentRecord->mother_id)
+      ->orWhere('guardian_id', $parentRecord->guardian_id);
+})->get();
+    } else {
+        $children = collect();
+    }
+
+    $payments = $paymentsQuery->get();
+
+    // For month dropdown (last 12 months)
+    $months = [];
+    for ($i = 0; $i < 12; $i++) {
+        $months[] = now()->subMonths($i)->format('Y-m');
+    }
+
+
+    return view('payments.index', compact('payments', 'months', 'month', 'status', 'children'));
+}
 
     //function to get the parent record for the logged-in user
     protected function getParentRecordForLoggedInUser()

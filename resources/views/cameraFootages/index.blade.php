@@ -1,25 +1,44 @@
 
 <x-app-layout>
     <div class="max-w-[1150px] m-auto px-3">
-        <!-- Title and Date/Time -->
-        <div class="text-left mt-5">
-            <h1 class="text-5xl font-bold">Kid Live Camera</h1>
-            <p id="currentDateTime" class="text-gray-600 mt-2"></p>
-        </div> 
+
+    <div class="py-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Header Section with Gradient -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+            
+
+                <!-- Title and Subtitle -->
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
+                        {{ __('Kid Live Camera') }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">Watch your child live and never miss a smile</p>
+                </div>
+           
+                 <div class="mt-4 md:mt-0 text-gray-600 font-medium text-lg" id="currentDateTime"></div> 
+                
+        </div>
+    </div>
+</div>
+
+       
 
         <!-- Camera Feed Section -->
-        <div id="camera_section" class="mt-10 flex flex-col items-center">
+        <div id="camera_section" class="mt-1 flex flex-col items-center">
             <!-- Live Camera Container -->
             <div class="bg-white shadow-lg rounded-xl p-6 w-full max-w-xl border border-gray-300">
                 <video autoplay="true" id="videoElement" class="w-full h-auto"></video>
             </div>
 
+            
             <!-- Control Buttons -->
             <div id="controls" class="mt-6">
                 <button id="startBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-5 rounded">Start Record</button>
                 <button id="stopBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded ml-4" disabled>Stop Record</button>
             </div>
         </div>
+      
 
     
         <!-- Recorded Footages Section
@@ -31,9 +50,9 @@
         <!-- Recorded Footages Table -->
         <div class="mt-10">
             <h2 class="text-xl font-bold mb-4">Recorded Footages</h2>
-            <table class="min-w-full border-collapse border border-gray-300">
-                <thead class="bg-gray-100">
-                    <tr>
+            <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
+                <thead>
+                    <tr class="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
                         <th class="border px-4 py-2 text-left">Date</th>
                         <th class="border px-4 py-2 text-left">Time Recorded</th>
                         <th class="border px-4 py-2 text-left">Footage</th>
@@ -42,25 +61,40 @@
                 </thead>
                 <tbody id="footageTable">
                     @foreach ($cameraFootages as $footage)
-                        <tr class="hover:bg-gray-50">
-                            <td class="border px-4 py-2">{{ $footage->date }}</td>
-                            <td class="border px-4 py-2">{{ $footage->start_time }} - {{ $footage->end_time }}</td>
+                        <tr class="hover:bg-blue-50 border-b border-gray-200 transition-colors">
+                            <td class="border px-4 py-2 text-center">{{ $footage->date }}</td>
+                            <td class="border px-4 py-2 text-center">{{ $footage->start_time }} - {{ $footage->end_time }}</td>
                             <td class="border px-4 py-2 text-center">
-                                <video src="{{ asset($footage->file_location) }}" controls class="w-20 h-12"></video>
+                                <video src="{{ asset($footage->file_location) }}" controls class="w-20 h-12 mx-auto"></video>
                             </td>
+
                             <td class="border px-4 py-2 text-center">
                                 <form method="POST" action="{{ route('camera-footages.destroy', $footage->id) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded">Delete</button>
+                                      <button type="submit" class="text-red-500 hover:text-red-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-trash">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M4 7l16 0" />
+                                        <path d="M10 11l0 6" />
+                                        <path d="M14 11l0 6" />
+                                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                    </svg>
+                                </button>
+
                                 </form>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+          
+            
         </div>
+       
     </div>
+    
 
     @push('scripts')
     
@@ -158,8 +192,19 @@
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
                 document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
             }
-            updateDateTime();
-            setInterval(updateDateTime, 60000); // Update every minute
+             // Function to update current date and time every second
+            function updateDateTime() {
+                const now = new Date();
+                const options = { 
+                weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+                };
+                document.getElementById('currentDateTime').textContent = now.toLocaleString('en-US', options);
+            }
+
+            
+                        updateDateTime();
+                        setInterval(updateDateTime, 1000); // Update every minute
         });
     </script>
     @endpush

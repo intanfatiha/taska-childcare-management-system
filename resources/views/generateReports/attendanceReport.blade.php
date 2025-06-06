@@ -13,15 +13,18 @@
     };
 </script>
 
-<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-    <!-- Header Section with Gradient -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
-        <div>
-            <h2 class="text-3xl font-bold text-indigo-800">
-                {{ __('Attendance Report') }}
-            </h2>
-        </div>
-    </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> 
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
+                        {{ __('Attendance Report') }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">Administration and Monitoring of Attendance Records</p>
+                </div>
+
+            
+            </div>
 
 
 

@@ -34,7 +34,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo Section -->
                 <div class="flex items-center space-x-3">
-                    <img src="{{ asset('assets/ppuk_logo.png') }}" alt="PPUK Logo" class="w-10 h-10 rounded-full">
+                    <img src="{{ asset('assets/ppuk_logo_v2.png') }}" alt="PPUK Logo" class="w-10 h-10 rounded-full">
                     <div>
                         <h1 class="text-lg font-bold text-gray-800">LITTLECARE</h1>
                         <p class="text-xs text-gray-600">TASKA HIKMAH</p>

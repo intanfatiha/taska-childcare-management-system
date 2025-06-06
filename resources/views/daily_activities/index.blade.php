@@ -1,35 +1,33 @@
 
 
 <x-app-layout>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header Section with improved layout -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg shadow-sm">
+
+ 
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> 
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+                
             <div>
-                <h2 class="text-3xl font-bold text-indigo-800">
-                    {{ __('Children Daily Board') }}
-                </h2>
-                <p class="text-gray-600 mt-1">See what your children are doing today at our center</p>
+                      
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
+                        {{ __('Children Daily Board') }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">See what your children are doing today at our Taska</p>
+                </div>
+
+                @if(auth()->user()->role === 'admin')
+                        <div class="flex space-x-3">
+                            <a href="{{ route('daily_activities.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Create New Post
+                            </a>
+                        </div>
+                        @endif
             </div>
+
             
-            <!-- Action buttons for admins -->
-            @if(auth()->user()->role === 'admin')
-            <div class="mt-4 md:mt-0 flex space-x-3">
-                <a href="{{ route('daily_activities.create') }}" class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    Create New Post
-                </a>
-               
-                <!-- <a href="" class="btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
-                    </svg>
-                    Manage Posts
-                </a> -->
-            </div>
-            @endif
-        </div>
+    
 
         <form method="GET" action="{{ route('daily_activities.index') }}" id="filterForm">
     <div class="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">

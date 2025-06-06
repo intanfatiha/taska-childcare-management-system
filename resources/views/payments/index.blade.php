@@ -3,7 +3,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> 
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
                 <div>
-                    <h2 class="text-3xl font-bold text-indigo-800">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
                         {{ __('Payment Management') }}
                     </h2>
                     <p class="text-gray-600 mt-1">Manage and track childcare payment records</p>
@@ -136,6 +136,48 @@
         </div>
     </div>
 
+    
+                    <!-- Date Filter -->
+                    <form method="GET" action="{{ route('payments.index') }}" class="mb-6 flex items-center justify-between">
+                        <!-- Date Filter -->
+                         <div>
+                            <label for="month" class="text-sm font-medium text-gray-700 mb-1 block">Filter by Month</label>
+                            <select name="month" id="month"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                                @foreach($months as $m)
+                                    <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                         <!-- Filter Buttons -->
+                        <div class="flex gap-4">
+                            <button type="submit" name="status" value="complete"
+                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'complete' ? 'ring-2 ring-green-400' : '' }}">
+                                Complete
+                            </button>
+                            <button type="submit" name="status" value="pending"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'pending' ? 'ring-2 ring-yellow-400' : '' }}">
+                                Pending
+                            </button>
+                            <button type="submit" name="status" value="overdue"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'overdue' ? 'ring-2 ring-red-400' : '' }}">
+                                Overdue
+                            </button>
+                            <button type="submit" name="status" value="all"
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded
+                                {{ !request('status') || request('status') == 'all' ? 'ring-2 ring-gray-400' : '' }}">
+                                All
+                            </button>
+                        </div>
+                    </form>
+
             <!-- Admin Payments Table -->
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                 
@@ -159,14 +201,14 @@
                         </div>
                     @else
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Child Information</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent(s)</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment Details</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                        <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
+                                <thead >
+                                    <tr class="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+                                        <th scope="col" class="px-4 py-3 text-center">Child Information</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Parent(s)</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Payment Details</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Status</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
@@ -187,7 +229,7 @@
 
                                             <!-- Parent(s) -->
                                             <td class="px-6 py-4">
-                                                <div class="text-sm text-gray-900 font-medium">
+                                                <div class="text-sm text-gray-900 font-medium items-center ">
                                                     @php
                                                         $parentRecord = $payment->parentRecord;
                                                         $names = [];
@@ -201,43 +243,42 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Payment Details -->
-                                            <td class="px-6 py-4">
-                                                <div class="space-y-1">
-                                                    <div class="text-lg font-bold text-blue-600">
-                                                        RM {{ number_format($payment->payment_amount, 2) }}
+             <!-- Payment Details -->
+<td class="px-6 py-4 flex flex-col items-center justify-center">
+    <div class="space-y-1 text-center">
+        <div class="text-lg font-bold text-blue-600">
+            RM {{ number_format($payment->payment_amount, 2) }}
+        </div>
+        <div class="text-xs text-gray-500">
+            Due: {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}
+        </div>
+        @if($payment->paymentByParents_date)
+        <div class="text-xs text-green-600">
+            Paid: {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') }}
+        </div>
+        @endif
+    </div>
+</td>
 
-                                                        
-                                                    </div>
-                                                    <div class="text-xs text-gray-500">
-                                                        Due: {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('d M Y') }}
-                                                    </div>
-                                                    @if($payment->paymentByParents_date)
-                                                    <div class="text-xs text-green-600">
-                                                        Paid: {{ \Carbon\Carbon::parse($payment->paymentByParents_date)->format('d M Y') }}
-                                                    </div>
-                                                    @endif
-                                                </div>
-                                            </td>
 
                                             <!-- Status -->
-                                            <td class="px-6 py-4">
+                                            <td class="px-6 py-4 items-center  justify-center">
                                                 @php
                                                     $isOverdue = $payment->payment_status == 'pending' && \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
                                                     $status = $isOverdue ? 'overdue' : $payment->payment_status;
                                                 @endphp
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                                <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
                                                     @if($status == 'Complete')
-                                                        bg-green-100 text-green-800
+                                                        bg-green-100 text-green-800 items-center 
                                                     @elseif($status == 'Pending')
-                                                        bg-yellow-100 text-yellow-800
+                                                        bg-yellow-100 text-yellow-800 items-center 
                                                     @elseif($status == 'Overdue')
-                                                        bg-red-100 text-red-800
+                                                        bg-red-100 text-red-800 items-center 
                                                     @else
-                                                        bg-gray-100 text-gray-800
+                                                        bg-gray-100 text-gray-800 items-center 
                                                     @endif">
                                                     @if($status == 'Complete')
-                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <svg class="w-3 h-3 mr-1 items-center " fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                                         </svg>
                                                     @elseif($status == 'Overdue')
@@ -333,13 +374,145 @@
 
             @if(auth()->user()->role === 'staff')
 
-            <h3 class="text-lg font-semibold text-gray-800">All Payment Records</h3>
-                    <p class="text-sm text-gray-600 mt-1">Overview of all childcare payments</p>
-            <!-- Admin Payments Table -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            
+
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Revenue Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-teal-400 to-teal-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.51-1.31c-.562-.649-1.413-1.076-2.353-1.253V5z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            RM {{ number_format($payments->where('payment_status', 'Complete')->sum('payment_amount'), 2) }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Total Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            {{ $payments->where('payment_status', 'Complete')->count() }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Completed Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-orange-400 to-orange-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                           
+
+                              {{ $payments->where('payment_status', 'Pending')->count() }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Pending Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overdue Payments Card -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transform hover:scale-105 transition-all duration-300">
+            <div class="h-2 bg-gradient-to-r from-red-400 to-red-600"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl mb-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">
+                            @php
+                                $overdueCount = $payments->filter(function($payment) {
+                                    return $payment->payment_status == 'Pending' && 
+                                           \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
+                                })->count();
+                            @endphp
+                            {{ $overdueCount }}
+                        </div>
+                        <div class="text-sm font-medium text-gray-500">Overdue Payments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    <!-- Date Filter -->
+                    <form method="GET" action="{{ route('payments.index') }}" class="mb-6 flex items-center justify-between">
+                        <!-- Date Filter -->
+                         <div>
+                            <label for="month" class="text-sm font-medium text-gray-700 mb-1 block">Filter by Month</label>
+                            <select name="month" id="month"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                                @foreach($months as $m)
+                                    <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                         <!-- Filter Buttons -->
+                        <div class="flex gap-4">
+                            <button type="submit" name="status" value="complete"
+                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'complete' ? 'ring-2 ring-green-400' : '' }}">
+                                Complete
+                            </button>
+                            <button type="submit" name="status" value="pending"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'pending' ? 'ring-2 ring-yellow-400' : '' }}">
+                                Pending
+                            </button>
+                            <button type="submit" name="status" value="overdue"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'overdue' ? 'ring-2 ring-red-400' : '' }}">
+                                Overdue
+                            </button>
+                            <button type="submit" name="status" value="all"
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded
+                                {{ !request('status') || request('status') == 'all' ? 'ring-2 ring-gray-400' : '' }}">
+                                All
+                            </button>
+                        </div>
+                    </form>
+
+            <!-- Staff Payments Table -->
+            <!-- <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"> -->
+                 <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
                 
-                
-                <div class="p-6">
+                <div class="p-2">
                     @if($payments->isEmpty())
                         <div class="text-center py-12">
                             <div class="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4">
@@ -357,15 +530,15 @@
                             </a>
                         </div>
                     @else
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Child Information</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent(s)</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment Details</th>
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                        <!-- <div class="overflow-x-auto"> -->
+   
+                                <thead >
+                    <tr class="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+                                        <th scope="col" class="px-4 py-3 text-center">Child Information</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Parent(s)</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Payment Details</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Status</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
@@ -513,7 +686,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+                        <!-- </div> -->
                     @endif
                 </div>
             </div>
@@ -536,6 +709,66 @@
                             <p class="text-gray-600">Track your childcare payment history</p>
                         </div>
                     </div>
+
+                    <form method="GET" action="{{ route('payments.index') }}" class="mb-6 flex items-center justify-between">
+                        
+                   
+                        <div class="flex flex-wrap items-end gap-4 mb-4">
+                        <!-- Child Filter -->
+                        <div>
+                            <label for="child_id" class="text-sm font-medium text-gray-700 mb-1 block">Filter by Child</label>
+                            <select name="child_id" id="child_id"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                                <option value="">All Children</option>
+                                @foreach($children as $child)
+                                    <option value="{{ $child->id }}" {{ request('child_id') == $child->id ? 'selected' : '' }}>
+                                        {{ $child->child_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Date Filter -->
+                        <div>
+                            <label for="month" class="text-sm font-medium text-gray-700 mb-1 block">Filter by Month</label>
+                            <select name="month" id="month"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                onchange="this.form.submit()">
+                                @foreach($months as $m)
+                                    <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+
+                        <!-- Filter Buttons -->
+                        <div class="flex gap-4">
+                            <button type="submit" name="status" value="complete"
+                                class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'complete' ? 'ring-2 ring-green-400' : '' }}">
+                                Complete
+                            </button>
+                            <button type="submit" name="status" value="pending"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'pending' ? 'ring-2 ring-yellow-400' : '' }}">
+                                Pending
+                            </button>
+                            <button type="submit" name="status" value="overdue"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded
+                                {{ request('status') == 'overdue' ? 'ring-2 ring-red-400' : '' }}">
+                                Overdue
+                            </button>
+                            <button type="submit" name="status" value="all"
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded
+                                {{ !request('status') || request('status') == 'all' ? 'ring-2 ring-gray-400' : '' }}">
+                                All
+                            </button>
+                        </div>
+                    </form>
 
                     @forelse($payments as $payment)
                         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 hover:shadow-lg transition-all duration-200 mb-6">

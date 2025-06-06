@@ -4,14 +4,14 @@
             <!-- Header Section with Gradient -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
                 <div>
-                    <h2 class="text-3xl font-bold text-indigo-800">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 mb-1">
                         {{ __('Announcements') }}
                     </h2>
                     <p class="text-gray-600 mt-1">Stay updated with the latest information and events</p>
                 </div>
                 
                 <!-- Action buttons for admins -->
-                @if(auth()->user()->role === 'admin')
+                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                 <div class="mt-4 md:mt-0">
                     <a href="{{ route('announcements.create') }}" class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -43,6 +43,9 @@
                         <option value="all" {{ $eventType === 'all' ? 'selected' : '' }}>All</option>
                         <option value="Event" {{ $eventType === 'Event' ? 'selected' : '' }}>Event</option>
                         <option value="Notice" {{ $eventType === 'Notice' ? 'selected' : '' }}>Notice</option>
+                        <option value="Update" {{ $eventType === 'Update' ? 'selected' : '' }}>Update</option>
+                        <option value="Other" {{ $eventType === 'Other' ? 'selected' : '' }}>Other</option>
+
                     </select>
                 </form>
             </div>
@@ -50,7 +53,7 @@
             <!-- Announcements List -->
             <div class="space-y-6"> 
                 @forelse($announcements as $announcement)
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
                         <div class="flex flex-col md:flex-row justify-between">
                             <div class="flex-1">
                                 <!-- Title -->
@@ -108,7 +111,7 @@
                             @endif
 
                             <!-- Announcement Type Label for admin/staff-->
-                            @if(auth()->user()->role === 'admin')
+                            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                             <div class="mt-4 md:mt-0 md:ml-6 flex md:flex-col justify-end gap-4">
                                 <span class="inline-flex items-center px-3 py-1 text-sm rounded-full 
                                     {{ $announcement->announcement_type === 'Event' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">

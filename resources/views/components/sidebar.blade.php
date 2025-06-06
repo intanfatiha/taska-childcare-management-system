@@ -208,7 +208,7 @@
             <!-- Children Daily Board -->
             <a href="{{ route('daily_activities.index') }}"
                class="group flex items-center space-x-3 p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] {{ request()->routeIs('daily_activities.*') ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' : 'hover:bg-white hover:shadow-md' }}">
-                <div class="p-1.5 rounded-lg {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-yellow-100' }} transition-colors duration-200">
+                <div class="p-1.5 rounded-lg {{ request()->routeIs('daily_activities.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }} transition-colors duration-200">
                     <span class="text-xl"></span>
 
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -232,12 +232,12 @@
             <!-- Live Camera -->
             <a href="{{ route('camera-footages.index') }}"
                class="group flex items-center space-x-3 p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] {{ request()->routeIs('camera-footages.*') ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' : 'hover:bg-white hover:shadow-md' }}">
-                <div class="p-1.5 rounded-lg {{ request()->routeIs('camera-footages.*') ? 'bg-white bg-opacity-20' : 'group-hover:bg-purple-100' }} transition-colors duration-200">
+                <div class="p-1.5 rounded-lg {{ request()->routeIs('camera-footages.*') ? 'bg-purple bg-opacity-20' : 'group-hover:bg-purple-100' }} transition-colors duration-200">
                     <!-- <svg class="w-5 h-5 {{ request()->routeIs('camera-footages.*') ? 'text-white' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                     </svg> -->
 
-                    <svg class="w-5 h-5 {{ request()->routeIs('camera-footages.*') ? 'text-white' : 'text-gray-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 {{ request()->routeIs('camera-footages.*') ? 'text-purple' : 'text-purple-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                     </svg>
 
@@ -254,7 +254,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                     </svg> -->
 
-                     <svg class="w-5 h-5 {{ request()->routeIs('announcements.*') ? 'text-white' : 'text-red-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <svg class="w-5 h-5 {{ request()->routeIs('announcements.*') ? 'text-white' : 'text-purple-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                     </svg>
                 </div>

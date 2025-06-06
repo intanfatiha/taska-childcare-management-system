@@ -1,6 +1,8 @@
 
 <x-guest-layout>
-    
+    <div class="min-h-screen bg-cover bg-center flex items-center justify-center px-4 md:px-12"
+            style="background-color:rgb(238, 230, 245);">
+
     <div class="mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
 
         <div class="py-19">
@@ -663,6 +665,7 @@
             </div>
 </div>
 
+
     <script>
 
         toggleRegistrationType('parents');
@@ -710,4 +713,5 @@
                 }
         </script>
     </div>
+            
 </x-guest-layout>

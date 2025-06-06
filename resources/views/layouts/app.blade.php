@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-<div class="min-h-screen bg-purple-300">
+<div class="min-h-screen bg-gradient-to-r from-purple-400 via-purple-300 to-purple-400">
             <!-- Top Navigation -->
             @include('layouts.navigation')
 
