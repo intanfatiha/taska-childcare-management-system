@@ -125,7 +125,7 @@
                         formData.append('end_time', new Date().toLocaleTimeString());
                         formData.append('date', new Date().toISOString().slice(0, 10));
 
-                        fetch('{{ route("camera-footages.store") }}', {
+                        fetch('{{ '/camera-footages' }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
