@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Staff;
-use App\Models\staffAssignment;
+use App\Models\StaffAssignment;
 use App\Models\User;
 use App\Models\Enrollment;
 use App\Models\Child;
