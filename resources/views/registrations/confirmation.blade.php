@@ -22,11 +22,20 @@
                 </p>
 
                 <div class="mt-6">
-                    <a href="{{ url('/') }}"
-                       class="bg-gradient-to-r from-pink-400 to-purple-400 text-white px-8 py-2 rounded-full font-bold shadow hover:from-pink-500 hover:to-yellow-500 transition">
-                        Back to Homepage
-                    </a>
+                   @if(auth()->check() && auth()->user()->role === 'parents')
+                        <a href="{{ route('adminHomepage') }}"
+                        class="bg-gradient-to-r from-pink-400 to-purple-400 text-white px-8 py-2 rounded-full font-bold shadow hover:from-pink-500 hover:to-yellow-500 transition">
+                            Back to Homepage
+                        </a>
+                    @else
+                        <a href="{{ url('/') }}"
+                        class="bg-gradient-to-r from-pink-400 to-purple-400 text-white px-8 py-2 rounded-full font-bold shadow hover:from-pink-500 hover:to-yellow-500 transition">
+                            Back to Homepage
+                        </a>
+                    @endif
                 </div>
+
+                
             </div>
         </div>
     </div>

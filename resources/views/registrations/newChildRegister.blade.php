@@ -15,7 +15,7 @@
                     <!-- Hidden Parent/Guardian Info -->
                     <input type="hidden" name="registration_type" value="{{ $registration_type }}">
                     @if($registration_type === 'parents' && $parentRecord)
-                                            <input type="hidden" name="registration_type" value="parents">
+                        <input type="hidden" name="registration_type" value="parents">
 
                         <input type="hidden" name="father_id" value="{{ $parentRecord->father_id }}">
                         <input type="hidden" name="father_name" value="{{ $parentRecord->father->father_name }}">
@@ -77,21 +77,21 @@
                         <div class="grid grid-cols-2 gap-6 mb-6">
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block mb-1">Full Name</label>
+                                    <label class="block mb-1">Full Name <span class="text-red-500">*</span></label>
                                     <input type="text" name="child_name" value="{{ old('child_name') }}" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_name')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Birth Date</label>
-                                    <input type="date" name="child_birth_date" value="{{ old('child_birth_date') }}" class="border rounded px-2 py-1.5 w-full" required>
+                                    <label class="block mb-1">Birth Date <span class="text-red-500">*</span></label>
+                                    <input type="date" id="child_birth_date" name="child_birth_date" value="{{ old('child_birth_date') }}" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_birth_date')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Child Gender</label>
+                                    <label class="block mb-1">Child Gender <span class="text-red-500">*</span></label>
                                     <select name="child_gender" class="border rounded px-2 py-1.5 w-full" required>
                                         <option value="">Select Gender</option>
                                         <option value="Male" {{ old('child_gender') == 'Male' ? 'selected':''}}>Male</option>
@@ -102,28 +102,28 @@
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Age</label>
-                                    <input type="text" name="child_age" value="{{ old('child_age') }}" class="border rounded px-2 py-1.5 w-full" required>
+                                    <label class="block mb-1">Age (Year old)<span class="text-red-500">*</span></label>
+                                    <input type="text" id="child_age" name="child_age" value="{{ old('child_age') }}" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_age')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Number of Siblings</label>
+                                    <label class="block mb-1">Number of Siblings <span class="text-red-500">*</span></label>
                                     <input type="number" name="child_siblings_count" value="{{ old('child_siblings_count') }}" class="border rounded px-2 py-1.5 w-full" min="0">
                                     @error('child_siblings_count')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Child Position</label>
+                                    <label class="block mb-1">Child Position <span class="text-red-500">*</span></label>
                                     <input type="number" name="child_position" value="{{ old('child_position') }}" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_position')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Address</label>
+                                    <label class="block mb-1">Address <span class="text-red-500">*</span></label>
                                     <input type="text" name="child_address" value="{{ old('child_address') }}" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_address')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -154,21 +154,21 @@
                             <!-- Right Column -->
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block mb-1">Child Passport Photo</label>
+                                    <label class="block mb-1">Child Passport Photo <span class="text-red-500">*</span></label>
                                     <input type="file" name="child_photo" accept="image/*" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('child_photo')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Birth Certificate / MyKid</label>
+                                    <label class="block mb-1">Birth Certificate / MyKid <span class="text-red-500">*</span></label>
                                     <input type="file" name="birth_cert" accept="image/*" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('birth_cert')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block mb-1">Immunization Record</label>
+                                    <label class="block mb-1">Immunization Record <span class="text-red-500">*</span></label>
                                     <input type="file" name="immunization_record" accept="image/*" class="border rounded px-2 py-1.5 w-full" required>
                                     @error('immunization_record')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -184,4 +184,35 @@
             </div>
         </div>
     </div>
+
+    <script>
+              
+        document.getElementById('child_birth_date').addEventListener('change', function() {
+            const birthDate = new Date(this.value);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            const d = today.getDate() - birthDate.getDate();
+
+            // If birthday hasn't occurred yet this year, subtract one year
+            if (m < 0 || (m === 0 && d < 0)) {
+                age--;
+            }
+
+            // If less than 1 year old, show in decimal (months/12)
+            if (age < 1) {
+                const months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+                // If birthday day hasn't occurred yet this month, subtract one month
+                let adjMonths = months;
+                if (today.getDate() < birthDate.getDate()) {
+                    adjMonths--;
+                }
+                const decimalAge = Math.max(0, (adjMonths / 12)).toFixed(1);
+                document.getElementById('child_age').value = decimalAge;
+            } else {
+                document.getElementById('child_age').value = age;
+            }
+        });
+
+    </script>
 </x-app-layout>
