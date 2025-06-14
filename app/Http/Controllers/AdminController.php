@@ -224,14 +224,24 @@ class AdminController extends Controller
             }
         }
 
-        // $parentRecord = ParentRecord::findOrFail($id);
 
+       $sharedChildren = ParentRecord::where('father_id', $parentRecord->father_id)
+    ->orWhere('mother_id', $parentRecord->mother_id)
+    ->orWhere('guardian_id', $parentRecord->guardian_id)
+    ->orWhere('enrollment_id', $parentRecord->enrollment_id)
+    ->where('id', '!=', $parentRecord->id) // exclude current
+    ->exists();
+
+    if (!$sharedChildren) {
         Enrollment::where("id", $parentRecord->enrollment_id)->delete();
-Father::where("id", $parentRecord->father_id)->delete();
-Mother::where("id", $parentRecord->mother_id)->delete();
-Guardian::where("id", $parentRecord->guardian_id)->delete();
-Child::where("id", $parentRecord->child_id)->delete();
-$parentRecord->delete();
+        Father::where("id", $parentRecord->father_id)->delete();
+        Mother::where("id", $parentRecord->mother_id)->delete();
+        Guardian::where("id", $parentRecord->guardian_id)->delete();
+    }
+
+    Child::where("id", $parentRecord->child_id)->delete();
+    $parentRecord->delete();
+
 
         // Redirect back with a success message
         return redirect()->route('childrenRegisterRequest')->with('message', 'Application rejected successfully.');

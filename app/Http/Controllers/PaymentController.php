@@ -120,24 +120,20 @@ public function index(Request $request)
 
 public function create()
 {
-    $children = Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
+     $children = Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian', 'parentRecord.enrollment'])
+        ->get();
 
     $formattedChildren = [];
     $parentsByChild = [];
     $parentRecordIdByChild = [];
     $enrollmentStartDates = [];
 
-    
-// $formattedChildren = $children->filter(function($child) {
-//     return isset($child->enrollment) && $child->enrollment->status === 'approved';
-// })->map(function($child) {
-//     return [
-//         'id' => $child->id,
-//         'name' => $child->child_name,
-//     ];
-// })->values();
-
     foreach ($children as $child) {
+        // Only include enrolled children
+        if (!$child->parentRecord?->enrollment || $child->parentRecord->enrollment->status !== 'approved') {
+            continue;
+        }
+
         $formattedChildren[] = [
             'id' => $child->id,
             'name' => $child->child_name,
@@ -158,13 +154,15 @@ public function create()
 
         $parentsByChild[$child->id] = $parentName;
         $parentRecordIdByChild[$child->id] = $parentRecordId;
+        
+        // Use enrollment created_at as start date
         $enrollmentStartDates[$child->id] = $child->parentRecord?->enrollment?->created_at?->format('Y-m-d');
     }
 
     // Sort children alphabetically
     usort($formattedChildren, fn($a, $b) => strcmp($a['name'], $b['name']));
 
-    // Optimized overtime query
+    // Get overtime data for current month
     $attendanceSums = Attendance::select('children_id', \DB::raw('SUM(attendance_overtime) as total'))
         ->whereMonth('attendance_date', now()->month)
         ->whereYear('attendance_date', now()->year)
@@ -173,8 +171,8 @@ public function create()
         ->toArray();
 
     $totalOvertimeMinutesByChild = [];
-    foreach ($children as $child) {
-        $totalOvertimeMinutesByChild[$child->id] = $attendanceSums[$child->id] ?? 0;
+    foreach ($formattedChildren as $child) {
+        $totalOvertimeMinutesByChild[$child['id']] = $attendanceSums[$child['id']] ?? 0;
     }
 
     return view('payments.create', compact(

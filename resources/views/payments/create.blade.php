@@ -67,7 +67,7 @@
                         </div>
                         <div>
                             <label for="total_overtime_minutes" class="block text-sm font-medium text-gray-700 mb-1">Total Overtime (min)</label>
-                            <input type="number" id="total_overtime_minutes" name="total_overtime_minutes" class="w-24 rounded-md border-gray-300 shadow-sm bg-gray-100" readonly>
+                            <input type="number" id="total_overtime_minutes" name="total_overtime_minutes" class="w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                         </div>
                     </div>
 
@@ -89,8 +89,6 @@
                         @enderror
                     </div>
 
-
-
                     <!-- Form Buttons -->
                     <div class="flex justify-end space-x-3 mt-6">
                         <a href="{{ route('payments.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition">
@@ -106,60 +104,145 @@
     </div>
 
 <script>
-    const parentsByChild = @json($parentsByChild);
-    const parentRecordIdByChild = @json($parentRecordIdByChild);
-    const enrollmentDatesByChild = @json($enrollmentStartDates);
-    const overtimeMinutesByChild = @json($totalOvertimeMinutesByChild);
+const parentsByChild = @json($parentsByChild);
+const parentRecordIdByChild = @json($parentRecordIdByChild);
+const enrollmentDatesByChild = @json($enrollmentStartDates);
+const overtimeMinutesByChild = @json($totalOvertimeMinutesByChild);
 
-    const today = "{{ \Carbon\Carbon::now()->format('Y-m-d') }}";
-    const ratePerDay = 25.81;
-    const ratePerMinute = 0.50;
+const today = "{{ \Carbon\Carbon::now()->format('Y-m-d') }}";
+const monthlyFee = 300.00;
+const ratePerMinute = 0.50;
 
-    function calculateDaysEnrolled(startDate, endDateStr) {
-        if (!startDate) return 0;
-        const start = new Date(startDate);
-        const end = new Date(endDateStr);
-        end.setDate(new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate());
-        const diffTime = Math.abs(end - start);
-        return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+/**
+ * Calculate prorated fee based on enrollment date
+ */
+function calculateProratedFee(enrollmentDate, billingMonth = null) {
+    if (!enrollmentDate) return monthlyFee;
+    
+    const enrollment = new Date(enrollmentDate);
+    const currentDate = new Date();
+    
+    // Use provided billing month or current month
+    const billingYear = billingMonth ? new Date(billingMonth).getFullYear() : currentDate.getFullYear();
+    const billingMonthNum = billingMonth ? new Date(billingMonth).getMonth() : currentDate.getMonth();
+    
+    // Get total days in the billing month
+    const totalDaysInMonth = new Date(billingYear, billingMonthNum + 1, 0).getDate();
+    
+    // Check if enrollment is in the billing month
+    if (enrollment.getFullYear() === billingYear && enrollment.getMonth() === billingMonthNum) {
+        // Calculate remaining days from enrollment date to end of month
+        const enrollmentDay = enrollment.getDate();
+        const remainingDays = totalDaysInMonth - enrollmentDay + 1;
+        
+        // Calculate prorated amount
+        const dailyRate = monthlyFee / totalDaysInMonth;
+        return remainingDays * dailyRate;
     }
+    
+    // If enrolled in previous months, charge full amount
+    if (enrollment < new Date(billingYear, billingMonthNum, 1)) {
+        return monthlyFee;
+    }
+    
+    // If enrollment is in future months, no charge
+    return 0;
+}
 
-    function updatePaymentFields(startDate, overtimeMinutes) {
-         const days = calculateDaysEnrolled(startDate, today);
-
-    // Make overtimeMinutes always positive
+/**
+ * Calculate and update all payment fields
+ */
+function updatePaymentCalculations() {
+    const childId = document.getElementById('child_id').value;
+    if (!childId) return;
+    
+    // Get enrollment date for this child
+    const enrollmentDate = enrollmentDatesByChild[childId] || null;
+    
+    // Calculate base fee
+    const baseFee = calculateProratedFee(enrollmentDate);
+    
+    // Get overtime minutes (from input field)
+    const overtimeMinutes = parseInt(document.getElementById('total_overtime_minutes').value) || 0;
     const positiveOvertimeMinutes = Math.abs(overtimeMinutes);
-
+    
+    // Calculate overtime charges
     const overtimeAmount = positiveOvertimeMinutes * ratePerMinute;
-    const paymentAmount = days * ratePerDay;
-    const totalPaymentAmount = paymentAmount + overtimeAmount; // same value, but cleaner
+    
+    // Calculate total
+    const totalPaymentAmount = baseFee + overtimeAmount;
+    
+    // Update form fields
+    document.getElementById('overtime_amount').value = overtimeAmount.toFixed(2);
+    document.getElementById('payment_amount').value = baseFee.toFixed(2);
+    document.getElementById('total_payment_amount').value = totalPaymentAmount.toFixed(2);
+}
 
+/**
+ * Initialize payment fields when child is selected
+ */
+function initializePaymentFields(enrollmentDate, overtimeMinutes) {
+    // Calculate base fee
+    const baseFee = calculateProratedFee(enrollmentDate);
+    
+    // Set initial overtime minutes (from database)
+    const positiveOvertimeMinutes = Math.abs(overtimeMinutes || 0);
+    
+    // Calculate overtime charges
+    const overtimeAmount = positiveOvertimeMinutes * ratePerMinute;
+    
+    // Calculate total
+    const totalPaymentAmount = baseFee + overtimeAmount;
+    
+    // Update form fields
     document.getElementById('total_overtime_minutes').value = positiveOvertimeMinutes;
     document.getElementById('overtime_amount').value = overtimeAmount.toFixed(2);
-    document.getElementById('payment_amount').value = paymentAmount.toFixed(2);
+    document.getElementById('payment_amount').value = baseFee.toFixed(2);
     document.getElementById('total_payment_amount').value = totalPaymentAmount.toFixed(2);
+}
+
+// Event listeners
+document.getElementById('child_id').addEventListener('change', function () {
+    const childId = this.value;
+    
+    if (!childId) {
+        // Clear all fields if no child selected
+        document.getElementById('parent_display').value = '';
+        document.getElementById('parent_id').value = '';
+        document.getElementById('total_overtime_minutes').value = '';
+        document.getElementById('overtime_amount').value = '';
+        document.getElementById('payment_amount').value = '';
+        document.getElementById('total_payment_amount').value = '';
+        return;
     }
 
-    document.getElementById('child_id').addEventListener('change', function () {
-        const childId = this.value;
+    // Update parent fields
+    document.getElementById('parent_display').value = parentsByChild[childId] || '';
+    document.getElementById('parent_id').value = parentRecordIdByChild[childId] || '';
 
-        // Update parent fields
-        document.getElementById('parent_display').value = parentsByChild[childId] || '';
-        document.getElementById('parent_id').value = parentRecordIdByChild[childId] || '';
+    // Initialize payment fields with database values
+    const enrollmentDate = enrollmentDatesByChild[childId] || null;
+    const overtimeMinutes = overtimeMinutesByChild[childId] || 0;
 
-        // Update payment fields
-        const startDate = enrollmentDatesByChild[childId] || null;
-        const overtime = overtimeMinutesByChild[childId] || 0;
+    initializePaymentFields(enrollmentDate, overtimeMinutes);
+});
 
-        updatePaymentFields(startDate, overtime);
-    });
+// Add event listener for manual overtime input
+document.getElementById('total_overtime_minutes').addEventListener('input', function() {
+    updatePaymentCalculations();
+});
 
-    // Auto-trigger for first child (if any preselected)
-    document.addEventListener('DOMContentLoaded', () => {
-        const initialChildId = document.getElementById('child_id').value;
-        if (initialChildId) {
-            document.getElementById('child_id').dispatchEvent(new Event('change'));
-        }
-    });
+// Also listen for change event (when user leaves the field)
+document.getElementById('total_overtime_minutes').addEventListener('change', function() {
+    updatePaymentCalculations();
+});
+
+// Auto-trigger for preselected child
+document.addEventListener('DOMContentLoaded', () => {
+    const initialChildId = document.getElementById('child_id').value;
+    if (initialChildId) {
+        document.getElementById('child_id').dispatchEvent(new Event('change'));
+    }
+});
 </script>
 </x-app-layout>
