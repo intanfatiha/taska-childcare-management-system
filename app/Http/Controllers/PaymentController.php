@@ -64,15 +64,21 @@ public function index(Request $request)
         }
     }
 
-    if (auth()->user()->role === 'parents') {
-    $children = \App\Models\Child::whereHas('parentRecord', function($q) use ($parentRecord) {
-    $q->where('father_id', $parentRecord->father_id)
-      ->orWhere('mother_id', $parentRecord->mother_id)
-      ->orWhere('guardian_id', $parentRecord->guardian_id);
-})->get();
+
+if (auth()->user()->role === 'parents') {
+    $parentRecord = $this->getParentRecordForLoggedInUser();
+    if ($parentRecord) {
+        $children = \App\Models\Child::whereHas('parentRecord', function($q) use ($parentRecord) {
+            $q->where('father_id', $parentRecord->father_id)
+              ->orWhere('mother_id', $parentRecord->mother_id)
+              ->orWhere('guardian_id', $parentRecord->guardian_id);
+        })->get();
     } else {
         $children = collect();
     }
+} else {
+    $children = collect();
+}
 
     $payments = $paymentsQuery->get();
 
@@ -179,7 +185,73 @@ public function create()
         'formattedChildren', 'parentsByChild', 'parentRecordIdByChild',
         'enrollmentStartDates', 'totalOvertimeMinutesByChild'
     ));
+
+
+// $children = Child::with(['parentRecord.father', 'parentRecord.mother', 'parentRecord.guardian'])->get();
+
+//     $formattedChildren = [];
+//     $parentsByChild = [];
+//     $parentRecordIdByChild = [];
+//     $enrollmentStartDates = [];
+
+    
+// // $formattedChildren = $children->filter(function($child) {
+// //     return isset($child->enrollment) && $child->enrollment->status === 'approved';
+// // })->map(function($child) {
+// //     return [
+// //         'id' => $child->id,
+// //         'name' => $child->child_name,
+// //     ];
+// // })->values();
+
+//     foreach ($children as $child) {
+//         $formattedChildren[] = [
+//             'id' => $child->id,
+//             'name' => $child->child_name,
+//         ];
+
+//         $parentRecord = $child->parentRecord;
+//         $parentName = 'No Data';
+//         $parentRecordId = null;
+
+//         if ($parentRecord) {
+//             $names = [];
+//             if ($parentRecord->father) $names[] = $parentRecord->father->father_name;
+//             if ($parentRecord->mother) $names[] = $parentRecord->mother->mother_name;
+//             if ($parentRecord->guardian) $names[] = $parentRecord->guardian->guardian_name;
+//             $parentName = implode(' & ', $names);
+//             $parentRecordId = $parentRecord->id;
+//         }
+
+//         $parentsByChild[$child->id] = $parentName;
+//         $parentRecordIdByChild[$child->id] = $parentRecordId;
+//         $enrollmentStartDates[$child->id] = $child->parentRecord?->enrollment?->created_at?->format('Y-m-d');
+//     }
+
+//     // Sort children alphabetically
+//     usort($formattedChildren, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+//     // Optimized overtime query
+//     $attendanceSums = Attendance::select('children_id', \DB::raw('SUM(attendance_overtime) as total'))
+//         ->whereMonth('attendance_date', now()->month)
+//         ->whereYear('attendance_date', now()->year)
+//         ->groupBy('children_id')
+//         ->pluck('total', 'children_id')
+//         ->toArray();
+
+//     $totalOvertimeMinutesByChild = [];
+//     foreach ($children as $child) {
+//         $totalOvertimeMinutesByChild[$child->id] = $attendanceSums[$child->id] ?? 0;
+//     }
+
+//     return view('payments.create', compact(
+//         'formattedChildren', 'parentsByChild', 'parentRecordIdByChild',
+//         'enrollmentStartDates', 'totalOvertimeMinutesByChild'
+//     ));
+
 }
+
+
 
 
     /**
