@@ -80,6 +80,17 @@
                         @enderror
                     </div>
 
+                     <!-- Total Amount -->
+                    <div class="mb-5">
+                    <label for="total_payment_amount" class="block text-sm font-bold text-gray-700 mb-1">Total Payment (RM)</label>
+                        <input type="number" id="total_payment_amount" name="total_payment_amount" class="w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" readonly>
+                        @error('total_payment_amount')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+
+
                     <!-- Form Buttons -->
                     <div class="flex justify-end space-x-3 mt-6">
                         <a href="{{ route('payments.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition">
@@ -114,13 +125,19 @@
     }
 
     function updatePaymentFields(startDate, overtimeMinutes) {
-        const days = calculateDaysEnrolled(startDate, today);
-        const overtimeAmount = overtimeMinutes * ratePerMinute;
-        const paymentAmount = (days * ratePerDay) + overtimeAmount;
+         const days = calculateDaysEnrolled(startDate, today);
 
-        document.getElementById('total_overtime_minutes').value = overtimeMinutes;
-        document.getElementById('overtime_amount').value = overtimeAmount.toFixed(2);
-        document.getElementById('payment_amount').value = paymentAmount.toFixed(2);
+    // Make overtimeMinutes always positive
+    const positiveOvertimeMinutes = Math.abs(overtimeMinutes);
+
+    const overtimeAmount = positiveOvertimeMinutes * ratePerMinute;
+    const paymentAmount = days * ratePerDay;
+    const totalPaymentAmount = paymentAmount + overtimeAmount; // same value, but cleaner
+
+    document.getElementById('total_overtime_minutes').value = positiveOvertimeMinutes;
+    document.getElementById('overtime_amount').value = overtimeAmount.toFixed(2);
+    document.getElementById('payment_amount').value = paymentAmount.toFixed(2);
+    document.getElementById('total_payment_amount').value = totalPaymentAmount.toFixed(2);
     }
 
     document.getElementById('child_id').addEventListener('change', function () {

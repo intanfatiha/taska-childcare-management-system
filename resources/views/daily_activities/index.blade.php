@@ -14,7 +14,7 @@
                     <p class="text-gray-600 mt-1">See what your children are doing today at our Taska</p>
                 </div>
 
-                @if(auth()->user()->role === 'admin')
+                @if(auth()->user()->role === 'admin'||auth()->user()->role === 'staff')
                         <div class="flex space-x-3">
                             <a href="{{ route('daily_activities.create') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,30 @@
     
 
         <form method="GET" action="{{ route('daily_activities.index') }}" id="filterForm">
+            
+        <!-- Success Message Alert -->
+            @if(session('message'))
+                <div class="mb-6">
+                    <div class="bg-green-50 border-l-4 border-green-400 rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700 font-medium">{{ session('message') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+
     <div class="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+
+   
+
         <!-- Filter Type Selection -->
         <div class="flex flex-col">
             <label for="filter_type" class="text-sm font-medium text-gray-700 mb-1">Filter By</label>
@@ -84,80 +107,78 @@
 
        
 
-        <div id="timelineView" class="hidden">
-        @forelse ($daily_activities as $activity)
-                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                    <div class="flex justify-between items-start">
-                        <!-- Post creator -->
-                        <div class="flex items-center text-sm text-gray-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Created by: Teacher {{ explode(' ', $activity->user->name ?? 'Unknown')[0] }}
-                        </div>
-                            
-                        <!-- Post date and time -->
-                        <div>
-                            <!-- <p class="text-sm text-gray-600">{{ \Carbon\Carbon::parse($activity->created_at)->format('d.m.Y g:i a') }}</p> -->
-                            <p class="text-sm text-gray-600">
-                                Posted on: {{ \Carbon\Carbon::parse($activity->post_date)->format('d.m.Y') }} 
-                                at {{ \Carbon\Carbon::parse($activity->post_time)->format('g:i a') }}
-                            </p>
-                            <!-- <p class="text-xs text-gray-500">
-                                Created: {{ \Carbon\Carbon::parse($activity->created_at)->format('d.m.Y g:i a') }}
-                            </p> -->
-                        </div>
-                    </div>
-
-                    <!-- Image section -->
-                    <div class="max-w-2xl mx-auto">
-                        <div class="w-[400px] h-[400px] mb-4 overflow-hidden rounded-lg mx-auto">
-                            <img src="{{ asset('uploads/dailyActivityBoards/' . $activity->activity_photo) }}" 
-                                 alt="Activity Photo" 
-                                 class="w-full h-full object-cover">
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mt-2">
-                        <p class="text-gray-700">{{ $activity->post_desc }}</p>
-                    </div>
-
-                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
-                    <!-- Action buttons -->
-                    <div class="flex justify-between mt-4">
-                        <!-- Edit button -->
-                        <a href="{{ route('daily_activities.edit', $activity->id) }}" class="text-blue-500 hover:text-blue-700 text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-edit">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                                    <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-                                    <path d="M16 5l3 3" />
-                                </svg>
-                        </a>
-                      
-                        <!-- Delete button -->
-                        <form action="{{ route('daily_activities.destroy', $activity->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-trash">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M4 7l16 0" />
-                                        <path d="M10 11l0 6" />
-                                        <path d="M14 11l0 6" />
-                                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+        <div id="timelineView" class="hidden space-y-6">
+                @forelse ($daily_activities as $activity)
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <!-- Post Header -->
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
-                                </button>
-                        </form>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">Teacher {{ explode(' ', $activity->user->name ?? 'Unknown')[0] }}</p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ \Carbon\Carbon::parse($activity->post_date)->format('M d, Y') }} at {{ \Carbon\Carbon::parse($activity->post_time)->format('g:i A') }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('daily_activities.edit', $activity->id) }}" 
+                                   class="p-2 text-blue-400 hover:text-blue-600 transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </a>
+                                <form action="{{ route('daily_activities.destroy', $activity->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="p-2 text-red-400 hover:text-red-600 transition-colors duration-200"
+                                            onclick="return confirm('Are you sure you want to delete this post?')">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                            @endif
+                        </div>
+
+                        <!-- Post Title -->
+                        <h2 class="text-xl font-bold text-gray-900 mt-4">
+                            {{ $activity->post_title ?? 'Daily Activity' }}
+                        </h2>
                     </div>
-                    @endif
+
+                    <!-- Post Image -->
+                
+                    <div class="relative flex justify-center mb-4">
+                        <img src="{{ asset('uploads/dailyActivityBoards/' . $activity->activity_photo) }}" 
+                            alt="Activity Photo" 
+                            class="w-90 h-100 object-cover rounded-lg shadow-md">
+                    </div>
+
+
+                    <!-- Post Content -->
+                    <div class="p-6">
+                        <p class="text-gray-700 leading-relaxed">{{ $activity->post_desc }}</p>
+                    </div>
                 </div>
-            @empty
-                <p class="text-center text-gray-600">No activities available.</p>
-            @endforelse
-        </div>
+                @empty
+                <div class="text-center py-12">
+                    <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="text-gray-600 text-lg">No activities available</p>
+                </div>
+                @endforelse
+            </div>
 
 
 
@@ -170,7 +191,7 @@
                     <div class="relative">
                         <img src="{{ asset('uploads/dailyActivityBoards/' . $activity->activity_photo) }}" 
                              alt="Activity Photo" 
-                             class="w-full h-56 object-cover">
+                             class="w-full h-80 object-cover">
                         
 <!--                         
                         @if(isset($activity->class_group))
@@ -189,8 +210,8 @@
                     
                     <div class="p-5">
                         <!-- Title (new field) -->
-                        @if(isset($activity->title))
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $activity->title }}</h3>
+                        @if(isset($activity->post_title))
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $activity->post_title }}</h3>
                         @else
                         <h3 class="text-lg font-bold text-gray-800 mb-2">Daily Activity</h3>
                         @endif
@@ -233,7 +254,7 @@
                             </div> -->
                             
                             <!-- Admin controls -->
-                            @if(auth()->user()->role === 'admin')
+                            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'staff')
                             <div class="flex space-x-2">
                                 <a href="{{ route('daily_activities.edit', $activity->id) }}" class="text-blue-500 hover:text-blue-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

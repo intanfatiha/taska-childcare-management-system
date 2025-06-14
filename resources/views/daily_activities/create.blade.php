@@ -1,39 +1,18 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb navigation -->
-        <nav class="flex mb-5" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                
-                <li>
-                    <div class="flex items-center">
-                       
-                        <a href="{{ route('daily_activities.index') }}" class="text-gray-700 hover:text-indigo-600 text-sm font-medium">
-                            Children Daily Board
-                        </a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                        </svg>
-                        <span class="text-gray-500 text-sm font-medium">Create Post</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-        
         <!-- Page header -->
-        <div class="bg-white rounded-lg shadow-sm mb-6 p-6">
-            <h2 class="text-2xl font-bold text-gray-800">Create New Activity Post</h2>
+        <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-bold text-indigo-800">
+                {{ __('Create New Activity Post') }}
+            </h2>
             <p class="text-gray-600 mt-1">Share activities, events, and important moments with parents</p>
         </div>
-        
-        <!-- Form card -->
-        <div class="bg-white rounded-lg shadow-sm">
-            <form action="{{ route('daily_activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+        <!-- Form Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <form action="{{ route('daily_activities.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                
+
                 <!-- Form errors -->
                 @if ($errors->any())
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
@@ -55,44 +34,50 @@
                     </div>
                 @endif
 
-                <!-- Activity Type & Class Group -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Activity Title -->
+                <!-- Title Field -->
+                <div class="mb-5">
+                    <label for="post_title" class="block text-sm font-medium text-gray-700 mb-1">Activity Title</label>
+                    <input type="text" name="post_title" id="post_title" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                    placeholder="Enter post title" value="{{ old('post_title') }}" required>
+                    @error('post_title')
+                        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Date and Time Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700">Activity Title</label>
-                        <input type="text" name="title" id="title" value="{{ old('title') }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="e.g. Art Project: Autumn Leaves">
+                        <label for="post_date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" name="post_date" id="post_date" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                            value="{{ old('post_date') }}">
+                        @error('post_date')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
-                
-                
-                <!-- Activity Type & Date/Time -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Activity Type -->
-                    
-                    
-                    <!-- Date -->
+
                     <div>
-                        <label for="post_date" class="block text-sm font-medium text-gray-700">Date</label>
-                        <input type="date" name="post_date" id="post_date" value="{{ old('post_date', date('Y-m-d')) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                    </div>
-                    
-                    <!-- Time -->
-                    <div>
-                        <label for="post_time" class="block text-sm font-medium text-gray-700">Time</label>
-                        <input type="time" name="post_time" id="post_time" value="{{ old('post_time', date('H:i')) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <label for="post_time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                        <input type="time" name="post_time" id="post_time" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                            value="{{ old('post_time') }}">
+                        @error('post_time')
+                            <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
-                
-                <!-- Description -->
-                <div>
-                    <label for="post_desc" class="block text-sm font-medium text-gray-700">Description</label>
-                    <div class="mt-1">
-                        <textarea id="post_desc" name="post_desc" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Describe the activity, what children learned, and any other important details...">{{ old('post_desc') }}</textarea>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Write a detailed description of the activity. This will be visible to parents.
-                    </p>
+
+                <!-- Description Field -->
+                <div class="mb-5">
+                    <label for="post_desc" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="post_desc" id="post_desc" rows="4" 
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                        placeholder="Write a detailed description of the activity. This will be visible to parents.">{{ old('post_desc') }}</textarea>
+                    @error('post_desc')
+                        <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                    @enderror
                 </div>
-                
+
                 <!-- Image Upload with preview -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Activity Photo</label>
@@ -101,9 +86,7 @@
                             <div id="preview" class="hidden mb-3">
                                 <img id="image-preview" class="mx-auto h-48 object-cover rounded" alt="Image preview">
                             </div>
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+
                             <div class="flex text-sm text-gray-600">
                                 <label for="activity_photo" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                                     <span>Upload a photo</span>
@@ -114,94 +97,85 @@
                             <p class="text-xs text-gray-500">
                                 PNG, JPG, GIF up to 10MB
                             </p>
+                            @error('activity_photo')
+                                <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
-                
-                <!-- Optional: Tags
-                <div>
-                    <label for="tags" class="block text-sm font-medium text-gray-700">Tags (Optional)</label>
-                    <div class="mt-1">
-                        <input type="text" name="tags" id="tags" value="{{ old('tags') }}" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="art, outdoor, learning, music (separate with commas)">
-                    </div>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Add relevant tags to help with filtering and searching.
-                    </p>
-                </div> -->
-                
-                <!-- Action Buttons -->
-              
-                </div>
-                <div class="flex justify-center space-x-3 pt-5">
-                    <a href="{{ route('daily_activities.index') }}" class="py-2 px-6 w-32 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center">
-                        Go Back
+
+                <!-- Form Buttons -->
+                <div class="flex justify-end space-x-3 mt-6">
+                    <a href="{{ route('daily_activities.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition">
+                        Cancel
                     </a>
-                    <button type="submit" class="py-2 px-6 w-32 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
                         Create Post
                     </button>
+                </div>
             </form>
         </div>
-    </div>
-   
-    <script>
-        // Image preview functionality
-        function previewImage() {
-            const preview = document.getElementById('preview');
-            const imagePreview = document.getElementById('image-preview');
-            const fileInput = document.getElementById('activity_photo');
-            const file = fileInput.files[0];
-            
-            if (file) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    preview.classList.remove('hidden');
+
+        <script>
+            // Image preview functionality
+            function previewImage() {
+                const preview = document.getElementById('preview');
+                const imagePreview = document.getElementById('image-preview');
+                const fileInput = document.getElementById('activity_photo');
+                const file = fileInput.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                    }
+
+                    reader.readAsDataURL(file);
                 }
-                
-                reader.readAsDataURL(file);
             }
-        }
-        
-        // Drag and drop functionality
-        const dropArea = document.querySelector('.border-dashed');
-        const fileInput = document.getElementById('activity_photo');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            dropArea.classList.add('border-indigo-300', 'bg-indigo-50');
-        }
-        
-        function unhighlight() {
-            dropArea.classList.remove('border-indigo-300', 'bg-indigo-50');
-        }
-        
-        dropArea.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length) {
-                fileInput.files = files;
-                previewImage();
+
+            // Drag and drop functionality
+            const dropArea = document.querySelector('.border-dashed');
+            const fileInput = document.getElementById('activity_photo');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
-        }
-    </script>
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('border-indigo-300', 'bg-indigo-50');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('border-indigo-300', 'bg-indigo-50');
+            }
+
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length) {
+                    fileInput.files = files;
+                    previewImage();
+                }
+            }
+        </script>
+    </div>
 </x-app-layout>

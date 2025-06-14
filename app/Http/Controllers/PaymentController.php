@@ -42,10 +42,10 @@ public function index(Request $request)
         ->orderBy('payment_duedate', 'desc');
 
     // Filter by month
-    if ($month) {
-        $paymentsQuery->whereMonth('payment_duedate', Carbon::parse($month)->month)
-                      ->whereYear('payment_duedate', Carbon::parse($month)->year);
-    }
+   if ($month && $month !== '') {
+    $paymentsQuery->whereMonth('payment_duedate', Carbon::parse($month)->month)
+                  ->whereYear('payment_duedate', Carbon::parse($month)->year);
+}
 
     // Filter by status
     if ($status && $status !== 'all') {
@@ -56,7 +56,7 @@ public function index(Request $request)
         }
     }
 
-    // Filter for parents
+    // Filter for parents 
     if (auth()->user()->role === 'parents') {
         $parentRecord = $this->getParentRecordForLoggedInUser();
         if ($parentRecord) {
@@ -127,6 +127,16 @@ public function create()
     $parentRecordIdByChild = [];
     $enrollmentStartDates = [];
 
+    
+// $formattedChildren = $children->filter(function($child) {
+//     return isset($child->enrollment) && $child->enrollment->status === 'approved';
+// })->map(function($child) {
+//     return [
+//         'id' => $child->id,
+//         'name' => $child->child_name,
+//     ];
+// })->values();
+
     foreach ($children as $child) {
         $formattedChildren[] = [
             'id' => $child->id,
@@ -183,7 +193,7 @@ public function create()
         $validatedData = $request->validate([
             'child_id' => 'required|exists:childrens,id',
             'parent_id' => 'required|exists:parent_records,id',
-            'payment_amount' => 'required|numeric|min:0',
+            'total_payment_amount' => 'required|numeric|min:0',
             'due_date' => 'required|date',
         ]);
 
@@ -192,7 +202,7 @@ public function create()
             'user_id' => null, 
             'child_id' => $validatedData['child_id'],
             'parent_id' => $validatedData['parent_id'],
-            'payment_amount' => $validatedData['payment_amount'],
+            'payment_amount' => $validatedData['total_payment_amount'],
             'payment_duedate' => $validatedData['due_date'],
             'payment_status' => 'pending',
             'bill_date' => Carbon::now()->toDateString(),

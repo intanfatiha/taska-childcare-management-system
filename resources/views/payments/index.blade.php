@@ -145,6 +145,7 @@
                             <select name="month" id="month"
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
+                                 <option value="">All Months</option>
                                 @foreach($months as $m)
                                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                                         {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}
@@ -475,6 +476,7 @@
                             <select name="month" id="month"
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
+                                 <option value="">All Months</option>
                                 @foreach($months as $m)
                                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                                         {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}
@@ -729,12 +731,13 @@
                             </select>
                         </div>
 
-                        <!-- Date Filter -->
-                        <div>
+                       <!-- Date Filter -->
+                         <div>
                             <label for="month" class="text-sm font-medium text-gray-700 mb-1 block">Filter by Month</label>
                             <select name="month" id="month"
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
+                                 <option value="">All Months</option>
                                 @foreach($months as $m)
                                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                                         {{ \Carbon\Carbon::parse($m . '-01')->format('F Y') }}

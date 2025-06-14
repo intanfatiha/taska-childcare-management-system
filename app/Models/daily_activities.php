@@ -12,6 +12,7 @@ class daily_activities extends Model
 
     protected $fillable = [
         'user_id',
+        'post_title',
         'activity_photo',
         'post_date',
         'post_time',

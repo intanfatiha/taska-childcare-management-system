@@ -319,6 +319,8 @@ class EnrollmentController extends Controller
 
     public function store(Request $request)
 {
+      
+
     $registration_type = $request->registration_type;
 
     // Check if father and mother already exist
@@ -328,6 +330,7 @@ class EnrollmentController extends Controller
     // Check if guardian already exists
     $guardianExists = Guardian::where('guardian_ic', $request->guardian_ic)->orWhere('guardian_email', $request->guardian_email)->exists();
 
+    
     $commonChildRules = [
         'child_name' => 'required|string|max:255',
         'child_birth_date' => 'required|date',
@@ -345,6 +348,7 @@ class EnrollmentController extends Controller
         'registration_type' => 'required|in:parents,guardian',
 
     ];
+    //   dd('Method is being called!', $request->all());
 
     if ($registration_type === "parents") {
         $parentRules = [
@@ -391,7 +395,7 @@ class EnrollmentController extends Controller
         }
 
         $validated = $request->validate(array_merge($commonChildRules, $parentRules));
-
+  
     } else if ($registration_type === "guardian") {
         $guardianRules = [
             'guardian_name' => 'required|string|max:255',
@@ -417,11 +421,14 @@ class EnrollmentController extends Controller
 
         $validated = $request->validate(array_merge($commonChildRules, $guardianRules));
     }
+    
 
     $registration = Enrollment::create([
         'status' => 'pending',
         'registration_type' => $registration_type,
     ]);
+    
+    
 
     // Set parent/guardian variables
     $father = $mother = $guardian = null;
@@ -543,6 +550,7 @@ class EnrollmentController extends Controller
 
                   
     ]);
+    
 
     ParentRecord::create([
         'enrollment_id' => $registration->id,
@@ -552,6 +560,7 @@ class EnrollmentController extends Controller
         'child_id' => $child->id,
     ]);
 
+  
     //  Send email notification to admin when new request is made
               try {
                   $loginUrl = route('login');
@@ -628,21 +637,49 @@ class EnrollmentController extends Controller
     }
 
      
-    public function createNewChild()
-    {
-        $userId = auth()->id();
-        $father = \App\Models\Father::where('user_id', $userId)->first();
-        $mother = \App\Models\Mother::where('user_id', $userId)->first();
-        $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
+    public function createNewChild(Request $request)
+{
+    
+    $userId = auth()->id();
 
-        if ($guardian) {
-            $registration_type = 'guardian';
-        } elseif ($father || $mother) {
-            $registration_type = 'parents';
-        } else {
-            $registration_type = null; // or handle as needed
+    $father = \App\Models\Father::where('user_id', $userId)->first();
+    $mother = \App\Models\Mother::where('user_id', $userId)->first();
+    $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
+
+    $parentRecord = null; // Initialize
+
+    if ($guardian) {
+        $registration_type = 'guardian';
+    } elseif ($father || $mother) {
+        $registration_type = 'parents';
+
+        // Now find ParentRecord where either father_id or mother_id matches:
+        $parentRecordQuery = \App\Models\ParentRecord::query();
+
+        if ($father) {
+            $parentRecordQuery->where('father_id', $father->id);
+           
+
         }
 
-        return view('registrations.newChildRegister', compact('father', 'mother', 'guardian', 'registration_type'));
+        if ($mother) {
+            // If both father and mother exist, ensure we check for both:
+            $parentRecordQuery->orWhere('mother_id', $mother->id);
+        }
+
+        $parentRecord = $parentRecordQuery->first();
+
+    } else {
+        $registration_type = null;
     }
+
+    return view('registrations.newChildRegister', compact(
+        'father',
+        'mother',
+        'guardian',
+        'registration_type',
+        'parentRecord'  // Pass this to the view
+    ));
+}
+
 }

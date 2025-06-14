@@ -1,38 +1,20 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Breadcrumb navigation -->
-        <nav class="flex mb-5" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li>
-                    <div class="flex items-center">
-                        <a href="{{ route('daily_activities.index') }}" class="text-gray-700 hover:text-indigo-600 text-sm font-medium">
-                            Children Daily Board
-                        </a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                        </svg>
-                        <span class="text-gray-500 text-sm font-medium">Edit Post</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-        
+
         <!-- Page header -->
-        <div class="bg-white rounded-lg shadow-sm mb-6 p-6">
-            <h2 class="text-2xl font-bold text-gray-800">Edit Activity Post</h2>
+        <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-100 p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-bold text-indigo-800">
+                {{ __('Update Activity Post') }}
+            </h2>
             <p class="text-gray-600 mt-1">Update the activity details to keep parents informed.</p>
         </div>
-        
+
         <!-- Form card -->
-        <div class="bg-white rounded-lg shadow-sm">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
             <form action="{{ route('daily_activities.update', $daily_activity->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
-                
+
                 <!-- Form errors -->
                 @if ($errors->any())
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
@@ -53,13 +35,13 @@
                         </div>
                     </div>
                 @endif
-                
+
                 <!-- Activity Title -->
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700">Activity Title</label>
-                    <input type="text" name="title" id="title" value="{{ old('title', $daily_activity->title) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="e.g. Art Project: Autumn Leaves">
+                    <label for="post_title" class="block text-sm font-medium text-gray-700">Activity Title</label>
+                    <input type="text" name="post_title" id="post_title" value="{{ old('post_title', $daily_activity->post_title) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="e.g. Art Project: Autumn Leaves">
                 </div>
-                
+
                 <!-- Date and Time -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -71,13 +53,13 @@
                         <input type="time" name="post_time" id="post_time" value="{{ old('post_time', \Carbon\Carbon::parse($daily_activity->post_time)->format('H:i')) }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                     </div>
                 </div>
-                
+
                 <!-- Description -->
                 <div>
                     <label for="post_desc" class="block text-sm font-medium text-gray-700">Description</label>
                     <textarea id="post_desc" name="post_desc" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Describe the activity, what children learned, and any other important details...">{{ old('post_desc', $daily_activity->post_desc) }}</textarea>
                 </div>
-                
+
                 <!-- Image Upload with Preview -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Activity Photo</label>
@@ -102,16 +84,18 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Action Buttons -->
-                <div class="flex justify-center space-x-3 pt-5">
-                    <a href="{{ route('daily_activities.index') }}" class="py-2 px-6 w-32 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center">
+                <div class="flex justify-end space-x-3 mt-6">
+                    <a href="{{route('daily_activities.index') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition">
                         Cancel
                     </a>
-                    <button type="submit" class="py-2 px-6 w-32 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center">
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
                         Update Post
                     </button>
                 </div>
+
+               
             </form>
         </div>
     </div>

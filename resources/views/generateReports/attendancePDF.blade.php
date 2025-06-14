@@ -200,10 +200,10 @@
                             @endif
                         </td>
                         <td>
-                            @if($attendance->attendance_overtime && $attendance->attendance_overtime > 0)
-                                <span class="overtime">{{ $attendance->attendance_overtime }} min</span>
+                            @if(!is_null($attendance->attendance_overtime) && $attendance->attendance_overtime != 0)
+                                <span class="font-bold">{{ abs($attendance->attendance_overtime) }} min</span>
                             @else
-                                <span class="na-text">-</span>
+                                <span class="text-gray-400">-</span>
                             @endif
                         </td>
                     </tr>

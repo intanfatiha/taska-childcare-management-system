@@ -66,6 +66,7 @@ class DailyActivitiesController extends Controller
         $validatedData = $request->validate
         (
         [ 
+            'post_title' => 'required|string|max:255',
             'activity_photo' => 'required|image|mimes:jpeg,jpg,png|max:2048', 
             'post_date' => 'required|date|after_or_equal:today',
             'post_time' => 'required|date_format:H:i',
@@ -138,7 +139,8 @@ class DailyActivitiesController extends Controller
     {
         $validatedData = $request->validate(
             [ 
-                'activity_photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048', // Photo is optional for updates
+                'post_title' => 'required|string|max:255',
+                'activity_photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048', 
                 'post_date' => 'required|date',
                 'post_time' => 'required|date_format:H:i',
                 'post_desc' => 'required|string|max:255'
@@ -184,12 +186,12 @@ class DailyActivitiesController extends Controller
                 if ($daily_activity->activity_photo && file_exists($directory . '/' . $daily_activity->activity_photo)) {
                     unlink($directory . '/' . $daily_activity->activity_photo);
                 }
-            }
+            } 
         
             // Update the activity using the instance method
             $daily_activity->update($validatedData);
         
-            return redirect()->back()->with('message', 'Post updated successfully');
+    return redirect()->route('daily_activities.index')->with('message', 'Post updated successfully');
 
             //return redirect()->route('daily_activities.index')->with('message', 'Post updated successfully');
     }

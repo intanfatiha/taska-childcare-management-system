@@ -20,13 +20,16 @@
                 @endphp
 
                 @php
-                    $totalEnrollments = \App\Models\Enrollment::count(); 
+                   
                     $totalStaffs = \App\Models\Staff::count();
                     $totalChildren = \App\Models\Child::count();
 
                     $totalRegisteredChildren = \App\Models\Child::whereHas('enrollment', function($query) {
                         $query->where('status', 'approved');
                     })->count();
+
+                  
+                    $totalEnrollments = \App\Models\Enrollment::where('status', 'pending')->count();
 
                     //get total child for parents  
                     $parentChildrenCount = auth()->user()->role === 'parents' 
@@ -285,7 +288,7 @@
 
                 @endif
 
-               @if(auth()->user()->role === 'parents')
+              @if(auth()->user()->role === 'parents')
     @php
         // Initialize parent data
         $userId = auth()->id();
@@ -293,17 +296,23 @@
         $mother = \App\Models\Mother::where('user_id', $userId)->first();
         $guardian = \App\Models\Guardian::where('user_id', $userId)->first();
 
-        // Get children records
-        $childrenRecords = \App\Models\ParentRecord::with('child')
-            ->where(function ($query) use ($father, $mother, $guardian) {
-                if ($father) $query->orWhere('father_id', $father->id);
-                if ($mother) $query->orWhere('mother_id', $mother->id);
-                if ($guardian) $query->orWhere('guardian_id', $guardian->id);
-            })
-            ->get();
+         // Get children records with approved enrollment only
+        $childrenRecords = \App\Models\ParentRecord::with(['child' => function($q) {
+            $q->whereHas('enrollment', function($query) {
+                $query->where('status', 'approved');
+            });
+        }])
+        ->where(function ($query) use ($father, $mother, $guardian) {
+            if ($father) $query->orWhere('father_id', $father->id);
+            if ($mother) $query->orWhere('mother_id', $mother->id);
+            if ($guardian) $query->orWhere('guardian_id', $guardian->id);
+        })
+        ->get();
 
-        $childrenTot = $childrenRecords->count();
-
+        $childrenTot = $childrenRecords->filter(function($record) {
+            return $record->child !== null;
+        })->count();
+        
         // Get parent record for payments
         $parentRecord = null;
         if ($father) $parentRecord = \App\Models\ParentRecord::where('father_id', $father->id)->first();
@@ -332,7 +341,7 @@
             ];
         }
 
-        // Get payment data
+        // Get payment data with statistics
         $payments = $parentRecord
             ? \App\Models\Payment::with('child')
                 ->where('parent_id', $parentRecord->id)
@@ -340,316 +349,391 @@
                 ->take(5)
                 ->get()
             : collect();
+
+        // Calculate payment statistics
+        $totalUnpaid = $payments->where('payment_status', '!=', 'Complete')->where('payment_status', '!=', 'Paid')->sum('payment_amount');
+        $overdueCount = $payments->where('payment_status', 'overdue')->count();
+        $upcomingDue = $payments->where('payment_status', '!=', 'Complete')
+            ->where('payment_status', '!=', 'Paid')
+            ->where('payment_duedate', '>=', now())
+            ->where('payment_duedate', '<=', now()->addDays(7))
+            ->count();
+
+        // Calculate attendance statistics
+        $presentToday = collect($attendanceSummary)->where('status', 'attend')->count();
+        $absentToday = collect($attendanceSummary)->where('status', 'absent')->count();
+        $notMarkedToday = collect($attendanceSummary)->where('status', 'Not Marked')->count();
     @endphp
 
     <div class="bg-white rounded-lg overflow-hidden">
         
-        {{-- MY CHILDREN SECTION --}}
-        <div class="mb-8">
-            <!-- Header with Register Button -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <span class="text-3xl mr-3">👨‍👩‍👧‍👦</span>
-                    <h2 class="text-2xl font-bold text-black-700">My Children</h2>
-                </div>
-                
-                <a href="{{ route('enrollment.createNewChild') }}"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center">
-                    <span class="mr-1">➕</span> Register New Child
-                </a>
-            </div>
+        {{-- MAIN CONTENT WRAPPER --}}
+        <div class="flex flex-col lg:flex-row gap-8">
             
-            <!-- Total Children Card -->
-            <div class="mb-8 border-2 border-pink-200 p-6 rounded-lg bg-gradient-to-br from-white to-pink-50 shadow-md w-48">
-                <div class="flex items-center justify-center mb-2">
-                    <span class="text-3xl">👶</span>
+            {{-- LEFT SECTION - MY CHILDREN --}}
+            <div class="lg:w-2/3">
+                <div class="mb-8">
+                    <!-- Header with Register Button -->
+                    <div class="flex items-center justify-between mb-6 w-full">
+    <div class="flex items-center">
+        <span class="text-3xl mr-3">👨‍👩‍👧‍👦</span>
+        <h2 class="text-2xl font-bold text-black-700">My Children</h2>
+   
+    
+    <a href="{{ route('enrollment.createNewChild') }}"
+        class="ml-10 bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center">
+        <span class="mr-1">➕</span> Register New Child
+    </a>
+     </div>
+</div>
+                    
+                    <!-- Total Children Card -->
+                    <div class="mb-8 border-2 border-pink-200 p-6 rounded-lg bg-gradient-to-br from-white to-pink-50 shadow-md w-48">
+                        <div class="flex items-center justify-center mb-2">
+                            <span class="text-3xl">👶</span>
+                        </div>
+                        <p class="text-center font-medium text-gray-700">Your Children</p>
+                        <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $childrenTot }}</p>
+                    </div>
+
+                    <!-- Children Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        @forelse($childrenRecords as $record)
+                            @php $child = $record->child; @endphp
+                            @if($child)
+                                <!-- Child Card -->
+                                <div class="border-2 border-indigo-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 bg-white">
+                                    <!-- Child Photo -->
+                                    <div class="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                                        @if($child->child_photo)
+                                            <img src="{{ asset('storage/' . $child->child_photo) }}"
+                                                 alt="Child Photo"
+                                                 class="w-full h-full object-cover">
+                                        @else
+                                            <img src="{{ asset('images/no-image.png') }}"
+                                                 alt="No Image"
+                                                 class="w-full h-full object-cover">
+                                        @endif
+                                    </div>
+
+                                    <!-- Child Information -->
+                                    <div class="p-4">
+                                        <p class="font-bold text-center text-lg text-indigo-700 mb-2">{{ $child->child_name ?? 'No Name' }}</p>
+                                        
+                                        <div class="space-y-1 text-sm">
+                                            <p class="flex items-center">
+                                                <span class="mr-2">🎂</span> Age: {{ $child->child_age ?? 'N/A' }} years old
+                                            </p>
+                                            <p class="flex items-center">
+                                                <span class="mr-2">📅</span> Birthday: {{ $child->child_birthdate ?? '-' }}
+                                            </p>
+                                            <p class="flex items-center">
+                                                <span class="mr-2">
+                                                    @if($child->child_gender == 'Male')
+                                                        👦
+                                                    @elseif($child->child_gender == 'Female')
+                                                        👧
+                                                    @else
+                                                        👶
+                                                    @endif
+                                                </span>
+                                                Gender: {{ $child->child_gender ?? '-' }}
+                                            </p>
+                                            <p class="flex items-center">
+                                                <span class="mr-2">⚠️</span> Allergic: {{ $child->child_allergies ?? 'No allergies' }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Staff Assignment -->
+                                        @php
+                                            $staffAssignment = \App\Models\StaffAssignment::where('child_id', $child->id)
+                                                ->whereIn('status', ['active', 'offday'])
+                                                ->with('staff')
+                                                ->first();
+                                        @endphp
+                                        
+                                       <div class="mt-4">
+                                        <h3 class="font-semibold text-gray-700 mb-2">Caretaker:</h3>
+                                        @if($staffAssignment && $staffAssignment->staff)
+                                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-1">
+                                                <p class="text-indigo-800 font-medium flex items-center">
+                                                    👩‍🏫 <span class="ml-2">{{ $staffAssignment->staff->staff_name }}</span>
+                                                </p>
+                                                <p class="text-indigo-700 text-sm flex items-center">
+                                                    📞 <span class="ml-2">{{ $staffAssignment->staff->staff_phoneno }}</span>
+                                                </p>
+                                            <div class="flex justify-end mt-2">
+                                        <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold 
+                                            {{ $staffAssignment->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                            {{ ucfirst($staffAssignment->status) }}
+                                        </span>
+                                    </div>
+
+                                        </div>
+                                    @else
+                                        <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                            <p class="text-red-500 text-sm font-medium">No staff assigned</p>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                    </div>
+                                </div>
+                            @endif
+                        @empty
+                            <div class="col-span-full py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                <span class="text-4xl mb-4">🔍</span>
+                                <p class="text-gray-500 text-center">No children found. Register your child to see them here.</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
-                <p class="text-center font-medium text-gray-700">Your Children</p>
-                <p class="text-center text-4xl font-bold mt-2 text-pink-600">{{ $childrenTot }}</p>
             </div>
 
-            <!-- Children Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @php 
-                @endphp
-                @forelse($childrenRecords as $record)
-                    @php $child = $record->child; @endphp
-                    @if($child)
-                        <!-- Child Card -->
-                        <div class="border-2 border-indigo-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 bg-white">
-                            <!-- Child Photo -->
-                            <div class="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                @if($child->child_photo)
-                                    <img src="{{ asset('storage/' . $child->child_photo) }}"
-                                         alt="Child Photo"
-                                         class="w-full h-full object-cover"
-                                         >
-                                @else
-                                    <img src="{{ asset('images/no-image.png') }}"
-                                         alt="No Image"
-                                         class="w-full h-full object-cover">
+            {{-- RIGHT SECTION - SUMMARIES --}}
+            <div class="lg:w-1/3 space-y-6">
+                
+                {{-- QUICK STATS OVERVIEW --}}
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-lg font-bold text-indigo-800 mb-4 flex items-center">
+                        <span class="mr-2">📊</span> Today's Overview
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Attendance Stats -->
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-1">👥</div>
+                            <div class="text-2xl font-bold text-green-600">{{ $presentToday }}</div>
+                            <div class="text-xs text-gray-600">Present</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-1">❌</div>
+                            <div class="text-2xl font-bold text-red-600">{{ $absentToday }}</div>
+                            <div class="text-xs text-gray-600">Absent</div>
+                        </div>
+                        
+                        <!-- Payment Stats -->
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-1">💰</div>
+                            <div class="text-lg font-bold text-yellow-600">RM{{ number_format($totalUnpaid, 0) }}</div>
+                            <div class="text-xs text-gray-600">Unpaid</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4 text-center shadow-sm">
+                            <div class="text-2xl mb-1">⚠️</div>
+                            <div class="text-2xl font-bold text-orange-600">{{ $upcomingDue }}</div>
+                            <div class="text-xs text-gray-600">Due Soon</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- LATEST ANNOUNCEMENT --}}
+                <div class="bg-white border-2 border-blue-200 rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <span class="mr-2">📢</span> Latest News
+                        </h3>
+                    </div>
+                    
+                    <div class="p-4">
+                        @if($latestAnnouncement)
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                                        {{ ucfirst($latestAnnouncement->announcement_type) }}
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($latestAnnouncement->announcement_date)->format('M d') }}
+                                    </span>
+                                </div>
+                                
+                                <h4 class="font-bold text-gray-800 leading-tight">{{ $latestAnnouncement->announcement_title }}</h4>
+                                
+                                <p class="text-sm text-gray-600 line-clamp-3">{{ $latestAnnouncement->activity_description }}</p>
+                                
+                                @if($latestAnnouncement->announcement_location)
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="mr-1">📍</span> {{ $latestAnnouncement->announcement_location }}
+                                    </div>
                                 @endif
                             </div>
-
-                            <!-- Child Information -->
-                            <div class="p-4">
-                                <p class="font-bold text-center text-lg text-indigo-700 mb-2">{{ $child->child_name ?? 'No Name' }}</p>
-                                
-                                <div class="space-y-1 text-sm">
-                                    <p class="flex items-center">
-                                        <span class="mr-2">🎂</span> Age: {{ $child->child_age ?? 'N/A' }} years old
-                                    </p>
-                                    <p class="flex items-center">
-                                        <span class="mr-2">📅</span> Birthday: {{ $child->child_birthdate ?? '-' }}
-                                    </p>
-                                    <p class="flex items-center">
-                                        <span class="mr-2">
-                                            @if($child->child_gender == 'Male')
-                                                👦
-                                            @elseif($child->child_gender == 'Female')
-                                                👧
-                                            @else
-                                                👶
-                                            @endif
-                                        </span>
-                                        Gender: {{ $child->child_gender ?? '-' }}
-                                    </p>
-                                    <p class="flex items-center">
-                                        <span class="mr-2">⚠️</span> Allergic: {{ $child->child_allergies ?? 'No allergies' }}
-                                    </p>
-                                </div>
-
-                                <!-- Staff Assignment -->
-                                @php
-                                    $staffAssignment = \App\Models\StaffAssignment::where('child_id', $child->id)
-                                        ->whereIn('status', ['active', 'offday'])
-                                        ->with('staff')
-                                        ->first();
-                                @endphp
-                                
-                               <div class="mt-4">
-                                <h3 class="font-semibold text-gray-700 mb-2">Caretaker:</h3>
-                                @if($staffAssignment && $staffAssignment->staff)
-                                    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-1">
-                                        <p class="text-indigo-800 font-medium flex items-center">
-                                            👩‍🏫 <span class="ml-2">{{ $staffAssignment->staff->staff_name }}</span>
-                                        </p>
-                                        <p class="text-indigo-700 text-sm flex items-center">
-                                            📞 <span class="ml-2">{{ $staffAssignment->staff->staff_phoneno }}</span>
-                                        </p>
-                                    <div class="flex justify-end mt-2">
-                                <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold 
-                                    {{ $staffAssignment->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                    {{ ucfirst($staffAssignment->status) }}
-                                </span>
+                            
+                            <a href="{{ route('announcements.index') }}"
+                               class="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                View all announcements →
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-6">
+                                <span class="text-3xl mb-2 block">📢</span>
+                                <p class="text-sm">No announcements yet</p>
                             </div>
-
-                                </div>
-                            @else
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-                                    <p class="text-red-500 text-sm font-medium">No staff assigned</p>
-                                </div>
-                            @endif
-                        </div>
-
-                            </div>
-                        </div>
-                    @endif
-                @empty
-                    <div class="col-span-full py-8 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <span class="text-4xl mb-4">🔍</span>
-                        <p class="text-gray-500 text-center">No children found. Register your child to see them here.</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        {{-- ANNOUNCEMENTS & DAILY BOARD SECTION --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            
-            <!-- Announcements Section -->
-            <div class="bg-white border-2 border-indigo-200 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
-                    <span class="mr-2">🔔</span> Latest Announcement
-                </h3>
-
-                @if($latestAnnouncement)
-                    <div class="mb-4">
-                        <!-- Date and Time -->
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs text-gray-500">
-                                {{ \Carbon\Carbon::parse($latestAnnouncement->announcement_date)->format('d M Y') }}
-                            </span>
-                            @if($latestAnnouncement->announcement_time)
-                                <span class="text-xs text-gray-500">{{ $latestAnnouncement->announcement_time }}</span>
-                            @endif
-                        </div>
-
-                        <!-- Title and Description -->
-                        <h4 class="font-bold text-lg text-indigo-800 mb-1">{{ $latestAnnouncement->announcement_title }}</h4>
-                        <p class="text-gray-700 mb-2">{{ $latestAnnouncement->activity_description }}</p>
-
-                        <!-- Location -->
-                        @if($latestAnnouncement->announcement_location)
-                            <p class="text-sm text-gray-500 mb-1">
-                                <span class="font-semibold">Location:</span> {{ $latestAnnouncement->announcement_location }}
-                            </p>
                         @endif
-
-                        <!-- Type -->
-                        <p class="text-sm text-indigo-600 mt-1 font-semibold italic">
-                            Type: {{ ucfirst($latestAnnouncement->announcement_type) }}
-                        </p>
                     </div>
+                </div>
 
-                    <a href="{{ route('announcements.index') }}"
-                       class="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-                        View All Announcements
-                    </a>
-                @else
-                    <div class="text-center text-gray-500 py-8">
-                        <span class="text-2xl mb-2 block">🔔</span>
-                        <p>No announcements found.</p>
+                {{-- DAILY BOARD --}}
+                <div class="bg-white border-2 border-purple-200 rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-600 p-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <span class="mr-2">📝</span> Daily Activity
+                        </h3>
                     </div>
-                @endif
-            </div>
-
-            <!-- Daily Board Section -->
-            <div class="bg-white border-2 border-indigo-200 rounded-lg shadow-md p-6">
-                <h3 class="text-xl font-bold text-indigo-700 mb-4 flex items-center">
-                    <span class="mr-2">📅</span> Daily Board
-                </h3>
-
-                @if($latestDaily)
-                    <div class="mb-4">
-                        <!-- Date and Time -->
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs text-gray-500">
-                                {{ \Carbon\Carbon::parse($latestDaily->post_date)->format('d M Y') }}
-                            </span>
-                            <span class="text-xs text-gray-500">{{ $latestDaily->post_time }}</span>
-                        </div>
-
-                        <!-- Title and Description -->
-                        <h4 class="font-bold text-lg text-indigo-800 mb-1">Daily Activity</h4>
-                        <p class="text-gray-700 mb-2">{{ $latestDaily->post_desc }}</p>
+                    
+                    <div class="p-4">
+                        @if($latestDaily)
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full font-medium">
+                                        Daily Update
+                                    </span>
+                                    <span class="text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($latestDaily->post_date)->format('M d') }}
+                                    </span>
+                                </div>
+                                
+                                <p class="text-sm text-gray-700 leading-relaxed">{{ $latestDaily->post_desc }}</p>
+                                
+                                @if($latestDaily->post_time)
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="mr-1">🕐</span> {{ $latestDaily->post_time }}
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            <a href="{{ route('daily_activities.index') }}"
+                               class="inline-block mt-4 text-purple-600 hover:text-purple-800 text-sm font-medium">
+                                View all activities →
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-6">
+                                <span class="text-3xl mb-2 block">📝</span>
+                                <p class="text-sm">No activities posted yet</p>
+                            </div>
+                        @endif
                     </div>
+                </div>
 
-                    <a href="{{ route('daily_activities.index') }}"
-                       class="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-                        View All Daily Board
-                    </a>
-                @else
-                    <div class="text-center text-gray-500 py-8">
-                        <span class="text-2xl mb-2 block">📅</span>
-                        <p>No daily board posts found.</p>
+                {{-- ATTENDANCE SUMMARY --}}
+                <div class="bg-white border-2 border-green-200 rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <span class="mr-2">✅</span> Today's Attendance
+                        </h3>
                     </div>
-                @endif
-            </div>
-        </div>
+                    
+                    <div class="p-4">
+                        @if(count($attendanceSummary) > 0)
+                            <div class="space-y-3">
+                                @foreach($attendanceSummary as $row)
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center">
+                                            @if($row['status'] === 'attend')
+                                                <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                                            @elseif($row['status'] === 'absent')
+                                                <span class="w-3 h-3 bg-red-500 rounded-full mr-3"></span>
+                                            @else
+                                                <span class="w-3 h-3 bg-gray-400 rounded-full mr-3"></span>
+                                            @endif
+                                            <div>
+                                                <p class="font-medium text-sm text-gray-800">{{ $row['name'] }}</p>
+                                                @if($row['time_in'])
+                                                    <p class="text-xs text-gray-500">In: {{ \Carbon\Carbon::parse($row['time_in'])->format('g:i A') }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-right">
+                                            @if($row['status'] === 'attend')
+                                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Present</span>
+                                            @elseif($row['status'] === 'absent')
+                                                <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Absent</span>
+                                            @else
+                                                <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Pending</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            
+                            <a href="{{ route('attendances.parentsIndex') }}"
+                               class="inline-block mt-4 text-green-600 hover:text-green-800 text-sm font-medium">
+                                View full attendance →
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-6">
+                                <span class="text-3xl mb-2 block">📋</span>
+                                <p class="text-sm">No attendance data today</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
 
-        {{-- ATTENDANCE SECTION --}}
-        <div class="bg-white border-2 border-green-200 rounded-lg shadow-md p-6 mb-8">
-            <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center">
-                <span class="mr-2">🗓️</span> Attendance Summary
-            </h3>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full table-auto border-collapse border border-gray-200">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border px-4 py-2 text-left">Child Name</th>
-                            <th class="border px-4 py-2 text-left">Status</th>
-                            <th class="border px-4 py-2 text-left">Time In</th>
-                            <th class="border px-4 py-2 text-left">Time Out</th>
-                            <th class="border px-4 py-2 text-left">Overtime</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($attendanceSummary as $row)
-                            <tr>
-                                <td class="border px-4 py-2">{{ $row['name'] }}</td>
-                                <td class="border px-4 py-2">
-                                    @if($row['status'] === 'attend')
-                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Present</span>
-                                    @elseif($row['status'] === 'absent')
-                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded">Absent</span>
-                                    @else
-                                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded">{{ $row['status'] }}</span>
+                {{-- PAYMENT SUMMARY --}}
+                <div class="bg-white border-2 border-yellow-200 rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 p-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <span class="mr-2">💳</span> Payment Status
+                        </h3>
+                    </div>
+                    
+                    <div class="p-4">
+                        @if($payments->count() > 0)
+                            <!-- Payment Summary Stats -->
+                            @if($totalUnpaid > 0 || $overdueCount > 0)
+                                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    @if($overdueCount > 0)
+                                        <div class="flex items-center text-red-600 mb-2">
+                                            <span class="mr-2">⚠️</span>
+                                            <span class="text-sm font-medium">{{ $overdueCount }} overdue payment(s)</span>
+                                        </div>
                                     @endif
-                                </td>
-                                <td class="border px-4 py-2">
-                                    {{ $row['time_in'] ? \Carbon\Carbon::parse($row['time_in'])->format('g:i A') : '-' }}
-                                </td>
-                                <td class="border px-4 py-2">
-                                    {{ $row['time_out'] ? \Carbon\Carbon::parse($row['time_out'])->format('g:i A') : '-' }}
-                                </td>
-                                <td class="border px-4 py-2">
-                                    {{ $row['overtime'] && $row['overtime'] > 0 ? $row['overtime'].' min' : '-' }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-gray-500">No attendance data for today.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <a href="{{ route('attendances.parentsIndex') }}"
-               class="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                View Full Attendance
-            </a>
-        </div>
-
-        {{-- PAYMENT SECTION --}}
-        <div class="bg-white border-2 border-yellow-200 rounded-lg shadow-md p-6 mb-8">
-            <h3 class="text-xl font-bold text-yellow-700 mb-4 flex items-center">
-                <span class="mr-2">💳</span> Payment Summary
-            </h3>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full table-auto border-collapse border border-gray-200">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border px-4 py-2 text-left">Child Name</th>
-                            <th class="border px-4 py-2 text-left">Amount</th>
-                            <th class="border px-4 py-2 text-left">Due Date</th>
-                            <th class="border px-4 py-2 text-left">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($payments as $payment)
-                            <tr>
-                                <td class="border px-4 py-2">{{ $payment->child->child_name ?? '-' }}</td>
-                                <td class="border px-4 py-2">RM {{ number_format($payment->payment_amount, 2) }}</td>
-                                <td class="border px-4 py-2">
-                                    {{ $payment->payment_duedate ? \Carbon\Carbon::parse($payment->payment_duedate)->format('Y-m-d') : '-' }}
-                                </td>
-                                <td class="border px-4 py-2">
-                                    @if($payment->payment_status === 'Complete' || $payment->payment_status === 'Paid')
-                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Paid</span>
-                                    @elseif($payment->payment_status === 'overdue' || $payment->payment_status === 'Overdue')
-                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded">Overdue</span>
-                                    @else
-                                        <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Unpaid</span>
+                                    @if($totalUnpaid > 0)
+                                        <div class="flex items-center text-yellow-700">
+                                            <span class="mr-2">💰</span>
+                                            <span class="text-sm">Total outstanding: <strong>RM{{ number_format($totalUnpaid, 2) }}</strong></span>
+                                        </div>
                                     @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center py-4 text-gray-500">No payment records found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            @endif
 
-            <a href="{{ route('payments.index') }}"
-               class="inline-block mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
-                View All Payments
-            </a>
+                            <!-- Recent Payments -->
+                            <div class="space-y-3">
+                                @foreach($payments->take(3) as $payment)
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-sm text-gray-800">{{ $payment->child->child_name ?? 'Unknown' }}</p>
+                                            <p class="text-xs text-gray-500">Due: {{ \Carbon\Carbon::parse($payment->payment_duedate)->format('M d, Y') }}</p>
+                                        </div>
+                                        
+                                        <div class="text-right">
+                                            <p class="text-sm font-bold text-gray-800">RM{{ number_format($payment->payment_amount, 2) }}</p>
+                                            @if($payment->payment_status === 'Complete' || $payment->payment_status === 'Paid')
+                                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Paid</span>
+                                            @elseif($payment->payment_status === 'overdue' || $payment->payment_status === 'Overdue')
+                                                <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Overdue</span>
+                                            @else
+                                                <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Pending</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            
+                            <a href="{{ route('payments.index') }}"
+                               class="inline-block mt-4 text-yellow-600 hover:text-yellow-800 text-sm font-medium">
+                                View all payments →
+                            </a>
+                        @else
+                            <div class="text-center text-gray-500 py-6">
+                                <span class="text-3xl mb-2 block">💳</span>
+                                <p class="text-sm">No payment records found</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+            </div>
         </div>
 
     </div>

@@ -166,13 +166,15 @@
                                     <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
-                                @if($attendance->attendance_overtime && $attendance->attendance_overtime > 0)
-                                    <span class="text-red-600 font-bold">{{ $attendance->attendance_overtime }} min</span>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
+                         <td class="px-4 py-3">
+                            @if(!is_null($attendance->attendance_overtime) && $attendance->attendance_overtime != 0)
+                                <span class="font-bold">{{ abs($attendance->attendance_overtime) }} min</span>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+
+
                         </tr>
                         @endforeach
                         @if($attendances->isEmpty())

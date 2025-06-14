@@ -14,37 +14,38 @@
 
                     <!-- Hidden Parent/Guardian Info -->
                     <input type="hidden" name="registration_type" value="{{ $registration_type }}">
-                    @if($father)
-                        <input type="hidden" name="father_id" value="{{ $father->id }}">
-                        <input type="hidden" name="father_name" value="{{ $father->father_name }}">
-                        <input type="hidden" name="father_email" value="{{ $father->father_email }}">
-                        <input type="hidden" name="father_phoneno" value="{{ $father->father_phoneNo }}">
-                        <input type="hidden" name="father_ic" value="{{ $father->father_ic }}">
-                        <input type="hidden" name="father_address" value="{{ $father->father_address }}">
-                        <input type="hidden" name="father_nationality" value="{{ $father->father_nationality }}">
-                        <input type="hidden" name="father_race" value="{{ $father->father_race }}">
-                        <input type="hidden" name="father_religion" value="{{ $father->father_religion }}">
-                        <input type="hidden" name="father_occupation" value="{{ $father->father_occupation }}">
-                        <input type="hidden" name="father_income" value="{{ $father->father_monthly_income }}">
-                        <input type="hidden" name="father_staff_number" value="{{ $father->father_staff_number }}">
-                        <input type="hidden" name="father_ptj" value="{{ $father->father_ptj }}">
-                        <input type="hidden" name="father_office_number" value="{{ $father->father_office_number }}">
-                    @endif
-                    @if($mother)
-                        <input type="hidden" name="mother_id" value="{{ $mother->id }}">
-                        <input type="hidden" name="mother_name" value="{{ $mother->mother_name }}">
-                        <input type="hidden" name="mother_email" value="{{ $mother->mother_email }}">
-                        <input type="hidden" name="mother_phoneno" value="{{ $mother->mother_phoneNo }}">
-                        <input type="hidden" name="mother_ic" value="{{ $mother->mother_ic }}">
-                        <input type="hidden" name="mother_address" value="{{ $mother->mother_address }}">
-                        <input type="hidden" name="mother_nationality" value="{{ $mother->mother_nationality }}">
-                        <input type="hidden" name="mother_race" value="{{ $mother->mother_race }}">
-                        <input type="hidden" name="mother_religion" value="{{ $mother->mother_religion }}">
-                        <input type="hidden" name="mother_occupation" value="{{ $mother->mother_occupation }}">
-                        <input type="hidden" name="mother_income" value="{{ $mother->mother_monthly_income }}">
-                        <input type="hidden" name="mother_staff_number" value="{{ $mother->mother_staff_number }}">
-                        <input type="hidden" name="mother_ptj" value="{{ $mother->mother_ptj }}">
-                        <input type="hidden" name="mother_office_number" value="{{ $mother->mother_office_number }}">
+                    @if($registration_type === 'parents' && $parentRecord)
+                                            <input type="hidden" name="registration_type" value="parents">
+
+                        <input type="hidden" name="father_id" value="{{ $parentRecord->father_id }}">
+                        <input type="hidden" name="father_name" value="{{ $parentRecord->father->father_name }}">
+                        <input type="hidden" name="father_email" value="{{$parentRecord->father->father_email }}">
+                        <input type="hidden" name="father_phoneno" value="{{ $parentRecord->father->father_phoneNo }}">
+                        <input type="hidden" name="father_ic" value="{{ $parentRecord->father->father_ic }}">
+                        <input type="hidden" name="father_address" value="{{ $parentRecord->father->father_address }}">
+                        <input type="hidden" name="father_nationality" value="{{$parentRecord->father->father_nationality }}">
+                        <input type="hidden" name="father_race" value="{{ $parentRecord->father->father_race }}">
+                        <input type="hidden" name="father_religion" value="{{ $parentRecord->father->father_religion }}">
+                        <input type="hidden" name="father_occupation" value="{{ $parentRecord->father->father_occupation }}">
+                        <input type="hidden" name="father_income" value="{{ $parentRecord->father->father_monthly_income }}">
+                        <input type="hidden" name="father_staff_number" value="{{ $parentRecord->father->father_staff_number }}">
+                        <input type="hidden" name="father_ptj" value="{{ $parentRecord->father->father_ptj }}">
+                        <input type="hidden" name="father_office_number" value="{{ $parentRecord->father->father_office_number }}">
+                
+                        <input type="hidden" name="mother_id" value="{{ $parentRecord->mother_id }}">
+                        <input type="hidden" name="mother_name" value="{{ $parentRecord->mother->mother_name }}">
+                        <input type="hidden" name="mother_email" value="{{ $parentRecord->mother->mother_email }}">
+                        <input type="hidden" name="mother_phoneno" value="{{$parentRecord->mother->mother_phoneNo }}">
+                        <input type="hidden" name="mother_ic" value="{{ $parentRecord->mother->mother_ic }}">
+                        <input type="hidden" name="mother_address" value="{{ $parentRecord->mother->mother_address }}">
+                        <input type="hidden" name="mother_nationality" value="{{ $parentRecord->mother->mother_nationality }}">
+                        <input type="hidden" name="mother_race" value="{{ $parentRecord->mother->mother_race }}">
+                        <input type="hidden" name="mother_religion" value="{{ $parentRecord->mother->mother_religion }}">
+                        <input type="hidden" name="mother_occupation" value="{{ $parentRecord->mother->mother_occupation }}">
+                        <input type="hidden" name="mother_income" value="{{$parentRecord->mother->mother_monthly_income }}">
+                        <input type="hidden" name="mother_staff_number" value="{{ $parentRecord->mother->mother_staff_number }}">
+                        <input type="hidden" name="mother_ptj" value="{{ $parentRecord->mother->mother_ptj }}">
+                        <input type="hidden" name="mother_office_number" value="{{ $parentRecord->mother->mother_office_number }}">
                     @endif
                     @if($guardian)
                         <input type="hidden" name="guardian_id" value="{{ $guardian->id }}">
