@@ -43,6 +43,7 @@ class AttendanceController extends Controller
     }
 
    
+
 public function parentsIndex(Request $request)
 {
     $date = $request->get('date', now()->format('Y-m-d'));
@@ -63,15 +64,14 @@ public function parentsIndex(Request $request)
         ->when($fatherId, fn($q) => $q->orWhere('father_id', $fatherId))
         ->when($motherId, fn($q) => $q->orWhere('mother_id', $motherId))
         ->when($guardianId, fn($q) => $q->orWhere('guardian_id', $guardianId))
-        ->with(['child' => function ($query) {
-            $query->where('status', 'approved'); // Only approved children
-        }])
+        ->with('child')
         ->get();
 
-    // Filter out nulls, remove duplicates
+    // Get all children associated with the parent, filter out nulls, and unique by id
     $myChildren = $parentRecords->pluck('child')->filter()->unique('id')->values();
 
     $filterDate = $request->get('date', now()->format('Y-m-d'));
+
     $totalChildren = $myChildren->count();
     $presentToday = 0;
     $absentToday = 0;
@@ -90,7 +90,6 @@ public function parentsIndex(Request $request)
 
     return view('attendances.parentsIndex', compact('myChildren', 'filterDate', 'totalChildren', 'presentToday', 'absentToday'));
 }
-
     /**
      * Show the form for creating a new resource.
      */
