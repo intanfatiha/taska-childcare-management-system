@@ -61,7 +61,7 @@
 
                         @if(auth()->user()->role === 'admin')
                         <td class="border px-4 py-2 text-center">
-                            <form method="POST" action="{{ route('camera-footages.destroy', $footage->id) }}">
+                            <form method="POST" action="{{ route('camera-footages.destroy', $footage->id) }}" onsubmit="return confirm('Are you sure you want to delete this footage?');" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-500 hover:text-red-700">
@@ -76,6 +76,7 @@
                                 </button>
                             </form>
                         </td>
+                      
                         @endif
                     </tr>
                 @endforeach
