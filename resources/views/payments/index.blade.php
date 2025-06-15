@@ -123,7 +123,7 @@
                         <div class="text-3xl font-bold text-gray-900 mb-1">
                             @php
                                 $overdueCount = $payments->filter(function($payment) {
-                                    return $payment->payment_status == 'Pending' && 
+                                    return $payment->payment_status == 'Overdue' && 
                                            \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($payment->payment_duedate));
                                 })->count();
                             @endphp
