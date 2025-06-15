@@ -36,6 +36,7 @@ class AdminController extends Controller
         ->with(['enrollment', 'parentRecords.father', 'parentRecords.mother', 'parentRecords.guardian'])
         ->paginate(15);
 
+
     return view('adminActivity.listChildEnrollment', compact('children'));
 }
 
