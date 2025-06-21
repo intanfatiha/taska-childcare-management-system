@@ -193,37 +193,42 @@ class AdminController extends Controller
 
         // Collect emails to send the rejection message
         $emails = [];
-        if (!empty($enrollment->father->father_email)) {
-            $emails[$enrollment->father->father_email] = $enrollment->father->father_name;
+        if (!empty($father?->father_email)) {
+            $emails[$father->father_email] = $father->father_name;
         }
-        if (!empty($enrollment->mother->mother_email)) {
-            $emails[$enrollment->mother->mother_email] = $enrollment->mother->mother_name;
+        if (!empty($mother?->mother_email)) {
+        $emails[$mother->mother_email] = $mother->mother_name;
         }
-        if (!empty($enrollment->guardian->guardian_email)) {
-            $emails[$enrollment->guardian->guardian_email] = $enrollment->guardian->guardian_name;
+
+        if (!empty($guardian?->guardian_email)) {
+            $emails[$guardian->guardian_email] = $guardian->guardian_name;
         }
 
             // Send rejection emails
-        foreach ($emails as $email => $name) {
-            try {
-                Mail::html("
-                    <h2>Dear $name,</h2>
-                    <p>We regret to inform you that your application has been rejected for the following reason:</p>
-                    <p><strong>Reason:</strong> {$validated['rejectReason']}</p>
-                    <p>If you have any questions, please contact us for further clarification.</p>
-                    <p>Thank you.</p>
-                ", function ($message) use ($email) {
-                    $message->to($email)
-                        ->subject('Application Rejected');
-                });
+         foreach ($emails as $email => $name) {
+        try {
+            Mail::html("
+                <div style=\"font-family: Arial, sans-serif; padding: 20px; background-color: #f8f8f8;\">
+                    <div style=\"max-width: 600px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);\">
+                        <h2 style=\"color: #cc0000;\">Dear $name,</h2>
+                        <p>We regret to inform you that your childcare registration for <strong>{$child?->full_name}</strong> has been <span style=\"color: #cc0000;\"><strong>rejected</strong></span>.</p>
+                        <p><strong>Reason for rejection:</strong><br>{$validated['rejectReason']}</p>
+                        <p>If you have any questions, please contact us for further clarification.</p>
+                        <p>Thank you for your interest in our childcare services.</p>
+                        <br>
+                        <p style=\"font-size: 14px; color: #888;\">This is an automated email. Please do not reply directly to this message.</p>
+                    </div>
+                </div>
+            ", function ($message) use ($email) {
+                $message->to($email)
+                        ->subject('Childcare Registration Rejected');
+            });
 
-                // Log successful email
-                Log::info("Rejection email sent successfully to: $email");
-            } catch (\Exception $e) {
-                // Log email sending failures
-                Log::error("Failed to send rejection email to $email. Error: " . $e->getMessage());
-            }
+            Log::info("Rejection email sent successfully to: $email");
+        } catch (\Exception $e) {
+            Log::error("Failed to send rejection email to $email. Error: " . $e->getMessage());
         }
+    }
 
 
        $sharedChildren = ParentRecord::where('father_id', $parentRecord->father_id)
@@ -242,6 +247,7 @@ class AdminController extends Controller
 
     Child::where("id", $parentRecord->child_id)->delete();
     $parentRecord->delete();
+
 
 
         // Redirect back with a success message
