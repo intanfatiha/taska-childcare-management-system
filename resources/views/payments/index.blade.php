@@ -724,9 +724,8 @@
                                 onchange="this.form.submit()">
                                 <option value="">All Children</option>
                                 @foreach($children as $child)
-                                    <option value="{{ $child->id }}" {{ request('child_id') == $child->id ? 'selected' : '' }}>
-                                        {{ $child->child_name }}
-                                    </option>
+                                           <option value="{{ $child->id }}">{{ $child->child_name }}</option>
+
                                 @endforeach
                             </select>
                         </div>

@@ -56,31 +56,44 @@ public function index(Request $request)
         }
     }
 
-    // Filter for parents 
-    if (auth()->user()->role === 'parents') {
-        $parentRecord = $this->getParentRecordForLoggedInUser();
-        if ($parentRecord) {
-            $paymentsQuery->where('parent_id', $parentRecord->id);
-        }
-    }
-
-
-if (auth()->user()->role === 'parents') {
+ // Filter for parents_
+   if (auth()->user()->role === 'parents') {
     $parentRecord = $this->getParentRecordForLoggedInUser();
+
     if ($parentRecord) {
-        $children = \App\Models\Child::whereHas('parentRecord', function($q) use ($parentRecord) {
-            $q->where('father_id', $parentRecord->father_id)
-              ->orWhere('mother_id', $parentRecord->mother_id)
-              ->orWhere('guardian_id', $parentRecord->guardian_id);
-        })->get();
+        // Find all parent records where the logged-in user is father/mother/guardian
+        $relatedParentRecords = \App\Models\ParentRecord::query()
+            ->when($parentRecord->father_id, function ($q) use ($parentRecord) {
+                $q->orWhere('father_id', $parentRecord->father_id);
+            })
+            ->when($parentRecord->mother_id, function ($q) use ($parentRecord) {
+                $q->orWhere('mother_id', $parentRecord->mother_id);
+            })
+            ->when($parentRecord->guardian_id, function ($q) use ($parentRecord) {
+                $q->orWhere('guardian_id', $parentRecord->guardian_id);
+            })
+            ->whereHas('enrollment', function ($q) {
+                $q->where('status', 'approved');
+            })
+            ->get();
+
+        // Collect child IDs from those records
+        $childIds = $relatedParentRecords->pluck('child_id');
+
+        // Get children records
+        $children = \App\Models\Child::whereIn('id', $childIds)->get();
+
+        // Filter payments by children
+        $paymentsQuery->whereIn('child_id', $childIds);
     } else {
-        $children = collect();
+        $children = collect(); // no children if no parent match
     }
 } else {
-    $children = collect();
+    // Admins or staff can view all children
+    $children = \App\Models\Child::all();
 }
 
-    $payments = $paymentsQuery->get();
+$payments = $paymentsQuery->get();
 
     // For month dropdown (last 12 months)
     $months = [];
@@ -112,11 +125,13 @@ if (auth()->user()->role === 'parents') {
         }
 
         // 3. Check if user is a guardian
-        $guardian = Guardian::where('user_id', $userId)->first();
-        if ($guardian) {
-            $record = ParentRecord::where('guardian_id', $guardian->id)->first();
-            if ($record) return $record;
+         $guardianId = \App\Models\Guardian::where('user_id', $userId)->value('id');
+    if ($guardianId) {
+        $record = \App\Models\ParentRecord::where('guardian_id', $guardianId)->first();
+        if ($record) {
+            return $record;
         }
+    }
 
         // No matching parent record
         return null;

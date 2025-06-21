@@ -38,16 +38,18 @@
                     <div class="flex gap-1">
                         @php
                             $tabs = [
-                                'pending' => ['label' => 'Pending', 'color' => 'yellow'],
+                                'pending' => ['label' => 'Pending', 'color' => 'blue'],
                                 'approved' => ['label' => 'Approved', 'color' => 'green'], 
                                 
                             ];
+                                $activeStatus = $status ?? request('status') ?? 'pending';
+
                         @endphp
                         @foreach ($tabs as $key => $tab)
                             <a href="{{ route('childrenRegisterRequest', ['status' => $key]) }}"
                                class="px-4 py-2 text-sm font-medium rounded-md transition-colors
                                {{ $status === $key 
-                                   ? 'bg-' . $tab['color'] . '-600 text-white' 
+                                   ? 'bg-' . $tab['color'] . '-500 text-gray-900' 
                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
                                 {{ $tab['label'] }}
                             </a>
