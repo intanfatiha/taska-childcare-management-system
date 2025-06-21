@@ -29,20 +29,19 @@
             @endisset
 
             <!-- Main Layout Container -->
-            <div class="flex">
-                <!-- Sidebar -->
-                <div class="w-72 flex-shrink-0 py-5 ">
-                    <x-sidebar />
-                </div>
+           <div class="flex flex-col md:flex-row">
+            <!-- Sidebar -->
+            <div class="w-full md:w-72 flex-shrink-0 py-5">
+                <x-sidebar />
+            </div>
 
-                <!-- Main Content Area -->
-                <div class="flex-1 overflow-x-hidden">
-                    <div class="container mx-auto px-6 py-8">
-                        <div class="bg-white overflow-hidden shadow-xl rounded-3xl border border-gray-100">
-                            <main class="p-8">
-                                {{ $slot }}
-                            </main>
-                        </div>
+            <!-- Main Content Area -->
+            <div class="flex-1 overflow-x-hidden">
+                <div class="container mx-auto px-4 py-6">
+                    <div class="bg-white overflow-hidden shadow-xl rounded-3xl border border-gray-100">
+                        <main class="p-6">
+                            {{ $slot }}
+                        </main>
                     </div>
                 </div>
             </div>
