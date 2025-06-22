@@ -353,16 +353,24 @@ class AdminController extends Controller
         // Send emails
         foreach ($emails as $email => $name) {
             try {
+                $loginUrl = route('login');
                 Mail::html("
                     <h2>Dear $name,</h2>
-                    <p>Your account has been approved. Below are your login credentials:</p>
+                    <p>>We are pleased to inform you that your new childcare registration has been approved!</p>
+                    <p>Welcome to <strong>Taska Hikmah</strong>! We look forward to providing the best care and support for your child.</p>
+
                     <p><strong>Email:</strong> $email</p>
                     <p><strong>Password:</strong> Your IC Number</p>
+                    <div style='text-align: center; margin-bottom: 24px;'>
+                                    <a href='{$loginUrl}' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                        🔑 Login to Admin Panel
+                                    </a>
+                    </div>
                     <p>Please log in and change your password immediately for security reasons.</p>
                     <p>Thank you.</p>
                 ", function ($message) use ($email) {
                     $message->to($email)
-                        ->subject('Your Account Credentials');
+                        ->subject('Childcare Registration Approved – Taska Hikmah');
                 });
 
                 Log::info("Email sent successfully to: $email");
