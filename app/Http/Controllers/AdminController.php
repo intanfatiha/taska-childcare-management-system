@@ -352,25 +352,36 @@ class AdminController extends Controller
 
         // Send emails
         foreach ($emails as $email => $name) {
-            try {
+           try {
                 $loginUrl = route('login');
-                Mail::html("
-                    <h2>Dear $name,</h2>
-                    <p>>We are pleased to inform you that your new childcare registration has been approved!</p>
-                    <p>Welcome to <strong>Taska Hikmah</strong>! We look forward to providing the best care and support for your child.</p>
 
-                    <p><strong>Email:</strong> $email</p>
-                    <p><strong>Password:</strong> Your IC Number</p>
-                    <div style='text-align: center; margin-bottom: 24px;'>
-                                    <a href='{$loginUrl}' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
-                                        🔑 Login to Admin Panel
-                                    </a>
+                Mail::html("
+                    <div style='font-family: Arial, sans-serif; padding: 20px; background-color: #f8f8f8;'>
+                        <div style='max-width: 600px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.05);'>
+                            <h2 style='color:rgb(0, 54, 204);'>Dear $name,</h2>
+                            <p>We are pleased to inform you that your new childcare registration has been <span style='color: #009900;'><strong>approved</strong></span>.</p>
+                            <p>Welcome to <strong>Taska Hikmah</strong>! We look forward to providing the best care and support for your child.</p>
+                            
+                            <p><strong>Email:</strong> $email</p>
+                            <p><strong>Password:</strong> Your IC Number</p>
+
+                            <div style='text-align: center; margin-bottom: 24px;'>
+                                <a href='{$loginUrl}' style='display: inline-block; background: #2563eb; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;'>
+                                    🔑 Login to Admin Panel
+                                            </a>
+                            </div>
+
+                            <p>Please log in and change your password immediately for security reasons.</p>
+
+                            <p>If you have any questions or need further assistance, feel free to contact us.</p>
+                            <p>Thank you for choosing our childcare services.</p>
+                            <br>
+                            <p style='font-size: 14px; color: #888;'>This is an automated email. Please do not reply directly to this message.</p>
+                        </div>
                     </div>
-                    <p>Please log in and change your password immediately for security reasons.</p>
-                    <p>Thank you.</p>
                 ", function ($message) use ($email) {
                     $message->to($email)
-                        ->subject('Childcare Registration Approved – Taska Hikmah');
+                            ->subject('Childcare Registration Approved – Taska Hikmah');
                 });
 
                 Log::info("Email sent successfully to: $email");
