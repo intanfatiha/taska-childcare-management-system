@@ -464,7 +464,7 @@
 
                                         <div>
                                             <label class="block mb-1">Race<span class="text-red-500">*</span></label>
-                                            <select name="guardian_race" class="border rounded px-2 py-1.5 w-full" required>
+                                            <select name="guardian_race" class="border rounded px-2 py-1.5 w-full" >
                                                 <option value="">Select Race</option>
                                                 <option value="Malay" {{ old('guardian_race') == 'Malay' ? 'selected' : '' }}>Malay</option>
                                                 <option value="Chinese" {{ old('guardian_race') == 'Chinese' ? 'selected' : '' }}>Chinese</option>
@@ -478,7 +478,7 @@
 
                                         <div>
                                             <label class="block mb-1">Religion<span class="text-red-500">*</span></label>
-                                            <select name="guardian_religion" class="border rounded px-2 py-1.5 w-full" required>
+                                            <select name="guardian_religion" class="border rounded px-2 py-1.5 w-full" >
                                                 <option value="">Select Religion</option>
                                                 <option value="Islam" {{ old('guardian_religion') == 'Islam' ? 'selected' : '' }}>Islam</option>
                                                 <option value="Christian" {{ old('guardian_religion') == 'Christian' ? 'selected' : '' }}>Christian</option>

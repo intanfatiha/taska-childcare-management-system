@@ -145,7 +145,7 @@
                                                 </button>
                                             @endif
                                             
-                                            <form action="{{ route('adminActivity.destroy', $record->id) }}" method="POST" 
+                                            <!-- <form action="{{ route('adminActivity.destroy', $record->id) }}" method="POST" 
                                                   onsubmit="return confirm('Are you sure you want to delete this registration?')" class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -159,7 +159,7 @@
                                         </svg>
                                    
                                     </button>
-                                            </form>
+                                            </form> -->
                                         </div>
                                     </td>
                                 </tr>

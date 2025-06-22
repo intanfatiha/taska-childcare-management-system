@@ -22,10 +22,21 @@
             </div>
 
             <div class="bg-blue-50 p-4 rounded-lg shadow-md mb-6 border-2 border-blue-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-blue-700">Attendance Sheet</h2>
-                </div>
-            </div>
+    <div class="flex justify-between items-end flex-wrap gap-4">
+        <!-- Title -->
+        <h2 class="text-xl font-bold text-blue-700">Attendance Sheet</h2>
+
+        <!-- Search Bar
+        <div class="flex flex-col">
+            <label for="search" class="text-sm font-medium text-gray-700 mb-1">Search Child Name</label>
+            <input type="text" name="search" id="search"
+                value="{{ request('search') }}"
+                placeholder="Enter child name"
+                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div> -->
+    </div>
+</div>
+
 
             <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-lg">
                 <thead>

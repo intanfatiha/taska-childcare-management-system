@@ -165,6 +165,7 @@
     </div> 
      <!-- Date Filter with Check In and Check Out Buttons -->
                     <form method="GET" action="{{ route('attendances.index') }}" class="mb-6 flex items-center justify-between">
+                       <div class="flex items-end gap-6 flex-wrap">
                         <!-- Date Filter -->
                         <div class="flex flex-col">
                             <label for="date" class="text-sm font-medium text-gray-700 mb-1">Filter by Date</label>
@@ -173,6 +174,16 @@
                                 class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 onchange="this.form.submit()">
                         </div>
+
+                        <!-- Search Bar
+                        <div class="flex flex-col">
+                            <label for="search" class="text-sm font-medium text-gray-700 mb-1">Search Child Name</label>
+                            <input type="text" name="search" id="search"
+                                value="{{ request('search') }}"
+                                placeholder="Enter child name"
+                                class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div> -->
+                    </div>
 
                         <!-- Buttons -->
                         <div class="flex gap-4">
@@ -286,6 +297,14 @@
         </div>
     </div>
 
-
+<!-- <script>
+let searchTimeout;
+document.getElementById('search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        this.form.submit();
+    }, 400); // 400ms debounce for better UX
+});
+</script> -->
     
 </x-app-layout>

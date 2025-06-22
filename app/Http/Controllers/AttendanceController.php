@@ -25,12 +25,20 @@ class AttendanceController extends Controller
     public function index(Request $request) 
     {
         $date = $request->get('date', now()->format('Y-m-d')); // Default to today's date
+            $search = $request->get('search'); // Get search term
 
-        $children = Child::whereHas('enrollment', function($query) {
-            $query->where('status', 'approved');
-        })->with(['enrollment', 'attendances' => function ($query) use ($date) {
-            $query->where('attendance_date', $date);
-        }])->get();
+ $childrenQuery = Child::whereHas('enrollment', function($query) {
+        $query->where('status', 'approved');
+    });
+
+    // Add search filter for child name
+    if ($search) {
+        $childrenQuery->where('child_name', 'like', '%' . $search . '%');
+    }
+
+    $children = $childrenQuery->with(['enrollment', 'attendances' => function ($query) use ($date) {
+        $query->where('attendance_date', $date);
+    }])->get();
 
         // Get the total number of children
         $totalChildren = Child::whereHas('enrollment', function($query) {
