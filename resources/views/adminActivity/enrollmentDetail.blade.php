@@ -5,14 +5,14 @@
             <h1 class="text-lg font-bold">TASKA HIKMAH ENROLLMENT RECORDS</h1>
         </div>
 
-        <!-- Breadcrumb -->
+        <!-- Breadcrumb
         <div class="text-gray-500 text-sm mt-4">
             <a href="{{ route('adminHomepage') }}" class="text-black-500 hover:underline">Home</a>
             <span class="mx-2">></span>
             <a href="{{ route('childrenRegisterRequest') }}" class="text-black-500 hover:underline">Parent Children Registration</a>
             <span class="mx-2">></span>
             <span class="text-gray-500">View Details</span>
-        </div>
+        </div> -->
 
         <!-- Main Content -->
         <div class="bg-white shadow-md rounded-md mt-4 p-6">
