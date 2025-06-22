@@ -270,8 +270,9 @@ class StaffController extends Controller
     public function staffAssignment()
     {
         // $childrens = Child::findOrFail($childrenId);
-        $childrens = Child::all();
-        $staffs = Staff::all();
+        $childrens = Child::whereHas('enrollment', function($query) {
+                $query->where('status', 'approved');
+            })->get();        $staffs = Staff::all();
 
         foreach ($childrens as $child) {
             $assignment = StaffAssignment::where('child_id', $child->id)->first();
