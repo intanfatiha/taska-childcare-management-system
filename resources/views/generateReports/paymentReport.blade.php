@@ -249,8 +249,18 @@
                     options: {
                         responsive: true,
                         scales: {
-                            y: { beginAtZero: true },
-                            x: { ticks: { autoSkip: true, maxTicksLimit: 12 } }
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : null;
+                                    }
+                                }
+                            },
+                            x: { 
+                                ticks: { autoSkip: true, maxTicksLimit: 12 } 
+                            }
                         }
                     }
                 });
