@@ -308,32 +308,46 @@
         // Overtime Chart
         const overtimeCtx = document.getElementById('overtimeChart').getContext('2d');
         let overtimeChart;
+        const ratePerMinute = 0.5; // RM0.50 per minute
+        const monthlyFee = 300;    // RM300 monthly fee
+
 
         function renderOvertimeChart(type) {
-            const data = overtimeData[type];
-            const labels = data.map(d => d.label);
-            const totals = data.map(d => Math.abs(d.total)); // Always positive
+           const data = overtimeData[type];
+    const labels = data.map(d => d.label);
+    // Convert minutes to price
+    const totals = data.map(d => Math.abs(d.total) * ratePerMinute);
 
-            if (overtimeChart) overtimeChart.destroy();
-            overtimeChart = new Chart(overtimeCtx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Overtime (min)',
-                        data: totals,
-                        backgroundColor: '#3498db',
-                        borderRadius: 10,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true },
-                        x: { ticks: { autoSkip: true, maxTicksLimit: 12 } }
+    if (overtimeChart) overtimeChart.destroy();
+    overtimeChart = new Chart(overtimeCtx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Overtime (RM)',
+                data: totals,
+                backgroundColor: '#3498db',
+                borderRadius: 10,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    // Set max to monthly fee if you want
+                    max: monthlyFee,
+                    ticks: {
+                        // Format as RM
+                        callback: function(value) {
+                            return 'RM ' + value.toFixed(2);
+                        }
                     }
-                }
-            });
+                },
+                x: { ticks: { autoSkip: true, maxTicksLimit: 12 } }
+            }
+        }
+    });
         }
 
         // Attendance Pie Chart
